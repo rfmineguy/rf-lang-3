@@ -1,0 +1,137 @@
+module Main
+=========
+module
+module Main
+module <id>
+<module_header>
+
+
+use io { print, scan }
+=========
+use
+use io
+use <id>
+use <id> {
+use <id> { print
+use <id> { <id>
+use <id> { <idlist>       # lookahead is comma
+use <id> { <idlist> ,
+use <id> { <idlist> , scan
+use <id> { <idlist> , <id>
+use <id> { <idlist>
+use <id> { <idlist> }
+<use_header>
+
+func1 = a: int, void {
+}
+=========
+func1
+<id>
+<id> =
+<id> = a
+<id> = <id>
+<id> = <id> :
+<id> = <id> : int
+<id> = <id> : <id>
+<id> = <id> : <type>      - decision made with context
+<id> = <typed_id>
+<id> = <typed_id_list>
+<id> = <typed_id_list> ,
+<id> = <typed_id_list> , void
+<id> = <typed_id_list> , <id>
+<id> = <typed_id_list> , <type> - decision made with context
+<id> = <typed_id_list> , <type>
+<id> = <function_header> {
+<id> = <function_header> { }
+<id> = <function_header> <block>
+<function>
+
+
+add<T> = values: [T], length: int, T {   }
+===========
+add
+<id>
+<id> '<'
+<id> '<' <id>
+<id> '<' <id> '>'
+<id> <generic>
+<id> <generic> =
+<id> <generic> = values
+<id> <generic> = <id>
+<id> <generic> = <id> :
+<id> <generic> = <id> : [
+<id> <generic> = <id> : [ <id>
+<id> <generic> = <id> : [ <type> - decision made with context
+<id> <generic> = <id> : [ <type> ]
+<id> <generic> = <id> : <type>
+<id> <generic> = <typed_id>
+<id> <generic> = <typed_id_list>
+<id> <generic> = <typed_id_list> ,
+<id> <generic> = <typed_id_list> , <id>
+<id> <generic> = <typed_id_list> , <id> :
+<id> <generic> = <typed_id_list> , <id> : <id>
+<id> <generic> = <typed_id_list> , <id> : <type> - decision made with context
+<id> <generic> = <typed_id_list> , <typed_id> - decision made with context
+<id> <generic> = <typed_id_list> , <typed_id>
+<id> <generic> = <typed_id_list>
+<id> <generic> = <typed_id_list> , <id>
+<id> <generic> = <typed_id_list> , <type> - decision made with context
+<id> <generic> = <function_header>
+<id> <generic> = <function_header> '{'
+<id> <generic> = <function_header> '{' '}'
+<id> <generic> = <function_header> <block>
+<id> <generic> = <function_header> <block>
+<function>
+
+
+for i: int = 0; i < length; i = i + 1 {
+	sum = sum + values[i]
+}
+=======
+for
+for <id>
+for <id> : 
+for <id> : <id>
+for <id> : <type>    								- with context
+for <typed_id>
+for <typed_id> =
+for <typed_id> = <number>
+for <typed_id> = <factor>
+for <typed_id> = <term>
+for <typed_id> = <expression>
+for <typed_id> = <expression> ;
+for <assignment> ; <id>
+for <assignment> ; <factor>
+for <assignment> ; <term>
+for <assignment> ; <mathematical>
+for <assignment> ; <conditional>
+for <assignment> ; <conditional> '<'
+for <assignment> ; <conditional> '<' <id>
+for <assignment> ; <conditional> '<' <factor>
+for <assignment> ; <conditional> '<' <term>
+for <assignment> ; <conditional> '<' <mathematical>
+for <assignment> ; <conditional>
+for <assignment> ; <conditional> ;
+for <assignment> ; <conditional> ; <id>
+for <assignment> ; <conditional> ; <factor>
+for <assignment> ; <conditional> ; <term>
+for <assignment> ; <conditional> ; <mathematical>
+
+
+
+using lookahead logic
+=======
+3 + 4 * 5
+<number>
+<factor>
+<term>
+<math_expression>              (because la = '+' dont reduce)
+<math_expression> +
+<math_expression> + <number>
+<math_expression> + <factor>
+<math_expression> + <term>     (lookahead to look for operator of higher precedence)
+<math_expression> + <term> *
+<math_expression> + <term> * <number>
+<math_expression> + <term> * <factor>
+<math_expression> + <term>
+<math_expression>

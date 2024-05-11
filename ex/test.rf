@@ -1,0 +1,14 @@
+module Main
+use io { print, scan }
+
+add<T> = values: [T], length: int, T {
+	sum: T = 0
+	for i: int = 0; i < length; i++ {
+		sum = sum + values[i]
+	}
+	return sum
+}
+
+main = argc: int, argv: [[char]], int {
+	print("{} args supplied", argc);
+}

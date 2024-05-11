@@ -18,8 +18,8 @@ TEST_SOURCES := $(TEST_MAIN)\
 .PHONY: always clean build
 .PHONY: build-test build-project
 build: always build-project build-test
-build-project: out/main
-build-test: out/test
+build-project: always out/main
+build-test: always out/test
 always:
 	mkdir -p out
 clean:

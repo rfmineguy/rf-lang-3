@@ -6,7 +6,7 @@
 
 typedef struct Factor Factor;
 typedef enum {
-	FACTOR_TYPE_ID, FACTOR_TYPE_STR, FACTOR_TYPE_NUMBER, FACTOR_TYPE_EXPR 
+	FACTOR_TYPE_UND, FACTOR_TYPE_ID, FACTOR_TYPE_STR, FACTOR_TYPE_NUMBER, FACTOR_TYPE_EXPR, FACTOR_TYPE_MATH_EXPR 
 } FactorType;
 
 typedef struct Number Number;
@@ -28,7 +28,7 @@ typedef enum {
 
 typedef struct MathExpression MathExpression;
 typedef enum {
-	MATH_EXPR_TYPE_ADD, MATH_EXPR_TYPE_SUB
+	MATH_EXPR_TYPE_ADD, MATH_EXPR_TYPE_SUB, MATH_EXPR_TYPE_TERM
 } MathExpressionType;
 
 typedef struct Term Term;
@@ -58,6 +58,7 @@ struct Factor {
 		String_View str;
 		Number number;
 		Expression* expr;
+		MathExpression* mathExpr_test;
 	};
 };
 
@@ -72,7 +73,7 @@ struct MathExpression {
 	MathExpressionType type;
 
 	MathExpression* left;
-	Term right;
+	Term* right;
 	char op;
 };
 
@@ -107,7 +108,7 @@ struct AST_Node {
 		LogicalConj logicconj;
 		Relational relate;
 		MathExpression* mathexpr;
-		Term term;
+		Term* term;
 	};
 };
 

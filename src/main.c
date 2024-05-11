@@ -21,9 +21,10 @@ int main() {
 
 	token t;
 	while ((t = tctx_get_next(&ctx)).type != T_EOF) {
-		// printf("%d: %s\n", t.type, token_str(t.type));
 		tctx_advance(&ctx);
+		pctx.lookahead = tctx_get_next(&ctx);
 		if (t.type == T_EOF) break;
+		//printf("t = %s; lookahead = %s\n", token_str(t.type), token_str(pctx.lookahead.type));
 
 		AST_Node n;
 		lalr_reduce_tok_to_term(t, &n);
@@ -33,13 +34,23 @@ int main() {
 		while ((popped = lalr_reduce(&pctx, &n)) != 0) {
 			lalr_pop_n(&pctx, popped);
 			lalr_push(&pctx, n);
+			if (pctx.skip_next == 1) {
+				tctx_advance(&ctx);
+				pctx.lookahead = tctx_get_next(&ctx);
+				pctx.skip_next = 0;
+				break;
+			}
+			lalr_show_stack(&pctx);
 		}
 	}
+	printf("End Stack\n");
+	lalr_show_stack(&pctx);
 
-	for (int i = 0; i <= pctx.stack_top; i++) {
-		printf("(%d)==========\n", i);
-		ast_print_node(pctx.stack[i], 1);
-	}
+	// for (int i = 0; i <= pctx.stack_top; i++) {
+	// 	printf("(%d)==========\n", i);
+	// 	ast_print_node(pctx.stack[i], 1);
+	// 	printf("\n");
+	// }
 
 	tctx_free(&ctx);
 }

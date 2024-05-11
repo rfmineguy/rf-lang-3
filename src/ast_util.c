@@ -17,7 +17,7 @@ void ast_print_node(AST_Node n, int d) {
 		case NT_LOGIC_CONJ: ast_print_logical_conj(&n.logicconj, d); break;
 		case NT_RELATE:     ast_print_relational(&n.relate, d); break;
 		case NT_MATH_EXPR:  ast_print_math_expr(n.mathexpr, d); break;
-		case NT_TERM: 			ast_print_term(&n.term, d); break;
+		case NT_TERM: 			ast_print_term(n.term, d); break;
 	}
 }
 
@@ -25,10 +25,12 @@ void ast_print_factor(Factor f, int d) {
 	printf(TREE_FMT "[Factor]\n", TREE_ARG(0));
 	// printf("%*c[Factor]\n", d * 2, ' ');
 	switch (f.type) {
-		case FACTOR_TYPE_ID:     printf(TREE_FMT "[Id] " SV_Fmt "\n", TREE_ARG(1), SV_Arg(f.id));  break;
-		case FACTOR_TYPE_STR:    printf("[Str]  " SV_Fmt "\n", SV_Arg(f.str)); break;
-		case FACTOR_TYPE_NUMBER: ast_print_number(f.number, d + 1);  break;
-		case FACTOR_TYPE_EXPR:   ast_print_expr(f.expr, d + 1);      break; 
+		case FACTOR_TYPE_UND:       printf(TREE_FMT "[UNDEFINED]\n", TREE_ARG(1));                      break;
+		case FACTOR_TYPE_ID:        printf(TREE_FMT "[Id] " SV_Fmt "\n", TREE_ARG(1), SV_Arg(f.id));    break;
+		case FACTOR_TYPE_STR:       printf(TREE_FMT "[Str]  " SV_Fmt "\n", TREE_ARG(1), SV_Arg(f.str)); break;
+		case FACTOR_TYPE_NUMBER:    ast_print_number(f.number, d + 1);  																break;
+		case FACTOR_TYPE_MATH_EXPR: ast_print_math_expr(f.mathExpr_test, d + 1);  											break;
+		case FACTOR_TYPE_EXPR:      ast_print_expr(f.expr, d + 1); 																			break; 
 	}
 }
 void ast_print_number(Number n, int d) {
@@ -71,13 +73,13 @@ void ast_print_expr(Expression* e, int d) {
 	ast_print_logical_disj(e->disj, d + 1);
 }
 void ast_print_math_expr(MathExpression* m, int d) {
-	printf(TREE_FMT "[MathExpression]", TREE_ARG(0));
-	// printf("%*c[MathExpression]", d * 2, ' ');
+	if (!m) return;
+	printf(TREE_FMT "[MathExpression %c]\n", TREE_ARG(0), m ? m->op : '_');
 	ast_print_math_expr(m->left, d + 1);
-	ast_print_term(&m->right, d + 1);
+	ast_print_term(m->right, d + 1);
 }
 void ast_print_term(Term* t, int d) {
-	printf(TREE_FMT "[Term]\n", TREE_ARG(0));
+	printf(TREE_FMT "[Term %c]\n", TREE_ARG(0), t->op);
 	if (t == NULL) {
 		printf("Null\n");
 		return;

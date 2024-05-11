@@ -1,5 +1,6 @@
 #include "lalr.h"
 #include "ast.h"
+#include "ast_util.h"
 #include "sv.h"
 #include "tokenizer.h"
 #include <stdio.h>
@@ -12,12 +13,11 @@ lalr_ctx lalr_create() {
 }
 
 void lalr_show_stack(lalr_ctx* ctx) {
-	printf("Stack: \n");
+	printf("Stack(%d): [", ctx->stack_top);
 	for (int i = 0; i <= ctx->stack_top; i++) {
-		printf("%d: ", i);
-		lalr_print_node(ctx->stack[i]);
+		printf("\n"); printf("%d\n", i); lalr_print_node(ctx->stack[i]);
 	}
-	printf("lookahead: %d, " SV_Fmt "\n", ctx->lookahead.type, SV_Arg(ctx->lookahead.text));
+	printf("]\n");
 }
 
 int lalr_reduce_tok_to_term(token tok, AST_Node* out_n) {
@@ -38,14 +38,14 @@ int lalr_reduce(lalr_ctx* ctx, AST_Node* out_n) {
 	 */
 	{
 	  // factor := "(" <expression> ")"
-		if (peeked[2].type == NT_TOKEN && peeked[2].token.type == T_LP &&
-				peeked[1].type == NT_EXPR &&
-				peeked[0].type == NT_TOKEN && peeked[0].token.type == T_RP) {
-			out_n->type = NT_FACTOR;
-			out_n->factor.type = FACTOR_TYPE_EXPR;
-			out_n->factor.expr = peeked[1].expr;
-			return 3;
-		}
+		// if (peeked[2].type == NT_TOKEN && peeked[2].token.type == T_LP &&
+		// 		peeked[1].type == NT_MATH_EXPR &&
+		// 		peeked[0].type == NT_TOKEN && peeked[0].token.type == T_RP) {
+		// 	out_n->type = NT_FACTOR;
+		// 	out_n->factor.type = FACTOR_TYPE_EXPR;
+		// 	out_n->factor.expr = peeked[1].expr;
+		// 	return 3;
+		// }
 
 		// factor := <id>
 		if (peeked[0].type == NT_TOKEN && peeked[0].token.type == T_ID) {
@@ -72,6 +72,20 @@ int lalr_reduce(lalr_ctx* ctx, AST_Node* out_n) {
 			out_n->factor.str = peeked[0].token.text;
 			return 1;
 		}
+
+		// factor := "(" <math_expression> ")"
+		// TODO: Expand this to <expression> rather than <math_expression>
+		if (peeked[0].type == NT_TOKEN && peeked[0].token.type == T_RP &&
+				peeked[1].type == NT_MATH_EXPR &&
+				peeked[2].type == NT_TOKEN && peeked[2].token.type == T_LP) {
+			out_n->type = NT_FACTOR;
+			out_n->factor.type = FACTOR_TYPE_MATH_EXPR;
+			out_n->factor.mathExpr_test = peeked[1].mathexpr;
+			printf("0: %s\n", token_str(peeked[0].token.type));
+			printf("1: MathExpr\n");
+			printf("2: %s\n", token_str(peeked[2].token.type));
+			return 3;
+		}
 	}
 
 	/**
@@ -82,12 +96,64 @@ int lalr_reduce(lalr_ctx* ctx, AST_Node* out_n) {
 	 *	   term := <factor>
 	 */
 	{
+		// term := <term> {"*" | "/" | "%"} <factor>
+		if ( peeked[2].type == NT_TERM &&
+				 peeked[1].type == NT_TOKEN && 
+				(peeked[1].token.type == T_MUL || peeked[1].token.type == T_DIV || peeked[1].token.type == T_MOD) &&
+				 peeked[0].type == NT_FACTOR) {
+			out_n->type = NT_TERM;
+			out_n->term = malloc(sizeof(Term));
+			out_n->term->type = TERM_TYPE_TERM_OP_FACTOR;
+			out_n->term->op = peeked[1].token.text.data[0];
+			out_n->term->left = peeked[2].term;
+			out_n->term->right = peeked[0].factor;
+			return 3;
+		}
+
 		// term := <factor>
 		if (peeked[0].type == NT_FACTOR) {
 			out_n->type = NT_TERM;
-			out_n->term.type = TERM_TYPE_FACTOR;
-			out_n->term.right = peeked[0].factor;
-			out_n->term.left = NULL;
+			out_n->term = malloc(sizeof(Term));
+			out_n->term->type = TERM_TYPE_FACTOR;
+			out_n->term->right = peeked[0].factor;
+			out_n->term->left = NULL;
+			return 1;
+		}
+	}
+
+	/**
+	 *   math_expression parsing
+	 *	   math_expression := <math_expression> "+" <term>
+	 *	   math_expression := <math_expression> "-" <term>
+	 *	   math_expression := <term>
+	 */
+	{
+	 	// math_expression := <math_expression> "+/-" <term>
+		if (peeked[2].type == NT_MATH_EXPR &&
+				peeked[1].type == NT_TOKEN &&
+				(peeked[1].token.type == T_PLUS || peeked[1].token.type == T_MINUS) &&
+				peeked[0].type == NT_TERM &&
+				(ctx->lookahead.type != T_MUL &&
+				 ctx->lookahead.type != T_DIV &&
+				 ctx->lookahead.type != T_MOD)) {
+			out_n->type = NT_MATH_EXPR;
+			out_n->mathexpr = malloc(sizeof(MathExpression));
+			out_n->mathexpr->type = peeked[1].token.type == T_PLUS ? MATH_EXPR_TYPE_ADD : MATH_EXPR_TYPE_SUB;
+			out_n->mathexpr->op = peeked[1].token.text.data[0];
+			out_n->mathexpr->left = peeked[2].mathexpr;
+			out_n->mathexpr->right = peeked[0].term;
+			return 3;
+		}
+
+	  // math_expression := <term>
+		if (peeked[0].type == NT_TERM &&
+				ctx->lookahead.type != T_MUL &&
+				ctx->lookahead.type != T_DIV &&
+				ctx->lookahead.type != T_MOD) {
+			out_n->type = NT_MATH_EXPR;
+			out_n->mathexpr = malloc(sizeof(MathExpression));
+			out_n->mathexpr->type = MATH_EXPR_TYPE_TERM;
+			out_n->mathexpr->right = peeked[0].term;
 			return 1;
 		}
 	}
@@ -131,4 +197,5 @@ AST_Node* lalr_peek_pn(lalr_ctx* ctx, int n) {
 }
 
 void lalr_print_node(AST_Node node) {
+	ast_print_node(node, 0);
 }

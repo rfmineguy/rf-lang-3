@@ -37,16 +37,6 @@ int lalr_reduce(lalr_ctx* ctx, AST_Node* out_n) {
 	 *     factor := <strlit>
 	 */
 	{
-	  // factor := "(" <expression> ")"
-		// if (peeked[2].type == NT_TOKEN && peeked[2].token.type == T_LP &&
-		// 		peeked[1].type == NT_MATH_EXPR &&
-		// 		peeked[0].type == NT_TOKEN && peeked[0].token.type == T_RP) {
-		// 	out_n->type = NT_FACTOR;
-		// 	out_n->factor.type = FACTOR_TYPE_EXPR;
-		// 	out_n->factor.expr = peeked[1].expr;
-		// 	return 3;
-		// }
-
 		// factor := <id>
 		if (peeked[0].type == NT_TOKEN && peeked[0].token.type == T_ID) {
 			out_n->type = NT_FACTOR;
@@ -61,6 +51,7 @@ int lalr_reduce(lalr_ctx* ctx, AST_Node* out_n) {
 			out_n->factor.type = FACTOR_TYPE_NUMBER;
 			out_n->factor.number.type = NUMBER_TYPE_INT;
 			out_n->factor.number.i = number_parse_integer_base(peeked[0].token.text.data, 10).ok;
+			printf("parsed: %d\n", out_n->factor.number.i);
 			return 1;
 		}
 
@@ -75,15 +66,12 @@ int lalr_reduce(lalr_ctx* ctx, AST_Node* out_n) {
 
 		// factor := "(" <math_expression> ")"
 		// TODO: Expand this to <expression> rather than <math_expression>
-		if (peeked[0].type == NT_TOKEN && peeked[0].token.type == T_RP &&
+		if (peeked[2].type == NT_TOKEN && peeked[2].token.type == T_LP &&
 				peeked[1].type == NT_MATH_EXPR &&
-				peeked[2].type == NT_TOKEN && peeked[2].token.type == T_LP) {
+				peeked[0].type == NT_TOKEN && peeked[0].token.type == T_RP) {
 			out_n->type = NT_FACTOR;
 			out_n->factor.type = FACTOR_TYPE_MATH_EXPR;
 			out_n->factor.mathExpr_test = peeked[1].mathexpr;
-			printf("0: %s\n", token_str(peeked[0].token.type));
-			printf("1: MathExpr\n");
-			printf("2: %s\n", token_str(peeked[2].token.type));
 			return 3;
 		}
 	}
@@ -117,6 +105,8 @@ int lalr_reduce(lalr_ctx* ctx, AST_Node* out_n) {
 			out_n->term->type = TERM_TYPE_FACTOR;
 			out_n->term->right = peeked[0].factor;
 			out_n->term->left = NULL;
+			// printf("reducing factor -> term\n");
+			// ast_print_term(out_n->term, 3);
 			return 1;
 		}
 	}
@@ -142,6 +132,10 @@ int lalr_reduce(lalr_ctx* ctx, AST_Node* out_n) {
 			out_n->mathexpr->op = peeked[1].token.text.data[0];
 			out_n->mathexpr->left = peeked[2].mathexpr;
 			out_n->mathexpr->right = peeked[0].term;
+
+			// printf("Reducing math_expr +- term\n");
+			// ast_print_term(peeked[0].term, 3);
+			// ast_print_term(out_n->mathexpr->right, 3);
 			return 3;
 		}
 

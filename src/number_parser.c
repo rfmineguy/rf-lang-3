@@ -10,6 +10,7 @@
 bool number_parse_isvalidbase(char c, int base) {
 	c = tolower(c);
 	if (isdigit(c) && c - '0' >= base) return false;
+	if (c - '0' < 0) return false;
 	if (isalpha(c)) {
 		int value = c - 'a' + 10;
 		if (value >= base) return false;

@@ -24,7 +24,7 @@ typedef enum token_type {
 
 	// LogicOp 
 	T_LOGIC_BEG = 300, 
-	T_DEQ, T_GT, T_LT, T_GTEQ, T_LTEQ,
+	T_DEQ = 301, T_GT = 302, T_LT = 303, T_GTEQ = 304, T_LTEQ = 305,
 	T_LOR, T_LAND, // logical
 	T_LOGIC_END,
 

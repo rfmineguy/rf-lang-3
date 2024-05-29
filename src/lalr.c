@@ -4,6 +4,7 @@
 #include "sv.h"
 #include "tokenizer.h"
 #include <stdio.h>
+#include <stdlib.h>
 #include "number_parser.h"
 
 lalr_ctx lalr_create() {
@@ -30,7 +31,7 @@ int lalr_reduce(lalr_ctx* ctx, AST_Node* out_n) {
 	AST_Node peeked[3] = {lalr_peek_n(ctx, 0), lalr_peek_n(ctx, 1), lalr_peek_n(ctx, 2)};
 
 	/**  factor parsing
-	 *   	 factor := "(" <expression> ")"
+	 *   	 factor := "(" <logic_conj> ")"
 	 *     factor := <id>
 	 *     factor := <number>
 	 *     factor := <strlit>
@@ -62,16 +63,16 @@ int lalr_reduce(lalr_ctx* ctx, AST_Node* out_n) {
 			return 1;
 		}
 
-		// factor := "(" <relate> ")"
+		// factor := "(" <logic_conj> ")"
 		// TODO: Expand this to <expression> rather than <math_expression>
 		if (peeked[2].type == NT_TOKEN && peeked[2].token.type == T_LP &&
-				peeked[1].type == NT_RELATE &&
+				peeked[1].type == NT_LOGIC_CONJ &&
 				peeked[0].type == NT_TOKEN && peeked[0].token.type == T_RP) {
 			out_n->type = NT_FACTOR;
 			// out_n->factor.type = FACTOR_TYPE_MATH_EXPR;
 			// out_n->factor.mathExpr_test = peeked[1].mathexpr;
-			out_n->factor.type = FACTOR_TYPE_RELATE;
-			out_n->factor.relational_test = peeked[1].relate;
+			out_n->factor.type = FACTOR_TYPE_LOGIC_CONJ;
+			out_n->factor.logical_test = peeked[1].logicconj;
 			return 3;
 		}
 	}
@@ -130,10 +131,6 @@ int lalr_reduce(lalr_ctx* ctx, AST_Node* out_n) {
 			out_n->mathexpr->op = peeked[1].token.text.data[0];
 			out_n->mathexpr->left = peeked[2].mathexpr;
 			out_n->mathexpr->right = peeked[0].term;
-
-			// printf("Reducing math_expr +- term\n");
-			// ast_print_term(peeked[0].term, 3);
-			// ast_print_term(out_n->mathexpr->right, 3);
 			return 3;
 		}
 
@@ -166,17 +163,16 @@ int lalr_reduce(lalr_ctx* ctx, AST_Node* out_n) {
 		// relational := relational "==" math_expression
 		if (peeked[2].type == NT_RELATE &&
 				peeked[1].type == NT_TOKEN &&
-				peeked[1].token.type >= T_LOGIC_BEG &&
-				peeked[1].token.type <= T_LOGIC_END &&
+				peeked[1].token.type >= T_DEQ && peeked[1].token.type <= T_LTEQ &&
 				peeked[0].type == NT_MATH_EXPR) {
 			out_n->type = NT_RELATE;
 			out_n->relate = calloc(1, sizeof(Relational));
 
 			// relational type
-			if (peeked[1].token.type == T_DEQ) out_n->relate->type = RELATIONAL_TYPE_DEQ;
-			if (peeked[1].token.type == T_LT) out_n->relate->type = RELATIONAL_TYPE_LT;
+			if (peeked[1].token.type == T_DEQ)  out_n->relate->type = RELATIONAL_TYPE_DEQ;
+			if (peeked[1].token.type == T_LT)   out_n->relate->type = RELATIONAL_TYPE_LT;
 			if (peeked[1].token.type == T_LTEQ) out_n->relate->type = RELATIONAL_TYPE_LTEQ;
-			if (peeked[1].token.type == T_GT) out_n->relate->type = RELATIONAL_TYPE_GT;
+			if (peeked[1].token.type == T_GT)   out_n->relate->type = RELATIONAL_TYPE_GT;
 			if (peeked[1].token.type == T_GTEQ) out_n->relate->type = RELATIONAL_TYPE_GTEQ;
 
 			out_n->relate->relate = peeked[2].relate;
@@ -197,6 +193,40 @@ int lalr_reduce(lalr_ctx* ctx, AST_Node* out_n) {
 			out_n->relate = calloc(1, sizeof(Relational));
 			out_n->relate->type = RELATIONAL_TYPE_MATH_EXPR;
 			out_n->relate->mathexpr = peeked[0].mathexpr;
+			return 1;
+		}
+	}
+
+	/** logical_conj
+	  		logical_conj := <logical_conj> "&&" <relational>
+				logical_conj := <relational>
+	 */
+	{
+		token_type lookahead = ctx->lookahead.type;
+
+		// logical_conj := <logical_conj> "&&" <relational>
+		if (peeked[2].type == NT_LOGIC_CONJ &&
+				peeked[1].type == NT_TOKEN &&
+				peeked[1].token.type == T_LAND &&
+				peeked[0].type == NT_RELATE &&
+				lookahead != T_DEQ && lookahead != T_GT && lookahead != T_LT &&
+				lookahead != T_GTEQ && lookahead != T_LTEQ) {
+			out_n->type = NT_LOGIC_CONJ;
+			out_n->logicconj = calloc(1, sizeof(LogicalConj));
+			out_n->logicconj->type = LOGICAL_CONJ_TYPE_CONJ_RELATE;
+			out_n->logicconj->relate = peeked[0].relate;
+			out_n->logicconj->conj = peeked[2].logicconj;
+			return 3;
+		}
+
+		// logical_conj := <relational>
+		if (peeked[0].type == NT_RELATE &&
+				lookahead != T_DEQ && lookahead != T_GT && lookahead != T_LT &&
+				lookahead != T_GTEQ && lookahead != T_LTEQ) {
+			out_n->type = NT_LOGIC_CONJ;
+			out_n->logicconj = calloc(1, sizeof(LogicalConj));
+			out_n->logicconj->type = LOGICAL_CONJ_TYPE_RELATE;
+			out_n->logicconj->relate = peeked[0].relate;
 			return 1;
 		}
 	}

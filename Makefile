@@ -6,12 +6,14 @@ SOURCES 	:= $(MAIN)\
 						 src/svimpl.c\
 						 src/number_parser.c\
 						 src/lalr.c\
-						 src/ast_util.c
+						 src/ast_util.c\
+						 src/ast_free.c
 TEST_SOURCES := $(TEST_MAIN)\
 						 src/tokenizer.c \
 						 src/svimpl.c\
 						 src/lalr.c\
 						 src/ast_util.c\
+						 src/ast_free.c\
 						 src/number_parser.c\
 						 tests/munit.c
 BIN          := rfc

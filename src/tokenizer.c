@@ -125,25 +125,9 @@ void tctx_internal_init_regex(tokenizer_ctx* ctx) {
 }
 
 void tctx_internal_free_regex(tokenizer_ctx* ctx) {
-	regfree(&ctx->regex_store.r_string_lit);
-	regfree(&ctx->regex_store.r_char_lit);
-	regfree(&ctx->regex_store.r_fn);
-	regfree(&ctx->regex_store.r_if);
-	regfree(&ctx->regex_store.r_else);
-	regfree(&ctx->regex_store.r_switch);
-	regfree(&ctx->regex_store.r_break);
-	regfree(&ctx->regex_store.r_default);
-	regfree(&ctx->regex_store.r_hexlit);
-	regfree(&ctx->regex_store.r_dbllit);
-	regfree(&ctx->regex_store.r_declit);
-	regfree(&ctx->regex_store.r_id);
-	regfree(&ctx->regex_store.r_lor);
-	regfree(&ctx->regex_store.r_land);
-	regfree(&ctx->regex_store.r_gteq);
-	regfree(&ctx->regex_store.r_lteq);
-	regfree(&ctx->regex_store.r_comma_seq);
-	regfree(&ctx->regex_store.r_period_seq);
-	regfree(&ctx->regex_store.r_semi_seq);
+	for (int i = 0; i < REGEX_COUNT; i++) {
+		regfree(&ctx->regex_store.r_store[i]);
+	}
 }
 
 tokenizer_ctx tctx_from_file(const char* filename) {

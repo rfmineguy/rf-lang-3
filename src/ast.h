@@ -112,7 +112,7 @@ struct AST_Node {
 		Factor factor;
 		Number number;
 		Expression* expr;
-		LogicalDisj logicdisj;
+		LogicalDisj* logicdisj;
 		LogicalConj* logicconj;
 		Relational* relate;
 		MathExpression* mathexpr;

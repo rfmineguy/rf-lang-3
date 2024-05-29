@@ -29,6 +29,7 @@ int lalr_reduce_tok_to_term(token tok, AST_Node* out_n) {
 
 int lalr_reduce(lalr_ctx* ctx, AST_Node* out_n) {
 	AST_Node peeked[3] = {lalr_peek_n(ctx, 0), lalr_peek_n(ctx, 1), lalr_peek_n(ctx, 2)};
+	token_type lookahead = ctx->lookahead.type;
 
 	/**  factor parsing
 	 *   	 factor := "(" <logic_conj> ")"
@@ -90,7 +91,7 @@ int lalr_reduce(lalr_ctx* ctx, AST_Node* out_n) {
 				(peeked[1].token.type == T_MUL || peeked[1].token.type == T_DIV || peeked[1].token.type == T_MOD) &&
 				 peeked[0].type == NT_FACTOR) {
 			out_n->type = NT_TERM;
-			out_n->term = malloc(sizeof(Term));
+			out_n->term = calloc(1, sizeof(Term));
 			out_n->term->type = TERM_TYPE_TERM_OP_FACTOR;
 			out_n->term->op = peeked[1].token.text.data[0];
 			out_n->term->left = peeked[2].term;
@@ -101,7 +102,7 @@ int lalr_reduce(lalr_ctx* ctx, AST_Node* out_n) {
 		// term := <factor>
 		if (peeked[0].type == NT_FACTOR) {
 			out_n->type = NT_TERM;
-			out_n->term = malloc(sizeof(Term));
+			out_n->term = calloc(1, sizeof(Term));
 			out_n->term->type = TERM_TYPE_FACTOR;
 			out_n->term->right = peeked[0].factor;
 			out_n->term->left = NULL;
@@ -122,11 +123,11 @@ int lalr_reduce(lalr_ctx* ctx, AST_Node* out_n) {
 				peeked[1].type == NT_TOKEN &&
 				(peeked[1].token.type == T_PLUS || peeked[1].token.type == T_MINUS) &&
 				peeked[0].type == NT_TERM &&
-				(ctx->lookahead.type != T_MUL &&
-				 ctx->lookahead.type != T_DIV &&
-				 ctx->lookahead.type != T_MOD)) {
+				(lookahead != T_MUL &&
+				 lookahead != T_DIV &&
+				 lookahead != T_MOD)) {
 			out_n->type = NT_MATH_EXPR;
-			out_n->mathexpr = malloc(sizeof(MathExpression));
+			out_n->mathexpr = calloc(1, sizeof(MathExpression));
 			out_n->mathexpr->type = peeked[1].token.type == T_PLUS ? MATH_EXPR_TYPE_ADD : MATH_EXPR_TYPE_SUB;
 			out_n->mathexpr->op = peeked[1].token.text.data[0];
 			out_n->mathexpr->left = peeked[2].mathexpr;
@@ -136,11 +137,11 @@ int lalr_reduce(lalr_ctx* ctx, AST_Node* out_n) {
 
 	  // math_expression := <term>
 		if (peeked[0].type == NT_TERM &&
-				ctx->lookahead.type != T_MUL &&
-				ctx->lookahead.type != T_DIV &&
-				ctx->lookahead.type != T_MOD) {
+				lookahead != T_MUL &&
+				lookahead != T_DIV &&
+				lookahead != T_MOD) {
 			out_n->type = NT_MATH_EXPR;
-			out_n->mathexpr = malloc(sizeof(MathExpression));
+			out_n->mathexpr = calloc(1, sizeof(MathExpression));
 			out_n->mathexpr->type = MATH_EXPR_TYPE_TERM;
 			out_n->mathexpr->right = peeked[0].term;
 			return 1;
@@ -198,12 +199,10 @@ int lalr_reduce(lalr_ctx* ctx, AST_Node* out_n) {
 	}
 
 	/** logical_conj
-	  		logical_conj := <logical_conj> "&&" <relational>
-				logical_conj := <relational>
+	       logical_conj := <logical_conj> "&&" <relational>
+	       logical_conj := <relational>
 	 */
 	{
-		token_type lookahead = ctx->lookahead.type;
-
 		// logical_conj := <logical_conj> "&&" <relational>
 		if (peeked[2].type == NT_LOGIC_CONJ &&
 				peeked[1].type == NT_TOKEN &&

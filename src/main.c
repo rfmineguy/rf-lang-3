@@ -1,5 +1,6 @@
 #include "ast.h"
 #include "ast_util.h"
+#include "ast_free.h"
 #include "lalr.h"
 #include "number_parser.h"
 #include "tokenizer.h"
@@ -42,6 +43,10 @@ int main() {
 	}
 	printf("End Stack\n");
 	lalr_show_stack(&pctx);
+
+	for (int i = 0; i < pctx.stack_top; i++) {
+		ast_free_node(pctx.stack[i]);
+	}
 
 	tctx_free(&ctx);
 }

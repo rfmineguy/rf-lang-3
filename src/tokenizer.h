@@ -47,13 +47,19 @@ typedef struct tokenizer_state {
 	int line, col, index;
 } tokenizer_state;
 
+#define REGEX_COUNT 20
 typedef struct tokenizer_regex_store {
-	regex_t r_string_lit;
-	regex_t r_char_lit;
-	regex_t r_fn, r_if, r_else, r_switch, r_break, r_default;
-	regex_t r_hexlit, r_dbllit, r_declit, r_id;
-	regex_t r_lor, r_land, r_gteq, r_lteq, r_deq;
-	regex_t r_comma_seq, r_period_seq, r_semi_seq;
+	union {
+		regex_t r_store[REGEX_COUNT];
+		struct {
+			regex_t r_string_lit;
+			regex_t r_char_lit;
+			regex_t r_fn, r_if, r_else, r_switch, r_break, r_default;
+			regex_t r_hexlit, r_dbllit, r_declit, r_id;
+			regex_t r_lor, r_land, r_gteq, r_lteq, r_deq;
+			regex_t r_comma_seq, r_period_seq, r_semi_seq;
+		};
+	};
 } tokenizer_regex_store;
 
 typedef struct token {

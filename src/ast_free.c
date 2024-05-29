@@ -33,7 +33,9 @@ void ast_free_logical_disj(LogicalDisj* disj){
 	free(disj);
 }
 void ast_free_logical_conj(LogicalConj* conj){
+	if (conj == NULL) return;
 	ast_free_relational(conj->relate);
+	ast_free_logical_conj(conj->conj);
 	free(conj);
 }
 void ast_free_relational(Relational* relate){

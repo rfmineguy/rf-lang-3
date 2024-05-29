@@ -1,4 +1,5 @@
 #include "ast_free.h"
+#include "ast.h"
 
 void ast_free_node(AST_Node n){
 	switch (n.type) {
@@ -34,6 +35,11 @@ void ast_free_logical_disj(LogicalDisj* disj){
 }
 void ast_free_logical_conj(LogicalConj* conj){
 	if (conj == NULL) return;
+	switch (conj->type) {
+		case LOGICAL_CONJ_TYPE_RELATE: ast_free_relational(conj->relate); break;
+		case LOGICAL_CONJ_TYPE_CONJ_RELATE: ast_free_relational(conj->relate);
+																				ast_free_logical_conj(conj->conj); break;
+	}
 	ast_free_relational(conj->relate);
 	ast_free_logical_conj(conj->conj);
 	free(conj);

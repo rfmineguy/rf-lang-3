@@ -29,8 +29,7 @@ int lalr_reduce_tok_to_term(token tok, AST_Node* out_n) {
 int lalr_reduce(lalr_ctx* ctx, AST_Node* out_n) {
 	AST_Node peeked[3] = {lalr_peek_n(ctx, 0), lalr_peek_n(ctx, 1), lalr_peek_n(ctx, 2)};
 
-	/**
-	 *   factor parsing
+	/**  factor parsing
 	 *   	 factor := "(" <expression> ")"
 	 *     factor := <id>
 	 *     factor := <number>
@@ -51,7 +50,6 @@ int lalr_reduce(lalr_ctx* ctx, AST_Node* out_n) {
 			out_n->factor.type = FACTOR_TYPE_NUMBER;
 			out_n->factor.number.type = NUMBER_TYPE_INT;
 			out_n->factor.number.i = number_parse_integer_base(peeked[0].token.text.data, 10).ok;
-			printf("parsed: %d\n", out_n->factor.number.i);
 			return 1;
 		}
 
@@ -64,20 +62,21 @@ int lalr_reduce(lalr_ctx* ctx, AST_Node* out_n) {
 			return 1;
 		}
 
-		// factor := "(" <math_expression> ")"
+		// factor := "(" <relate> ")"
 		// TODO: Expand this to <expression> rather than <math_expression>
 		if (peeked[2].type == NT_TOKEN && peeked[2].token.type == T_LP &&
-				peeked[1].type == NT_MATH_EXPR &&
+				peeked[1].type == NT_RELATE &&
 				peeked[0].type == NT_TOKEN && peeked[0].token.type == T_RP) {
 			out_n->type = NT_FACTOR;
-			out_n->factor.type = FACTOR_TYPE_MATH_EXPR;
-			out_n->factor.mathExpr_test = peeked[1].mathexpr;
+			// out_n->factor.type = FACTOR_TYPE_MATH_EXPR;
+			// out_n->factor.mathExpr_test = peeked[1].mathexpr;
+			out_n->factor.type = FACTOR_TYPE_RELATE;
+			out_n->factor.relational_test = peeked[1].relate;
 			return 3;
 		}
 	}
 
-	/**
-	 *   term parsing
+	/**  term parsing
 	 *	   term := <term> "*" <factor>
 	 *	   term := <term> "/" <factor>
 	 *	   term := <term> "%" <factor>
@@ -111,8 +110,7 @@ int lalr_reduce(lalr_ctx* ctx, AST_Node* out_n) {
 		}
 	}
 
-	/**
-	 *   math_expression parsing
+	/**  math_expression parsing
 	 *	   math_expression := <math_expression> "+" <term>
 	 *	   math_expression := <math_expression> "-" <term>
 	 *	   math_expression := <term>
@@ -148,6 +146,57 @@ int lalr_reduce(lalr_ctx* ctx, AST_Node* out_n) {
 			out_n->mathexpr = malloc(sizeof(MathExpression));
 			out_n->mathexpr->type = MATH_EXPR_TYPE_TERM;
 			out_n->mathexpr->right = peeked[0].term;
+			return 1;
+		}
+	}
+
+	/** relational parsing
+	 *     relational := relational ">=" math_expression
+	 *     relational := relational "<=" math_expression
+	 *     relational := relational ">"  math_expression
+	 *     relational := relational "<"  math_expression
+	 *     relational := relational "==" math_expression
+	 *     relational := math_expression
+	 */
+	{
+		// relational := relational ">=" math_expression
+		// relational := relational "<=" math_expression
+		// relational := relational ">"  math_expression
+		// relational := relational "<"  math_expression
+		// relational := relational "==" math_expression
+		if (peeked[2].type == NT_RELATE &&
+				peeked[1].type == NT_TOKEN &&
+				peeked[1].token.type >= T_LOGIC_BEG &&
+				peeked[1].token.type <= T_LOGIC_END &&
+				peeked[0].type == NT_MATH_EXPR) {
+			out_n->type = NT_RELATE;
+			out_n->relate = calloc(1, sizeof(Relational));
+
+			// relational type
+			if (peeked[1].token.type == T_DEQ) out_n->relate->type = RELATIONAL_TYPE_DEQ;
+			if (peeked[1].token.type == T_LT) out_n->relate->type = RELATIONAL_TYPE_LT;
+			if (peeked[1].token.type == T_LTEQ) out_n->relate->type = RELATIONAL_TYPE_LTEQ;
+			if (peeked[1].token.type == T_GT) out_n->relate->type = RELATIONAL_TYPE_GT;
+			if (peeked[1].token.type == T_GTEQ) out_n->relate->type = RELATIONAL_TYPE_GTEQ;
+
+			out_n->relate->relate = peeked[2].relate;
+			out_n->relate->mathexpr = peeked[0].mathexpr;
+			out_n->relate->op = peeked[1].token.text;
+			printf("relational (op=" SV_Fmt ") math_expr\n", SV_Arg(out_n->relate->op));
+			return 3;
+		}
+
+	  // relational := math_expression
+		if (peeked[0].type == NT_MATH_EXPR &&
+				ctx->lookahead.type != T_PLUS &&
+				ctx->lookahead.type != T_MINUS
+			 ) {
+				//ctx->lookahead.type != T_RP) {
+			printf("Reduced math_expr -> relational\n");
+			out_n->type = NT_RELATE;
+			out_n->relate = calloc(1, sizeof(Relational));
+			out_n->relate->type = RELATIONAL_TYPE_MATH_EXPR;
+			out_n->relate->mathexpr = peeked[0].mathexpr;
 			return 1;
 		}
 	}

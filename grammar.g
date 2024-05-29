@@ -38,6 +38,7 @@ relational       := <relational> ">=" <math_expression>
 									| <relational> "<=" <math_expression>
 									| <relational> ">"  <math_expression>
 									| <relational> "<"  <math_expression>
+									| <relational> "==" <math_expression>
 									| <math_expression>
 
 math_expression  := <math_expression> "+" <term>

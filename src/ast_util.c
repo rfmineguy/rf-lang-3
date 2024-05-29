@@ -15,7 +15,7 @@ void ast_print_node(AST_Node n, int d) {
 		case NT_EXPR:       ast_print_expr(n.expr, d); break;
 		case NT_LOGIC_DISJ: ast_print_logical_disj(&n.logicdisj, d); break;
 		case NT_LOGIC_CONJ: ast_print_logical_conj(&n.logicconj, d); break;
-		case NT_RELATE:     ast_print_relational(&n.relate, d); break;
+		case NT_RELATE:     ast_print_relational(n.relate, d); break;
 		case NT_MATH_EXPR:  ast_print_math_expr(n.mathexpr, d); break;
 		case NT_TERM: 			ast_print_term(n.term, d); break;
 	}
@@ -29,8 +29,9 @@ void ast_print_factor(Factor f, int d) {
 		case FACTOR_TYPE_ID:        printf(TREE_FMT "[Id] " SV_Fmt "\n", TREE_ARG(1), SV_Arg(f.id));    break;
 		case FACTOR_TYPE_STR:       printf(TREE_FMT "[Str]  " SV_Fmt "\n", TREE_ARG(1), SV_Arg(f.str)); break;
 		case FACTOR_TYPE_NUMBER:    ast_print_number(f.number, d + 1);  																break;
-		case FACTOR_TYPE_MATH_EXPR: ast_print_math_expr(f.mathExpr_test, d + 1);  											break;
+		case FACTOR_TYPE_RELATE:    ast_print_relational(f.relational_test, d + 1);											break;
 		case FACTOR_TYPE_EXPR:      ast_print_expr(f.expr, d + 1); 																			break; 
+		case FACTOR_TYPE_MATH_EXPR: assert(0 && "MathExpr factors decprecated");
 	}
 }
 void ast_print_number(Number n, int d) {
@@ -48,7 +49,7 @@ void ast_print_logical_disj(LogicalDisj* l, int d) {
 	ast_print_logical_disj(l->disj, d + 1);
 	printf(TREE_FMT "[LogicalDisj]", TREE_ARG(0));
 	// printf("%*c[LogicalDisj]", d * 2, ' ');
-	ast_print_logical_conj(&l->conj, d + 1);
+	ast_print_logical_conj(l->conj, d + 1);
 }
 void ast_print_logical_conj(LogicalConj* l, int d) {
 	if (l == NULL)
@@ -56,19 +57,26 @@ void ast_print_logical_conj(LogicalConj* l, int d) {
 	ast_print_logical_conj(l->conj, d + 1);
 	printf(TREE_FMT "[LogicalConj]", TREE_ARG(0));
 	// printf("%*c[LogicalConj]", d * 2, ' ');
-	ast_print_relational(&l->relate, d + 1);
+	ast_print_relational(l->relate, d + 1);
 
 }
 void ast_print_relational(Relational* r, int d) {
 	if (r == NULL)
 		return;
-	printf(TREE_FMT "[Relational]", TREE_ARG(0));
-	// printf("%*c[Relational]", d * 2, ' ');
-	ast_print_relational(r->relate, d + 1);
-	ast_print_math_expr(r->mathexpr, d + 1);
+	switch (r->type) {
+		case RELATIONAL_TYPE_MATH_EXPR:
+			printf(TREE_FMT "[Relational MathExpr]\n", TREE_ARG(0));
+			ast_print_math_expr(r->mathexpr, d + 1);
+			break;
+		case RELATIONAL_TYPE_GT...RELATIONAL_TYPE_DEQ:
+			printf(TREE_FMT "[Relational " SV_Fmt "]\n", TREE_ARG(0), SV_Arg(r->op));
+			ast_print_relational(r->relate, d + 1);
+			ast_print_math_expr(r->mathexpr, d + 1);
+			break;
+	}
 }
 void ast_print_expr(Expression* e, int d) {
-	printf(TREE_FMT "[Expression]", TREE_ARG(0));
+	printf(TREE_FMT "[Expression]\n", TREE_ARG(0));
 	// printf("%*c[Expression]", d * 2, ' ');
 	ast_print_logical_disj(e->disj, d + 1);
 }

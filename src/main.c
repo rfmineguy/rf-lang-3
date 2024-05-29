@@ -7,8 +7,6 @@
 #include <stdio.h>
 
 int main() {
-	printf("%s\n", number_parse_isvalidbase(')', 10) ? "Yes" : "No");
-
 	tokenizer_ctx ctx = tctx_from_file("ex/simpler_test.rf");
 	if (ctx.fail) {
 		fprintf(stderr, "Failed to open file\n");

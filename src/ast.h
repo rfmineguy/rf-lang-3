@@ -17,6 +17,10 @@ typedef enum {
 typedef struct Expression Expression;
 
 typedef struct LogicalDisj LogicalDisj;
+typedef enum LogicalDisjType {
+	LOGICAL_DISJ_TYPE_CONJ,
+	LOGICAL_DISJ_TYPE_DISJ_CONJ
+} LogicalDisjType;
 
 typedef struct LogicalConj LogicalConj;
 typedef enum LogicalConjType {
@@ -101,6 +105,7 @@ struct LogicalConj {
 };
 
 struct LogicalDisj {
+	LogicalDisjType type;
 	LogicalDisj* disj;
 	LogicalConj* conj;
 };

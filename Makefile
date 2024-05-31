@@ -27,7 +27,6 @@ always:
 	mkdir -p out
 clean:
 	rm -r out
-		printf("[%d]: %d -> %d -> %ul\n", i, digit, length - i - 1, digit * (int)pow(10, length - i - 1));
 debug: always
 	docker run --rm -it -v $(shell pwd):$(shell pwd) -w $(shell pwd) alpine sh -c "gcc $(SOURCES) -ggdb -lm -o out/$(BIN)_x86"
 	docker run --rm -it -e DISPLAY=192.168.1.142:0 -v $(shell pwd):$(shell pwd) -w $(shell pwd) alpine gf2 ./out/$(BIN)_x86

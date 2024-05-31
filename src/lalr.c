@@ -170,11 +170,11 @@ int lalr_reduce(lalr_ctx* ctx, AST_Node* out_n) {
 			out_n->relate = calloc(1, sizeof(Relational));
 
 			// relational type
-			if (peeked[1].token.type == T_DEQ)  out_n->relate->type = RELATIONAL_TYPE_DEQ;
-			if (peeked[1].token.type == T_LT)   out_n->relate->type = RELATIONAL_TYPE_LT;
-			if (peeked[1].token.type == T_LTEQ) out_n->relate->type = RELATIONAL_TYPE_LTEQ;
 			if (peeked[1].token.type == T_GT)   out_n->relate->type = RELATIONAL_TYPE_GT;
 			if (peeked[1].token.type == T_GTEQ) out_n->relate->type = RELATIONAL_TYPE_GTEQ;
+			if (peeked[1].token.type == T_LT)   out_n->relate->type = RELATIONAL_TYPE_LT;
+			if (peeked[1].token.type == T_LTEQ) out_n->relate->type = RELATIONAL_TYPE_LTEQ;
+			if (peeked[1].token.type == T_DEQ)  out_n->relate->type = RELATIONAL_TYPE_DEQ;
 
 			out_n->relate->relate = peeked[2].relate;
 			out_n->relate->mathexpr = peeked[0].mathexpr;
@@ -228,6 +228,37 @@ int lalr_reduce(lalr_ctx* ctx, AST_Node* out_n) {
 			out_n->logicconj->relate = peeked[0].relate;
 			return 1;
 		}
+	}
+
+	/** logical_disj
+	 *	   logical_disj := <logical_disj> "||" <logical_conj>
+	 *		 logical_disj := <logical_conj>
+	 */
+	{
+		/*
+		// logical_disj := <logical_disj> "||" <logical_conj>
+		if (peeked[2].type == NT_LOGIC_DISJ &&
+				peeked[1].type == NT_TOKEN &&
+				peeked[1].token.type == T_LOR &&
+				peeked[0].type == NT_LOGIC_CONJ &&
+				lookahead != T_LAND) {
+			out_n->type = NT_LOGIC_DISJ;
+			out_n->logicdisj = calloc(1, sizeof(LogicalDisj));
+			out_n->logicdisj->type = LOGICAL_DISJ_TYPE_DISJ_CONJ;
+			out_n->logicdisj->conj = peeked[0].logicconj;
+			return 3;
+		}
+
+		// logical_disj := <logical_conj>
+		if (peeked[0].type == NT_LOGIC_CONJ &&
+				lookahead != T_LAND) {
+			out_n->type = NT_LOGIC_DISJ;
+			out_n->logicdisj = calloc(1, sizeof(LogicalDisj));
+			out_n->logicdisj->type = LOGICAL_DISJ_TYPE_CONJ;
+			out_n->logicdisj->conj = peeked[0].logicconj;
+			return 1;
+		}
+		*/
 	}
 
 	return 0;

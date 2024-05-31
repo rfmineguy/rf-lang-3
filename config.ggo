@@ -1,0 +1,7 @@
+package "rfc"
+version "1.0.0"
+purpose "Language compiler"
+usage "rfc <options>"
+description "Compiler for the rflang programming language"
+
+option "file" f "Supply file to compile" string

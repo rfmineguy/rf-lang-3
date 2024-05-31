@@ -1,14 +1,26 @@
 #include "ast.h"
-#include "ast_util.h"
 #include "ast_free.h"
 #include "lalr.h"
-#include "number_parser.h"
 #include "tokenizer.h"
-#include <ctype.h>
 #include <stdio.h>
+#include "../getopt/cmdline.h"
 
-int main() {
-	tokenizer_ctx ctx = tctx_from_file("ex/simpler_test.rf");
+int compile(const char* file);
+
+int main(int argc, char **argv) {
+	struct gengetopt_args_info args_info;
+	if (cmdline_parser(argc, argv, &args_info) != 0) {
+		return 1;
+	}
+
+	if (args_info.file_given) {
+		return compile(args_info.file_arg);	
+	}
+	return 0;
+}
+
+int compile(const char* file) {
+	tokenizer_ctx ctx = tctx_from_file(file);
 	if (ctx.fail) {
 		fprintf(stderr, "Failed to open file\n");
 		tctx_free(&ctx);
@@ -49,4 +61,5 @@ int main() {
 	}
 
 	tctx_free(&ctx);
+	return 1;
 }

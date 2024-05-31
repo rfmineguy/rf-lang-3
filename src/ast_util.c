@@ -29,7 +29,7 @@ void ast_print_factor(Factor f, int d) {
 		case FACTOR_TYPE_ID:        printf(TREE_FMT "[Id] " SV_Fmt "\n", TREE_ARG(1), SV_Arg(f.id));    break;
 		case FACTOR_TYPE_STR:       printf(TREE_FMT "[Str]  " SV_Fmt "\n", TREE_ARG(1), SV_Arg(f.str)); break;
 		case FACTOR_TYPE_NUMBER:    ast_print_number(f.number, d + 1);  																break;
-		case FACTOR_TYPE_LOGIC_CONJ:ast_print_logical_conj(f.logical_test, d + 1);											break;
+		case FACTOR_TYPE_LOGIC_DISJ:ast_print_logical_disj(f.logicdisj, d + 1);    											break;
 		case FACTOR_TYPE_EXPR:      ast_print_expr(f.expr, d + 1); 																			break; 
 	}
 }
@@ -45,7 +45,7 @@ void ast_print_logical_disj(LogicalDisj* l, int d) {
 	if (l == NULL)
 		return;
 	ast_print_logical_disj(l->disj, d + 1);
-	printf(TREE_FMT "[LogicalDisj]", TREE_ARG(0));
+	printf(TREE_FMT "[LogicalDisj]\n", TREE_ARG(0));
 	ast_print_logical_conj(l->conj, d + 1);
 }
 void ast_print_logical_conj(LogicalConj* l, int d) {

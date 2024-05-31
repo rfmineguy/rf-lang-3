@@ -67,13 +67,13 @@ int lalr_reduce(lalr_ctx* ctx, AST_Node* out_n) {
 		// factor := "(" <logic_conj> ")"
 		// TODO: Expand this to <expression> rather than <math_expression>
 		if (peeked[2].type == NT_TOKEN && peeked[2].token.type == T_LP &&
-				peeked[1].type == NT_LOGIC_CONJ &&
+				peeked[1].type == NT_LOGIC_DISJ &&
 				peeked[0].type == NT_TOKEN && peeked[0].token.type == T_RP) {
 			out_n->type = NT_FACTOR;
 			// out_n->factor.type = FACTOR_TYPE_MATH_EXPR;
 			// out_n->factor.mathExpr_test = peeked[1].mathexpr;
-			out_n->factor.type = FACTOR_TYPE_LOGIC_CONJ;
-			out_n->factor.logical_test = peeked[1].logicconj;
+			out_n->factor.type = FACTOR_TYPE_LOGIC_DISJ;
+			out_n->factor.logicdisj = peeked[1].logicdisj;
 			return 3;
 		}
 	}
@@ -235,7 +235,6 @@ int lalr_reduce(lalr_ctx* ctx, AST_Node* out_n) {
 	 *		 logical_disj := <logical_conj>
 	 */
 	{
-		/*
 		// logical_disj := <logical_disj> "||" <logical_conj>
 		if (peeked[2].type == NT_LOGIC_DISJ &&
 				peeked[1].type == NT_TOKEN &&
@@ -258,7 +257,6 @@ int lalr_reduce(lalr_ctx* ctx, AST_Node* out_n) {
 			out_n->logicdisj->conj = peeked[0].logicconj;
 			return 1;
 		}
-		*/
 	}
 
 	return 0;

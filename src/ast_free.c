@@ -29,7 +29,8 @@ void ast_free_factor(Factor f){
 		case FACTOR_TYPE_ID:        break;
 		case FACTOR_TYPE_STR:       break;
 		case FACTOR_TYPE_NUMBER:    ast_free_number(f.number);  					break;
-		case FACTOR_TYPE_LOGIC_CONJ:ast_free_logical_conj(f.logical_test);break;
+		case FACTOR_TYPE_LOGIC_CONJ:break; //ast_free_logical_conj(f.logical_test);break;
+		case FACTOR_TYPE_LOGIC_DISJ:ast_free_logical_disj(f.logicdisj);break;
 		case FACTOR_TYPE_EXPR:      ast_free_expr(f.expr); 								break; 
 	}
 	FREE_NOTIF;

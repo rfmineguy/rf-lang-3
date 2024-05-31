@@ -51,9 +51,15 @@ term 						 := <term> "*" <factor>
 									| <factor>
 
 factor 					 := "(" <expression> ")"
+									| <id> "(" <expression> ")"
 									| <number>
 									| <strlit>
 									| <id>
+
+func_call        := <id> "(" <expression_list> ")"
+expression_list  := <expression_list> "," <expression>
+									| <expression>
+
 
 assignment 			 := { <typed_id> | <id> } "=" <expression>
 return 					 := "return" <expression>

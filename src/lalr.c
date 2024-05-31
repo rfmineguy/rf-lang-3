@@ -64,8 +64,8 @@ int lalr_reduce(lalr_ctx* ctx, AST_Node* out_n) {
 			return 1;
 		}
 
-		// factor := "(" <logic_conj> ")"
-		// TODO: Expand this to <expression> rather than <math_expression>
+		// factor := "(" <logic_disj> ")"
+		// TODO: Expand this to <expression> rather than <logic_disj>
 		if (peeked[2].type == NT_TOKEN && peeked[2].token.type == T_LP &&
 				peeked[1].type == NT_LOGIC_DISJ &&
 				peeked[0].type == NT_TOKEN && peeked[0].token.type == T_RP) {
@@ -76,6 +76,7 @@ int lalr_reduce(lalr_ctx* ctx, AST_Node* out_n) {
 			out_n->factor.logicdisj = peeked[1].logicdisj;
 			return 3;
 		}
+
 	}
 
 	/**  term parsing

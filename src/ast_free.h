@@ -11,5 +11,6 @@ void ast_free_relational(Relational*);
 void ast_free_expr(Expression*);
 void ast_free_math_expr(MathExpression*);
 void ast_free_term(Term*);
+void ast_free_stmt(Statement*);
 
 #endif

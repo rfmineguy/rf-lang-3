@@ -18,6 +18,7 @@ void ast_print_node(AST_Node n, int d) {
 		case NT_RELATE:     ast_print_relational(n.relate, d); break;
 		case NT_MATH_EXPR:  ast_print_math_expr(n.mathexpr, d); break;
 		case NT_TERM: 			ast_print_term(n.term, d); break;
+		case NT_STATEMENT:  ast_print_stmt(n.stmt, d); break;
 	}
 }
 
@@ -29,8 +30,9 @@ void ast_print_factor(Factor f, int d) {
 		case FACTOR_TYPE_ID:        printf(TREE_FMT "[Id] " SV_Fmt "\n", TREE_ARG(1), SV_Arg(f.id));    break;
 		case FACTOR_TYPE_STR:       printf(TREE_FMT "[Str]  " SV_Fmt "\n", TREE_ARG(1), SV_Arg(f.str)); break;
 		case FACTOR_TYPE_NUMBER:    ast_print_number(f.number, d + 1);  																break;
-		case FACTOR_TYPE_LOGIC_DISJ:ast_print_logical_disj(f.logicdisj, d + 1);    											break;
 		case FACTOR_TYPE_EXPR:      ast_print_expr(f.expr, d + 1); 																			break; 
+		case FACTOR_TYPE_LOGIC_DISJ:assert(0 && "No factor for logic disjunction");											break;
+		case FACTOR_TYPE_LOGIC_CONJ:assert(0 && "No factor for logic conjunction"); break;
 	}
 }
 void ast_print_number(Number n, int d) {
@@ -104,6 +106,15 @@ void ast_print_term(Term* t, int d) {
 		case TERM_TYPE_TERM_OP_FACTOR: 
 			ast_print_term(t->left, d + 1);
 			ast_print_factor(t->right, d + 1);
+			break;
+	}
+}
+
+void ast_print_stmt(Statement* stmt, int d) {
+	printf(TREE_FMT "[Statement]\n", TREE_ARG(0));
+	switch (stmt->type) {
+		case STATEMENT_TYPE_RETURN:
+			ast_print_expr(stmt->Return.expr, d + 1);
 			break;
 	}
 }

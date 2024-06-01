@@ -36,6 +36,6 @@ debug: always
 	docker run --rm -it -v $(shell pwd):$(shell pwd) -w $(shell pwd) alpine sh -c "gcc $(SOURCES) -ggdb -lm -o out/$(BIN)_x86"
 	docker run --rm -it -e DISPLAY=192.168.1.142:0 -v $(shell pwd):$(shell pwd) -w $(shell pwd) alpine gf2 ./out/$(BIN)_x86
 out/$(BIN): $(SOURCES) $(GETOPT_SOURCE)
-	gcc $^ -o $@ -lm -ggdb
+	clang $^ -o $@ -lm -ggdb
 out/test: $(TEST_SOURCES) $(GETOPT_SOURCE)
-	gcc $^ -o $@ -lm
+	clang $^ -o $@ -lm

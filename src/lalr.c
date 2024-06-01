@@ -64,8 +64,7 @@ int lalr_reduce(lalr_ctx* ctx, AST_Node* out_n) {
 			return 1;
 		}
 
-		// factor := "(" <logic_disj> ")"
-		// TODO: Expand this to <expression> rather than <logic_disj>
+		// factor := "(" <expression> ")"
 		if (peeked[2].type == NT_TOKEN && peeked[2].token.type == T_LP &&
 				peeked[1].type == NT_EXPRESSION &&
 				peeked[0].type == NT_TOKEN && peeked[0].token.type == T_RP) {
@@ -281,6 +280,11 @@ int lalr_reduce(lalr_ctx* ctx, AST_Node* out_n) {
 	if (peeked[1].type == NT_TOKEN &&
 			peeked[1].token.type == T_RETURN &&
 			peeked[0].type == NT_EXPRESSION) {
+		out_n->type = NT_STATEMENT;
+		out_n->stmt = calloc(1, sizeof(Statement));
+		out_n->stmt->type = STATEMENT_TYPE_RETURN;
+		out_n->stmt->Return.expr = peeked[0].expr;
+		return 2;
 	}
 
 	return 0;

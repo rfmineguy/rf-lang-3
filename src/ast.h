@@ -49,9 +49,14 @@ typedef enum {
 	TERM_TYPE_FACTOR, TERM_TYPE_TERM_OP_FACTOR
 } TermType;
 
+typedef struct Statement Statement;
+typedef enum {
+	STATEMENT_TYPE_RETURN
+} StatementType;
+
 typedef struct AST_Node AST_Node;
 typedef enum AST_NodeType {
-	NT_UNDEF, NT_TOKEN, NT_FACTOR, NT_NUMBER, NT_EXPRESSION, NT_LOGIC_DISJ, NT_LOGIC_CONJ, NT_RELATE, NT_MATH_EXPR, NT_TERM
+	NT_UNDEF, NT_TOKEN, NT_FACTOR, NT_NUMBER, NT_EXPRESSION, NT_STATEMENT, NT_LOGIC_DISJ, NT_LOGIC_CONJ, NT_RELATE, NT_MATH_EXPR, NT_TERM
 } AST_NodeType;
 
 
@@ -114,6 +119,13 @@ struct LogicalDisj {
 	LogicalConj* conj;
 };
 
+struct Statement {
+	StatementType type;
+	union {
+		Expression* expr;
+	} Return;
+};
+
 struct AST_Node {
 	AST_NodeType type;
 	union {
@@ -126,6 +138,7 @@ struct AST_Node {
 		Relational* relate;
 		MathExpression* mathexpr;
 		Term* term;
+		Statement* stmt;
 	};
 };
 

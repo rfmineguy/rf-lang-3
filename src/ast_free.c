@@ -19,6 +19,7 @@ void ast_free_node(AST_Node n){
 		case NT_RELATE:     ast_free_relational(n.relate); break;
 		case NT_MATH_EXPR:  ast_free_math_expr(n.mathexpr); break;
 		case NT_TERM: 			ast_free_term(n.term); break;
+		case NT_STATEMENT:  ast_free_stmt(n.stmt); break;
 	}
 	FREE_NOTIF;
 }
@@ -88,6 +89,11 @@ void ast_free_relational(Relational* relate){
 }
 void ast_free_expr(Expression* expr){
 	FREE_BEGIN;
+	switch (expr->type) {
+		case EXPRESSION_TYPE_LOGIC_DISJ: 
+			ast_free_logical_disj(expr->disj);
+			break;
+	}
 
 	free(expr);
 	FREE_NOTIF;
@@ -108,5 +114,15 @@ void ast_free_term(Term* term){
 																	 ast_free_factor(term->right); break;
 	}
 	free(term);
+	FREE_NOTIF;
+}
+void ast_free_stmt(Statement* stmt) {
+	FREE_BEGIN;
+	switch (stmt->type) {
+		case STATEMENT_TYPE_RETURN: 
+			ast_free_expr(stmt->Return.expr);
+			break;
+	}
+	free(stmt);
 	FREE_NOTIF;
 }

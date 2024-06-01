@@ -14,7 +14,9 @@ int main(int argc, char **argv) {
 	}
 
 	if (args_info.file_given) {
-		return compile(args_info.file_arg);	
+		int ret = compile(args_info.file_arg);
+		cmdline_parser_free(&args_info);
+		return ret;
 	}
 	return 0;
 }

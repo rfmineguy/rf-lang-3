@@ -13,7 +13,7 @@ void ast_free_node(AST_Node n){
 		case NT_TOKEN:      break;
 		case NT_FACTOR:     ast_free_factor(n.factor); break;
 		case NT_NUMBER:     ast_free_number(n.number); break;
-		case NT_EXPR:       ast_free_expr(n.expr); break;
+		case NT_EXPRESSION: ast_free_expr(n.expr); break;
 		case NT_LOGIC_DISJ: ast_free_logical_disj(n.logicdisj); break;
 		case NT_LOGIC_CONJ: ast_free_logical_conj(n.logicconj); break;
 		case NT_RELATE:     ast_free_relational(n.relate); break;

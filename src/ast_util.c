@@ -12,7 +12,7 @@ void ast_print_node(AST_Node n, int d) {
 		case NT_TOKEN:      printf(TREE_FMT "[Token] %s\n", TREE_ARG(0), token_str(n.token.type)); break;
 		case NT_FACTOR:     ast_print_factor(n.factor, d); break;
 		case NT_NUMBER:     ast_print_number(n.number, d); break;
-		case NT_EXPR:       ast_print_expr(n.expr, d); break;
+		case NT_EXPRESSION: ast_print_expr(n.expr, d); break;
 		case NT_LOGIC_DISJ: ast_print_logical_disj(n.logicdisj, d); break;
 		case NT_LOGIC_CONJ: ast_print_logical_conj(n.logicconj, d); break;
 		case NT_RELATE:     ast_print_relational(n.relate, d); break;
@@ -83,6 +83,7 @@ void ast_print_expr(Expression* e, int d) {
 	printf(TREE_FMT "[Expression]\n", TREE_ARG(0));
 	// printf("%*c[Expression]", d * 2, ' ');
 	ast_print_logical_disj(e->disj, d + 1);
+	free(e);
 }
 void ast_print_math_expr(MathExpression* m, int d) {
 	if (!m) return;

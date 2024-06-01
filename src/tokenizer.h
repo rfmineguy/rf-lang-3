@@ -18,6 +18,7 @@ typedef enum token_type {
 	T_SQUOTE, T_DQUOTE,
 	T_LP, T_RP,
 	T_LBRC, T_RBRC,
+	T_RETURN,
 	T_RESERVE_END,
 
 	T_BOR = 200, T_BAND, // bitwise
@@ -47,7 +48,7 @@ typedef struct tokenizer_state {
 	int line, col, index;
 } tokenizer_state;
 
-#define REGEX_COUNT 20
+#define REGEX_COUNT 21
 typedef struct tokenizer_regex_store {
 	union {
 		regex_t r_store[REGEX_COUNT];
@@ -58,6 +59,7 @@ typedef struct tokenizer_regex_store {
 			regex_t r_hexlit, r_dbllit, r_declit, r_id;
 			regex_t r_lor, r_land, r_gteq, r_lteq, r_deq;
 			regex_t r_comma_seq, r_period_seq, r_semi_seq;
+			regex_t r_return;
 		};
 	};
 } tokenizer_regex_store;

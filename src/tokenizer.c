@@ -110,6 +110,7 @@ void tctx_internal_init_regex(tokenizer_ctx* ctx) {
 	ctx->regex_store.r_switch     = rnew("switch");
 	ctx->regex_store.r_break      = rnew("break");
 	ctx->regex_store.r_default    = rnew("default");
+	ctx->regex_store.r_return     = rnew("return");
 	ctx->regex_store.r_hexlit     = rnew("0x[0-9a-fA-F]+");
 	ctx->regex_store.r_dbllit     = rnew("[0-9]+\\.[0-9]+");
 	ctx->regex_store.r_declit     = rnew("[0-9]+");
@@ -225,6 +226,7 @@ token tctx_get_next(tokenizer_ctx* ctx) {
 	RMATCH(ctx->regex_store.r_switch, T_SWITCH);
 	RMATCH(ctx->regex_store.r_break, T_BREAK);
 	RMATCH(ctx->regex_store.r_default, T_DEFAULT);
+	RMATCH(ctx->regex_store.r_return, T_RETURN);
 	RMATCH(ctx->regex_store.r_hexlit, T_HEX_LIT);
 	RMATCH(ctx->regex_store.r_dbllit, T_DOUBLE_LIT);
 	RMATCH(ctx->regex_store.r_declit, T_DECIMAL_LIT);

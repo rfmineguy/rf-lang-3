@@ -15,6 +15,9 @@ typedef enum {
 } NumberType;
 
 typedef struct Expression Expression;
+typedef enum {
+	EXPRESSION_TYPE_LOGIC_DISJ
+} ExpressionType;
 
 typedef struct LogicalDisj LogicalDisj;
 typedef enum LogicalDisjType {
@@ -48,7 +51,7 @@ typedef enum {
 
 typedef struct AST_Node AST_Node;
 typedef enum AST_NodeType {
-	NT_UNDEF, NT_TOKEN, NT_FACTOR, NT_NUMBER, NT_EXPR, NT_LOGIC_DISJ, NT_LOGIC_CONJ, NT_RELATE, NT_MATH_EXPR, NT_TERM
+	NT_UNDEF, NT_TOKEN, NT_FACTOR, NT_NUMBER, NT_EXPRESSION, NT_LOGIC_DISJ, NT_LOGIC_CONJ, NT_RELATE, NT_MATH_EXPR, NT_TERM
 } AST_NodeType;
 
 
@@ -95,6 +98,7 @@ struct Relational {
 };
 
 struct Expression {
+	ExpressionType type;
 	LogicalDisj* disj;
 };
 

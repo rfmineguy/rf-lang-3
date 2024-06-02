@@ -37,7 +37,6 @@ int compile(const char* file) {
 		tctx_advance(&ctx);
 		pctx.lookahead = tctx_get_next(&ctx);
 		if (t.type == T_EOF) break;
-		//  printf("t = %s; lookahead = %s\n", token_str(t.type), token_str(pctx.lookahead.type));
 
 		AST_Node n;
 		lalr_reduce_tok_to_term(t, &n);
@@ -54,7 +53,6 @@ int compile(const char* file) {
 				break;
 			}
 		}
-		// lalr_show_stack(&pctx);
 	}
 	printf("End Stack\n");
 	lalr_show_stack(&pctx);

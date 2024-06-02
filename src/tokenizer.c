@@ -111,6 +111,7 @@ void tctx_internal_init_regex(tokenizer_ctx* ctx) {
 	ctx->regex_store.r_switch     = rnew("switch");
 	ctx->regex_store.r_break      = rnew("break");
 	ctx->regex_store.r_default    = rnew("default");
+	ctx->regex_store.r_module     = rnew("module");
 	ctx->regex_store.r_return     = rnew("return");
 	ctx->regex_store.r_hexlit     = rnew("0x[0-9a-fA-F]+");
 	ctx->regex_store.r_dbllit     = rnew("[0-9]+\\.[0-9]+");
@@ -127,7 +128,9 @@ void tctx_internal_init_regex(tokenizer_ctx* ctx) {
 }
 
 void tctx_internal_free_regex(tokenizer_ctx* ctx) {
-	for (int i = 0; i < REGEX_COUNT; i++) {
+	int count = sizeof(ctx->regex_store) / sizeof(regex_t);
+	printf("Free tctx\n");
+	for (int i = 0; i < 10; i++) {
 		regfree(&ctx->regex_store.r_store[i]);
 	}
 }

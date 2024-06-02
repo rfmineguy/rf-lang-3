@@ -33,8 +33,12 @@ int lalr_reduce(lalr_ctx* ctx, AST_Node* out_n) {
 	AST_Node peeked[4] = {lalr_peek_n(ctx, 0), lalr_peek_n(ctx, 1), lalr_peek_n(ctx, 2), lalr_peek_n(ctx, 3)};
 	token_type lookahead = ctx->lookahead.type;
 
+	/**  module_header
+	 *     module_header := <id="module"> <id>
+	 */
+
 	/**  factor parsing
-	 *   	 factor := "(" <logic_conj> ")"
+	 *   	 factor := "(" <expression> ")"
 	 *     factor := <id>
 	 *     factor := <number>
 	 *     factor := <strlit>
@@ -84,7 +88,6 @@ int lalr_reduce(lalr_ctx* ctx, AST_Node* out_n) {
 			out_n->factor.funcCall = peeked[0].funcCall; 
 			return 1;
 		}
-
 	}
 
 	/**  term parsing
@@ -282,14 +285,16 @@ int lalr_reduce(lalr_ctx* ctx, AST_Node* out_n) {
 	 * return
 	 *    return <expression>
 	 */
-	if (peeked[1].type == NT_TOKEN &&
-			peeked[1].token.type == T_RETURN &&
-			peeked[0].type == NT_EXPRESSION) {
-		out_n->type = NT_STATEMENT;
-		out_n->stmt = arena_alloc(&ctx->arena, sizeof(Statement));
-		out_n->stmt->type = STATEMENT_TYPE_RETURN;
-		out_n->stmt->Return.expr = peeked[0].expr;
-		return 2;
+	{
+		if (peeked[1].type == NT_TOKEN &&
+				peeked[1].token.type == T_RETURN &&
+				peeked[0].type == NT_EXPRESSION) {
+			out_n->type = NT_STATEMENT;
+			out_n->stmt = arena_alloc(&ctx->arena, sizeof(Statement));
+			out_n->stmt->type = STATEMENT_TYPE_RETURN;
+			out_n->stmt->Return.expr = peeked[0].expr;
+			return 2;
+		}
 	}
 
 	/**

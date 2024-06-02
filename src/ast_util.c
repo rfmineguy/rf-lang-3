@@ -90,8 +90,6 @@ void ast_print_expr(Expression* e, int d) {
 			ast_print_logical_disj(e->disj, d + 1);
 			break;
 	}
-	// printf("%*c[Expression]", d * 2, ' ');
-	
 }
 void ast_print_math_expr(MathExpression* m, int d) {
 	if (!m) return;

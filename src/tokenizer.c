@@ -129,8 +129,7 @@ void tctx_internal_init_regex(tokenizer_ctx* ctx) {
 
 void tctx_internal_free_regex(tokenizer_ctx* ctx) {
 	int count = sizeof(ctx->regex_store) / sizeof(regex_t);
-	printf("Free tctx\n");
-	for (int i = 0; i < 10; i++) {
+	for (int i = 0; i < count - 1; i++) {
 		regfree(&ctx->regex_store.r_store[i]);
 	}
 }

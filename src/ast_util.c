@@ -125,7 +125,7 @@ void ast_print_stmt(Statement* stmt, int d) {
 
 void ast_print_expr_list_rec(ExpressionList* eList, int d, int index) {
 	if (eList == NULL) {
-		printf("NULL\n");
+		printf(TREE_FMT "NULL\n", TREE_ARG(0));
 		return;
 	}
 

@@ -7,8 +7,8 @@
 
 typedef enum token_type {
 	// Unreserved tokens
-	T_ID, 
-	T_DOUBLE_LIT, T_DECIMAL_LIT, T_HEX_LIT, T_STRING_LIT, T_CHAR_LIT, 
+	T_ID = 0, 
+	T_DOUBLE_LIT, T_DECIMAL_LIT, T_HEX_LIT, T_STRING_LIT, T_CHAR_LIT,
 	T_SINGLE_LINE_COMMENT, T_MULTI_LINE_COMMENT,
 
 	// Reserved tokens
@@ -23,8 +23,8 @@ typedef enum token_type {
 
 	T_BOR = 200, T_BAND, // bitwise
 
-	// LogicOp 
-	T_LOGIC_BEG = 300, 
+	// LogicOp
+	T_LOGIC_BEG = 300,
 	T_DEQ = 301, T_GT = 302, T_LT = 303, T_GTEQ = 304, T_LTEQ = 305,
 	T_LOR, T_LAND, // logical
 	T_LOGIC_END,

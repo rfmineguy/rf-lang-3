@@ -106,7 +106,8 @@ int lalr_reduce(lalr_ctx* ctx, AST_Node* out_n) {
 		// term := <factor>
 		if (peeked[0].type == NT_FACTOR) {
 			out_n->type = NT_TERM;
-			out_n->term = calloc(1, sizeof(Term));
+			out_n->term = arena_alloc(&ctx->arena, sizeof(Term));
+			// out_n->term = calloc(1, sizeof(Term));
 			out_n->term->type = TERM_TYPE_FACTOR;
 			out_n->term->right = peeked[0].factor;
 			out_n->term->left = NULL;
@@ -131,7 +132,8 @@ int lalr_reduce(lalr_ctx* ctx, AST_Node* out_n) {
 				 lookahead != T_DIV &&
 				 lookahead != T_MOD)) {
 			out_n->type = NT_MATH_EXPR;
-			out_n->mathexpr = calloc(1, sizeof(MathExpression));
+			out_n->mathexpr = arena_alloc(&ctx->arena, sizeof(MathExpression));
+			//out_n->mathexpr = calloc(1, sizeof(MathExpression));
 			out_n->mathexpr->type = peeked[1].token.type == T_PLUS ? MATH_EXPR_TYPE_ADD : MATH_EXPR_TYPE_SUB;
 			out_n->mathexpr->op = peeked[1].token.text.data[0];
 			out_n->mathexpr->left = peeked[2].mathexpr;
@@ -145,7 +147,8 @@ int lalr_reduce(lalr_ctx* ctx, AST_Node* out_n) {
 				lookahead != T_DIV &&
 				lookahead != T_MOD) {
 			out_n->type = NT_MATH_EXPR;
-			out_n->mathexpr = calloc(1, sizeof(MathExpression));
+			out_n->mathexpr = arena_alloc(&ctx->arena, sizeof(MathExpression));
+			// out_n->mathexpr = calloc(1, sizeof(MathExpression));
 			out_n->mathexpr->type = MATH_EXPR_TYPE_TERM;
 			out_n->mathexpr->right = peeked[0].term;
 			return 1;
@@ -171,7 +174,8 @@ int lalr_reduce(lalr_ctx* ctx, AST_Node* out_n) {
 				peeked[1].token.type >= T_DEQ && peeked[1].token.type <= T_LTEQ &&
 				peeked[0].type == NT_MATH_EXPR) {
 			out_n->type = NT_RELATE;
-			out_n->relate = calloc(1, sizeof(Relational));
+			out_n->relate = arena_alloc(&ctx->arena, sizeof(Relational));
+			// out_n->relate = calloc(1, sizeof(Relational));
 
 			// relational type
 			if (peeked[1].token.type == T_GT)   out_n->relate->type = RELATIONAL_TYPE_GT;
@@ -193,7 +197,8 @@ int lalr_reduce(lalr_ctx* ctx, AST_Node* out_n) {
 			 ) {
 				//ctx->lookahead.type != T_RP) {
 			out_n->type = NT_RELATE;
-			out_n->relate = calloc(1, sizeof(Relational));
+			out_n->relate = arena_alloc(&ctx->arena, sizeof(Relational));
+			// out_n->relate = calloc(1, sizeof(Relational));
 			out_n->relate->type = RELATIONAL_TYPE_MATH_EXPR;
 			out_n->relate->mathexpr = peeked[0].mathexpr;
 			return 1;
@@ -213,7 +218,8 @@ int lalr_reduce(lalr_ctx* ctx, AST_Node* out_n) {
 				lookahead != T_DEQ && lookahead != T_GT && lookahead != T_LT &&
 				lookahead != T_GTEQ && lookahead != T_LTEQ) {
 			out_n->type = NT_LOGIC_CONJ;
-			out_n->logicconj = calloc(1, sizeof(LogicalConj));
+			out_n->logicconj = arena_alloc(&ctx->arena, sizeof(LogicalConj));
+			// out_n->logicconj = calloc(1, sizeof(LogicalConj));
 			out_n->logicconj->type = LOGICAL_CONJ_TYPE_CONJ_RELATE;
 			out_n->logicconj->relate = peeked[0].relate;
 			out_n->logicconj->conj = peeked[2].logicconj;
@@ -225,7 +231,8 @@ int lalr_reduce(lalr_ctx* ctx, AST_Node* out_n) {
 				lookahead != T_DEQ && lookahead != T_GT && lookahead != T_LT &&
 				lookahead != T_GTEQ && lookahead != T_LTEQ) {
 			out_n->type = NT_LOGIC_CONJ;
-			out_n->logicconj = calloc(1, sizeof(LogicalConj));
+			out_n->logicconj = arena_alloc(&ctx->arena, sizeof(LogicalConj));
+			// out_n->logicconj = calloc(1, sizeof(LogicalConj));
 			out_n->logicconj->type = LOGICAL_CONJ_TYPE_RELATE;
 			out_n->logicconj->relate = peeked[0].relate;
 			return 1;
@@ -244,7 +251,8 @@ int lalr_reduce(lalr_ctx* ctx, AST_Node* out_n) {
 				peeked[0].type == NT_LOGIC_CONJ &&
 				lookahead != T_LAND) {
 			out_n->type = NT_LOGIC_DISJ;
-			out_n->logicdisj = calloc(1, sizeof(LogicalDisj));
+			out_n->logicdisj = arena_alloc(&ctx->arena, sizeof(LogicalDisj));
+			//out_n->logicdisj = calloc(1, sizeof(LogicalDisj));
 			out_n->logicdisj->type = LOGICAL_DISJ_TYPE_DISJ_CONJ;
 			out_n->logicdisj->conj = peeked[0].logicconj;
 			return 3;
@@ -254,7 +262,8 @@ int lalr_reduce(lalr_ctx* ctx, AST_Node* out_n) {
 		if (peeked[0].type == NT_LOGIC_CONJ &&
 				lookahead != T_LAND) {
 			out_n->type = NT_LOGIC_DISJ;
-			out_n->logicdisj = calloc(1, sizeof(LogicalDisj));
+			out_n->logicdisj = arena_alloc(&ctx->arena, sizeof(LogicalDisj));
+			// out_n->logicdisj = calloc(1, sizeof(LogicalDisj));
 			out_n->logicdisj->type = LOGICAL_DISJ_TYPE_CONJ;
 			out_n->logicdisj->conj = peeked[0].logicconj;
 			return 1;
@@ -268,7 +277,8 @@ int lalr_reduce(lalr_ctx* ctx, AST_Node* out_n) {
 		if (peeked[0].type == NT_LOGIC_DISJ &&
 				lookahead != T_LOR) {
 			out_n->type = NT_EXPRESSION;
-			out_n->expr = calloc(1, sizeof(Expression));
+			out_n->expr = arena_alloc(&ctx->arena, sizeof(Expression));
+			// out_n->expr = calloc(1, sizeof(Expression));
 			out_n->expr->type = EXPRESSION_TYPE_LOGIC_DISJ;
 			out_n->expr->disj = peeked[0].logicdisj;
 			return 1;
@@ -283,7 +293,8 @@ int lalr_reduce(lalr_ctx* ctx, AST_Node* out_n) {
 			peeked[1].token.type == T_RETURN &&
 			peeked[0].type == NT_EXPRESSION) {
 		out_n->type = NT_STATEMENT;
-		out_n->stmt = calloc(1, sizeof(Statement));
+		out_n->stmt = arena_alloc(&ctx->arena, sizeof(Statement));
+		// out_n->stmt = calloc(1, sizeof(Statement));
 		out_n->stmt->type = STATEMENT_TYPE_RETURN;
 		out_n->stmt->Return.expr = peeked[0].expr;
 		return 2;

@@ -1,6 +1,7 @@
 #include "ast.h"
 #include "ast_free.h"
 #include "lalr.h"
+#include "lib/arena.h"
 #include "tokenizer.h"
 #include <stdio.h>
 #include "../getopt/cmdline.h"
@@ -58,9 +59,7 @@ int compile(const char* file) {
 	printf("End Stack\n");
 	lalr_show_stack(&pctx);
 
-	for (int i = 0; i <= pctx.stack_top; i++) {
-		ast_free_node(pctx.stack[i]);
-	}
+	arena_free(&pctx.arena);
 
 	tctx_free(&ctx);
 	return 1;

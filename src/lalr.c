@@ -76,7 +76,7 @@ int lalr_reduce(lalr_ctx* ctx, AST_Node* out_n) {
 		// factor := <id>
 		if (peeked[0].type == NT_TOKEN && peeked[0].token.type == T_ID &&
 				!sv_eq(peeked[0].token.text, SV("module")) &&
-				lookahead != T_LP && lookahead != T_LBRK) {
+				lookahead != T_LP && lookahead != T_LBRK && lookahead != T_COLON) {
 			out_n->type = NT_FACTOR;
 			out_n->factor.type = FACTOR_TYPE_ID;
 			out_n->factor.id = peeked[0].token.text;

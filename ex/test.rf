@@ -10,5 +10,5 @@ add<T> = values: [T], length: int, T {
 }
 
 main = argc: int, argv: [char, 2], int {
-	print("{} args supplied", argc);
+	print("{} args supplied", argc)
 }

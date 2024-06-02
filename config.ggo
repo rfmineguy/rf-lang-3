@@ -5,3 +5,4 @@ usage "rfc <options>"
 description "Compiler for the rflang programming language"
 
 option "file" f "Supply file to compile" string
+option "action" a "Choose action to perform" required string values="tokenize","parse"

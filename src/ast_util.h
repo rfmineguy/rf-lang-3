@@ -12,5 +12,7 @@ void ast_print_expr(Expression*, int);
 void ast_print_math_expr(MathExpression*, int);
 void ast_print_term(Term*, int);
 void ast_print_stmt(Statement*, int);
+void ast_print_expr_list(ExpressionList*, int);
+void ast_print_func_call(FuncCall, int);
 
 #endif

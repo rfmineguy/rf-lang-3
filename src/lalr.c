@@ -30,7 +30,7 @@ int lalr_reduce_tok_to_term(token tok, AST_Node* out_n) {
 }
 
 int lalr_reduce(lalr_ctx* ctx, AST_Node* out_n) {
-	AST_Node peeked[3] = {lalr_peek_n(ctx, 0), lalr_peek_n(ctx, 1), lalr_peek_n(ctx, 2)};
+	AST_Node peeked[4] = {lalr_peek_n(ctx, 0), lalr_peek_n(ctx, 1), lalr_peek_n(ctx, 2), lalr_peek_n(ctx, 3)};
 	token_type lookahead = ctx->lookahead.type;
 
 	/**  factor parsing
@@ -41,7 +41,8 @@ int lalr_reduce(lalr_ctx* ctx, AST_Node* out_n) {
 	 */
 	{
 		// factor := <id>
-		if (peeked[0].type == NT_TOKEN && peeked[0].token.type == T_ID) {
+		if (peeked[0].type == NT_TOKEN && peeked[0].token.type == T_ID &&
+				lookahead != T_LP) {
 			out_n->type = NT_FACTOR;
 			out_n->factor.type = FACTOR_TYPE_ID;
 			out_n->factor.id = peeked[0].token.text;
@@ -74,6 +75,14 @@ int lalr_reduce(lalr_ctx* ctx, AST_Node* out_n) {
 			out_n->factor.type = FACTOR_TYPE_EXPR;
 			out_n->factor.expr = peeked[1].expr;
 			return 3;
+		}
+
+		// factor := <func_call>
+		if (peeked[0].type == NT_FUNC_CALL) {
+			out_n->type = NT_FACTOR;
+			out_n->factor.type = FACTOR_TYPE_FUNC_CALL;
+			out_n->factor.funcCall = peeked[0].funcCall; 
+			return 1;
 		}
 
 	}
@@ -281,6 +290,83 @@ int lalr_reduce(lalr_ctx* ctx, AST_Node* out_n) {
 		out_n->stmt->type = STATEMENT_TYPE_RETURN;
 		out_n->stmt->Return.expr = peeked[0].expr;
 		return 2;
+	}
+
+	/**
+	 * expression_list
+	 *    expression_list := <expression_list> , <expression>
+	 *    expression_list := <expression>
+	 */
+	{
+		if (peeked[2].type == NT_EXPRESSION_LIST &&
+				peeked[1].type == NT_TOKEN &&
+				peeked[1].token.type == T_COMMA && 
+				peeked[0].type == NT_EXPRESSION) {
+			ExpressionList* list = arena_alloc(&ctx->arena, sizeof(ExpressionList));
+			list->type = EXPRESSION_LIST_TYPE_EXPR_LIST_EXPR;
+			list->expr = peeked[0].expr;
+			list->next = NULL;
+
+			ExpressionList* curr = peeked[2].exprList;
+			while (curr->next) curr = curr->next;
+			curr->next = list;
+
+			out_n->type = NT_EXPRESSION_LIST;
+			out_n->exprList = peeked[2].exprList;
+			return 3;
+		}
+
+		//    expression_list := <expression>
+		if (peeked[0].type == NT_EXPRESSION &&
+				lookahead == T_COMMA) {
+			out_n->type = NT_EXPRESSION_LIST;
+			out_n->exprList = arena_alloc(&ctx->arena, sizeof(ExpressionList));
+			out_n->exprList->expr = peeked[0].expr;
+			return 1;
+		}
+	}
+
+	/**
+	 * func_call
+	 *    func_call := <id> "(" <expression_list> ")"
+	 */
+	{
+	  // func_call := <id> "(" <expression_list> ")"
+		if (peeked[3].type == NT_TOKEN &&
+				peeked[3].token.type == T_ID &&
+				peeked[2].type == NT_TOKEN &&
+				peeked[2].token.type == T_LP &&
+				peeked[1].type == NT_EXPRESSION_LIST &&
+				peeked[0].type == NT_TOKEN &&
+				peeked[0].token.type == T_RP) {
+			out_n->type = NT_FUNC_CALL;
+			out_n->funcCall.exprList = peeked[1].exprList;
+			out_n->funcCall.id = peeked[3].token.text;
+			return 4;
+		}
+
+	  // func_call := <id> "(" ")"
+		if (peeked[2].type == NT_TOKEN && peeked[2].token.type == T_ID &&
+				peeked[1].type == NT_TOKEN && peeked[1].token.type == T_LP &&
+				peeked[0].type == NT_TOKEN && peeked[0].token.type == T_RP) {
+			out_n->type = NT_FUNC_CALL;
+			out_n->funcCall.exprList = NULL;
+			out_n->funcCall.id = peeked[2].token.text;
+			return 3;
+		}
+
+		// func_call := <id> "(" <expression> ")"
+		if (peeked[3].type == NT_TOKEN && peeked[3].token.type == T_ID &&
+				peeked[2].type == NT_TOKEN && peeked[2].token.type == T_LP &&
+				peeked[1].type == NT_EXPRESSION &&
+				peeked[0].type == NT_TOKEN && peeked[0].token.type == T_RP) {
+			out_n->type = NT_FUNC_CALL;
+			out_n->funcCall.exprList = arena_alloc(&ctx->arena, sizeof(ExpressionList));
+			out_n->funcCall.exprList->type = EXPRESSION_LIST_TYPE_EXPR;
+			out_n->funcCall.exprList->expr = peeked[1].expr;
+			out_n->funcCall.exprList->next = NULL;
+			return 4;
+		}
 	}
 
 	return 0;

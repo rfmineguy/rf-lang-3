@@ -8,17 +8,19 @@
 
 void ast_print_node(AST_Node n, int d) {
 	switch (n.type) {
-		case NT_UNDEF:      printf("UNDEFINED\n"); break;
-		case NT_TOKEN:      printf(TREE_FMT "[Token] %s\n", TREE_ARG(0), token_str(n.token.type)); break;
-		case NT_FACTOR:     ast_print_factor(n.factor, d); break;
-		case NT_NUMBER:     ast_print_number(n.number, d); break;
-		case NT_EXPRESSION: ast_print_expr(n.expr, d); break;
-		case NT_LOGIC_DISJ: ast_print_logical_disj(n.logicdisj, d); break;
-		case NT_LOGIC_CONJ: ast_print_logical_conj(n.logicconj, d); break;
-		case NT_RELATE:     ast_print_relational(n.relate, d); break;
-		case NT_MATH_EXPR:  ast_print_math_expr(n.mathexpr, d); break;
-		case NT_TERM: 			ast_print_term(n.term, d); break;
-		case NT_STATEMENT:  ast_print_stmt(n.stmt, d); break;
+		case NT_UNDEF:           printf("UNDEFINED\n"); break;
+		case NT_TOKEN:           printf(TREE_FMT "[Token] %s\n", TREE_ARG(0), token_str(n.token.type)); break;
+		case NT_FACTOR:          ast_print_factor(n.factor, d); break;
+		case NT_NUMBER:          ast_print_number(n.number, d); break;
+		case NT_EXPRESSION:      ast_print_expr(n.expr, d); break;
+		case NT_LOGIC_DISJ:      ast_print_logical_disj(n.logicdisj, d); break;
+		case NT_LOGIC_CONJ:      ast_print_logical_conj(n.logicconj, d); break;
+		case NT_RELATE:          ast_print_relational(n.relate, d); break;
+		case NT_MATH_EXPR:       ast_print_math_expr(n.mathexpr, d); break;
+		case NT_TERM: 			     ast_print_term(n.term, d); break;
+		case NT_STATEMENT:       ast_print_stmt(n.stmt, d); break;
+		case NT_EXPRESSION_LIST: ast_print_expr_list(n.exprList, d); break;
+		case NT_FUNC_CALL:       ast_print_func_call(n.funcCall, d); break;
 	}
 }
 
@@ -33,6 +35,7 @@ void ast_print_factor(Factor f, int d) {
 		case FACTOR_TYPE_EXPR:      ast_print_expr(f.expr, d + 1); 																			break; 
 		case FACTOR_TYPE_LOGIC_DISJ:assert(0 && "No factor for logic disjunction");											break;
 		case FACTOR_TYPE_LOGIC_CONJ:assert(0 && "No factor for logic conjunction"); break;
+		case FACTOR_TYPE_FUNC_CALL: ast_print_func_call(f.funcCall, d + 1); break;
 	}
 }
 void ast_print_number(Number n, int d) {
@@ -82,8 +85,13 @@ void ast_print_relational(Relational* r, int d) {
 }
 void ast_print_expr(Expression* e, int d) {
 	printf(TREE_FMT "[Expression]\n", TREE_ARG(0));
+	switch (e->type) {
+		case EXPRESSION_TYPE_LOGIC_DISJ:
+			ast_print_logical_disj(e->disj, d + 1);
+			break;
+	}
 	// printf("%*c[Expression]", d * 2, ' ');
-	ast_print_logical_disj(e->disj, d + 1);
+	
 }
 void ast_print_math_expr(MathExpression* m, int d) {
 	if (!m) return;
@@ -115,4 +123,26 @@ void ast_print_stmt(Statement* stmt, int d) {
 			ast_print_expr(stmt->Return.expr, d + 1);
 			break;
 	}
+}
+
+void ast_print_expr_list_rec(ExpressionList* eList, int d, int index) {
+	if (eList == NULL) {
+		printf("NULL\n");
+		return;
+	}
+
+	// printf("%d:", index);
+	ast_print_expr(eList->expr, d + 1);
+	ast_print_expr_list_rec(eList->next, d, index + 1);
+}
+
+void ast_print_expr_list(ExpressionList * eList, int d) {
+	printf(TREE_FMT "[ExpressionList]\n", TREE_ARG(0));
+	ast_print_expr_list_rec(eList, d, 0);
+}
+
+void ast_print_func_call(FuncCall funcCall, int d) {
+	printf(TREE_FMT "[FuncCall]\n", TREE_ARG(0));
+	printf(TREE_FMT "[Id " SV_Fmt "]\n", TREE_ARG(1), SV_Arg(funcCall.id));
+	ast_print_expr_list(funcCall.exprList, d + 1);
 }

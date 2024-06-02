@@ -51,7 +51,7 @@ term 						 := <term> "*" <factor>
 									| <factor>
 
 factor 					 := "(" <expression> ")"
-									| <id> "(" <expression> ")"
+									| <func_call>
 									| <number>
 									| <strlit>
 									| <id>

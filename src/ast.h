@@ -5,7 +5,7 @@
 
 typedef struct Factor Factor;
 typedef enum {
-	FACTOR_TYPE_UND, FACTOR_TYPE_ID, FACTOR_TYPE_STR, FACTOR_TYPE_NUMBER, FACTOR_TYPE_EXPR, FACTOR_TYPE_LOGIC_CONJ, FACTOR_TYPE_LOGIC_DISJ 
+	FACTOR_TYPE_UND, FACTOR_TYPE_ID, FACTOR_TYPE_STR, FACTOR_TYPE_NUMBER, FACTOR_TYPE_EXPR, FACTOR_TYPE_LOGIC_CONJ, FACTOR_TYPE_LOGIC_DISJ, FACTOR_TYPE_FUNC_CALL 
 } FactorType;
 
 typedef struct Number Number;
@@ -17,6 +17,12 @@ typedef struct Expression Expression;
 typedef enum {
 	EXPRESSION_TYPE_LOGIC_DISJ
 } ExpressionType;
+
+typedef struct ExpressionList ExpressionList;
+typedef enum {
+	EXPRESSION_LIST_TYPE_EXPR, 
+	EXPRESSION_LIST_TYPE_EXPR_LIST_EXPR
+} ExpressionListType;
 
 typedef struct LogicalDisj LogicalDisj;
 typedef enum LogicalDisjType {
@@ -53,9 +59,14 @@ typedef enum {
 	STATEMENT_TYPE_RETURN
 } StatementType;
 
+typedef struct FuncCall FuncCall;
+typedef enum {
+	FUNC_CALL_TYPE_GENERIC
+} FuncCallType;
+
 typedef struct AST_Node AST_Node;
 typedef enum AST_NodeType {
-	NT_UNDEF, NT_TOKEN, NT_FACTOR, NT_NUMBER, NT_EXPRESSION, NT_STATEMENT, NT_LOGIC_DISJ, NT_LOGIC_CONJ, NT_RELATE, NT_MATH_EXPR, NT_TERM
+	NT_UNDEF, NT_TOKEN, NT_FACTOR, NT_NUMBER, NT_EXPRESSION, NT_EXPRESSION_LIST, NT_STATEMENT, NT_LOGIC_DISJ, NT_LOGIC_CONJ, NT_RELATE, NT_MATH_EXPR, NT_TERM, NT_FUNC_CALL
 } AST_NodeType;
 
 
@@ -68,6 +79,11 @@ struct Number {
 	};
 };
 
+struct FuncCall {
+	String_View id;
+	ExpressionList* exprList;
+};
+
 struct Factor {
 	FactorType type;
 	union {
@@ -76,6 +92,7 @@ struct Factor {
 		Number number;
 		Expression* expr;
 		LogicalDisj* logicdisj;
+		FuncCall funcCall;
 	};
 };
 
@@ -104,6 +121,13 @@ struct Relational {
 struct Expression {
 	ExpressionType type;
 	LogicalDisj* disj;
+	FuncCall funcCall;
+};
+
+struct ExpressionList {
+	ExpressionListType type;
+	Expression* expr;
+	ExpressionList* next;
 };
 
 struct LogicalConj {
@@ -125,6 +149,7 @@ struct Statement {
 	} Return;
 };
 
+
 struct AST_Node {
 	AST_NodeType type;
 	union {
@@ -132,12 +157,14 @@ struct AST_Node {
 		Factor factor;
 		Number number;
 		Expression* expr;
+		ExpressionList* exprList;
 		LogicalDisj* logicdisj;
 		LogicalConj* logicconj;
 		Relational* relate;
 		MathExpression* mathexpr;
 		Term* term;
 		Statement* stmt;
+		FuncCall funcCall;
 	};
 };
 

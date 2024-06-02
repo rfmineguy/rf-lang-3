@@ -52,11 +52,13 @@ term 						 := <term> "*" <factor>
 
 factor 					 := "(" <expression> ")"
 									| <func_call>
+									| <deref>
 									| <number>
 									| <strlit>
 									| <id>
 
 func_call        := <id> "(" <expression_list> ")"
+deref            := <id> "[" <expression_list> "]"
 expression_list  := <expression_list> "," <expression>
 									| <expression>
 

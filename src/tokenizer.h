@@ -18,6 +18,7 @@ typedef enum token_type {
 	T_SQUOTE, T_DQUOTE,
 	T_LP, T_RP,
 	T_LBRC, T_RBRC,
+	T_LBRK, T_RBRK,
 	T_RETURN,
 	T_RESERVE_END,
 

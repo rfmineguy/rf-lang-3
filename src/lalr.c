@@ -33,10 +33,12 @@ int lalr_reduce(lalr_ctx* ctx, AST_Node* out_n) {
 	AST_Node peeked[4] = {lalr_peek_n(ctx, 0), lalr_peek_n(ctx, 1), lalr_peek_n(ctx, 2), lalr_peek_n(ctx, 3)};
 	token_type lookahead = ctx->lookahead.type;
 
-	/**  module_header
-	 *     module_header := <id="module"> <id>
+	/**  header
+	 *     header := <id="module"> <id>
+	 *     header := <id="use"> <id> "{" <idlist> "}"
 	 */
 	{
+		// header := <id="module"> <id>
 		if (peeked[1].type == NT_TOKEN && peeked[1].token.type == T_ID &&
 				sv_eq(peeked[1].token.text, SV("module")) &&
 				peeked[0].type == NT_TOKEN && peeked[1].token.type == T_ID) {
@@ -48,17 +50,33 @@ int lalr_reduce(lalr_ctx* ctx, AST_Node* out_n) {
 		}
 	}
 
+	/** typed_id parsing
+	 * 		typed_id := <id> ":" <id>
+	 */
+	{
+		if (peeked[2].type == NT_TOKEN && peeked[2].token.type == T_ID &&
+				peeked[1].type == NT_TOKEN && peeked[1].token.type == T_COLON &&
+				peeked[0].type == NT_TOKEN && peeked[0].token.type == T_ID) {
+			out_n->type = NT_TYPED_ID;
+			out_n->typed_id.type = peeked[0].token.text;
+			out_n->typed_id.id = peeked[2].token.text;
+			return 3;
+		}
+	}
+
 	/**  factor parsing
 	 *   	 factor := "(" <expression> ")"
 	 *     factor := <id>
 	 *     factor := <number>
 	 *     factor := <strlit>
+	 *     factor := <func_call>
+	 *     factor := <deref>
 	 */
 	{
 		// factor := <id>
 		if (peeked[0].type == NT_TOKEN && peeked[0].token.type == T_ID &&
 				!sv_eq(peeked[0].token.text, SV("module")) &&
-				lookahead != T_LP) {
+				lookahead != T_LP && lookahead != T_LBRK) {
 			out_n->type = NT_FACTOR;
 			out_n->factor.type = FACTOR_TYPE_ID;
 			out_n->factor.id = peeked[0].token.text;
@@ -86,7 +104,8 @@ int lalr_reduce(lalr_ctx* ctx, AST_Node* out_n) {
 		// factor := "(" <expression> ")"
 		if (peeked[2].type == NT_TOKEN && peeked[2].token.type == T_LP &&
 				peeked[1].type == NT_EXPRESSION &&
-				peeked[0].type == NT_TOKEN && peeked[0].token.type == T_RP) {
+				peeked[0].type == NT_TOKEN && peeked[0].token.type == T_RP &&
+				peeked[3].type != NT_TOKEN && peeked[3].token.type != T_ID) {
 			out_n->type = NT_FACTOR;
 			out_n->factor.type = FACTOR_TYPE_EXPR;
 			out_n->factor.expr = peeked[1].expr;
@@ -98,6 +117,14 @@ int lalr_reduce(lalr_ctx* ctx, AST_Node* out_n) {
 			out_n->type = NT_FACTOR;
 			out_n->factor.type = FACTOR_TYPE_FUNC_CALL;
 			out_n->factor.funcCall = peeked[0].funcCall; 
+			return 1;
+		}
+
+	  // factor := <deref>
+		if (peeked[0].type == NT_DEREF) {
+			out_n->type = NT_FACTOR;
+			out_n->factor.type = FACTOR_TYPE_DEREF;
+			out_n->factor.deref = peeked[0].deref;
 			return 1;
 		}
 	}
@@ -314,7 +341,7 @@ int lalr_reduce(lalr_ctx* ctx, AST_Node* out_n) {
 	 *    expression_list := <expression_list> , <expression>
 	 *    expression_list := <expression>
 	 */
-	{
+	{ 
 		if (peeked[2].type == NT_EXPRESSION_LIST &&
 				peeked[1].type == NT_TOKEN &&
 				peeked[1].token.type == T_COMMA && 
@@ -344,8 +371,51 @@ int lalr_reduce(lalr_ctx* ctx, AST_Node* out_n) {
 	}
 
 	/**
+	 * deref
+	 *    deref := <id> "[" <expression_list> "]"
+	 *    deref := <id> "[" <expression> "]"
+	 */
+	{
+		// deref := <id> "[" <expression_list> "]"
+		if (peeked[3].type == NT_TOKEN &&
+				peeked[3].token.type == T_ID &&
+				peeked[2].type == NT_TOKEN &&
+				peeked[2].token.type == T_LBRK &&
+				peeked[1].type == NT_EXPRESSION_LIST &&
+				peeked[0].type == NT_TOKEN &&
+				peeked[0].token.type == T_RBRK) {
+			out_n->type = NT_DEREF;
+			out_n->deref.type = DEREF_TYPE_BRKT;
+			out_n->deref.Brkt.exprList = peeked[1].exprList;
+			out_n->deref.Brkt.id = peeked[3].token.text;
+			return 4;
+		}
+
+		// deref := <id> "[" <expression> "]"
+		if (peeked[3].type == NT_TOKEN &&
+				peeked[3].token.type == T_ID &&
+				peeked[2].type == NT_TOKEN &&
+				peeked[2].token.type == T_LBRK &&
+				peeked[1].type == NT_EXPRESSION &&
+				peeked[0].type == NT_TOKEN &&
+				peeked[0].token.type == T_RBRK) {
+			out_n->type = NT_DEREF;
+			out_n->deref.type = DEREF_TYPE_BRKT;
+			out_n->deref.Brkt.id = peeked[3].token.text;
+			out_n->deref.Brkt.exprList = arena_alloc(&ctx->arena, sizeof(ExpressionList));
+			out_n->deref.Brkt.exprList->type = EXPRESSION_LIST_TYPE_EXPR;
+			out_n->deref.Brkt.exprList->expr = peeked[1].expr;
+			out_n->deref.Brkt.exprList->next = NULL;
+			return 4;
+		}
+	}
+
+
+	/**
 	 * func_call
 	 *    func_call := <id> "(" <expression_list> ")"
+	 *    func_call := <id> "(" ")"
+	 *    func_call := <id> "(" <expression> ")"
 	 */
 	{
 	  // func_call := <id> "(" <expression_list> ")"
@@ -378,6 +448,7 @@ int lalr_reduce(lalr_ctx* ctx, AST_Node* out_n) {
 				peeked[1].type == NT_EXPRESSION &&
 				peeked[0].type == NT_TOKEN && peeked[0].token.type == T_RP) {
 			out_n->type = NT_FUNC_CALL;
+			out_n->funcCall.id = peeked[3].token.text;
 			out_n->funcCall.exprList = arena_alloc(&ctx->arena, sizeof(ExpressionList));
 			out_n->funcCall.exprList->type = EXPRESSION_LIST_TYPE_EXPR;
 			out_n->funcCall.exprList->expr = peeked[1].expr;

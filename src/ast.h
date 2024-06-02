@@ -5,12 +5,19 @@
 
 typedef struct Header Header;
 typedef enum {
-	HEADER_TYPE_MODULE
+	HEADER_TYPE_MODULE, HEADER_TYPE_USE
 } HeaderType;
+
+typedef struct TypedId TypedId;
+
+typedef struct Deref Deref;
+typedef enum {
+	DEREF_TYPE_BRKT, DEREF_TYPE_ASTERISK
+} DerefType;
 
 typedef struct Factor Factor;
 typedef enum {
-	FACTOR_TYPE_UND, FACTOR_TYPE_ID, FACTOR_TYPE_STR, FACTOR_TYPE_NUMBER, FACTOR_TYPE_EXPR, FACTOR_TYPE_LOGIC_CONJ, FACTOR_TYPE_LOGIC_DISJ, FACTOR_TYPE_FUNC_CALL 
+	FACTOR_TYPE_UND, FACTOR_TYPE_ID, FACTOR_TYPE_STR, FACTOR_TYPE_NUMBER, FACTOR_TYPE_EXPR, FACTOR_TYPE_LOGIC_CONJ, FACTOR_TYPE_LOGIC_DISJ, FACTOR_TYPE_FUNC_CALL, FACTOR_TYPE_DEREF 
 } FactorType;
 
 typedef struct Number Number;
@@ -71,9 +78,8 @@ typedef enum {
 
 typedef struct AST_Node AST_Node;
 typedef enum AST_NodeType {
-	NT_UNDEF, NT_TOKEN, NT_FACTOR, NT_NUMBER, NT_EXPRESSION, NT_EXPRESSION_LIST, NT_STATEMENT, NT_LOGIC_DISJ, NT_LOGIC_CONJ, NT_RELATE, NT_MATH_EXPR, NT_TERM, NT_FUNC_CALL, NT_HEADER
+	NT_UNDEF, NT_TOKEN, NT_FACTOR, NT_NUMBER, NT_EXPRESSION, NT_EXPRESSION_LIST, NT_STATEMENT, NT_LOGIC_DISJ, NT_LOGIC_CONJ, NT_RELATE, NT_MATH_EXPR, NT_TERM, NT_FUNC_CALL, NT_HEADER, NT_TYPED_ID, NT_DEREF
 } AST_NodeType;
-
 
 struct Header {
 	HeaderType type;
@@ -91,12 +97,23 @@ struct Number {
 		float f;
 	};
 };
-
+struct TypedId {
+	String_View id, type;
+};
 struct FuncCall {
 	String_View id;
 	ExpressionList* exprList;
 };
 
+struct Deref {
+	DerefType type;
+	union {
+		struct {
+			String_View id;
+			ExpressionList* exprList;
+		} Brkt;
+	};
+};
 struct Factor {
 	FactorType type;
 	union {
@@ -106,6 +123,7 @@ struct Factor {
 		Expression* expr;
 		LogicalDisj* logicdisj;
 		FuncCall funcCall;
+		Deref deref;
 	};
 };
 
@@ -179,6 +197,8 @@ struct AST_Node {
 		Statement* stmt;
 		FuncCall funcCall;
 		Header header;
+		TypedId typed_id;
+		Deref deref;
 	};
 };
 

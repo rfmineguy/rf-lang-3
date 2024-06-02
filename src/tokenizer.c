@@ -65,8 +65,8 @@ const char* token_str(token_type t) {
 		case T_DEFAULT: 		return "DEFAULT";
 		case T_LP:      		return "LP";
 		case T_RP:      		return "RP";
-		// case T_LBKT:				return "LKBT";
-		// case T_RBKT:				return "RKBT";
+		case T_LBRK:				return "LBRK";
+		case T_RBRK:				return "RBRK";
 		case T_LBRC:				return "LBRC";
 		case T_RBRC:				return "RBRC";
 		case T_DEQ:					return "DEQ"; 					 
@@ -251,6 +251,8 @@ token tctx_get_next(tokenizer_ctx* ctx) {
 	CHMATCH(')', T_RP);
 	CHMATCH('{', T_LBRC);
 	CHMATCH('}', T_RBRC);
+	CHMATCH('[', T_LBRK);
+	CHMATCH(']', T_RBRK);
 	CHMATCH('-', T_MINUS);
 	CHMATCH('+', T_PLUS);
 	CHMATCH('*', T_MUL);

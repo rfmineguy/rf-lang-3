@@ -22,6 +22,8 @@ void ast_print_node(AST_Node n, int d) {
 		case NT_EXPRESSION_LIST: ast_print_expr_list(n.exprList, d); break;
 		case NT_FUNC_CALL:       ast_print_func_call(n.funcCall, d); break;
 		case NT_HEADER: 				 ast_print_header(n.header, d); break;
+		case NT_TYPED_ID:				 ast_print_typed_id(n.typed_id, d); break;
+		case NT_DEREF:           ast_print_deref(n.deref, d); break;
 	}
 }
 
@@ -30,6 +32,9 @@ void ast_print_header(Header h, int d) {
 	switch (h.type) {
 		case HEADER_TYPE_MODULE:
 			printf(TREE_FMT "[Module " SV_Fmt "]", TREE_ARG(1), SV_Arg(h.module.name));
+			break;
+		case HEADER_TYPE_USE:
+			assert(0 && "Header Use not implemented");
 			break;
 	}
 }
@@ -46,8 +51,27 @@ void ast_print_factor(Factor f, int d) {
 		case FACTOR_TYPE_LOGIC_DISJ:assert(0 && "No factor for logic disjunction");											break;
 		case FACTOR_TYPE_LOGIC_CONJ:assert(0 && "No factor for logic conjunction"); break;
 		case FACTOR_TYPE_FUNC_CALL: ast_print_func_call(f.funcCall, d + 1); break;
+		case FACTOR_TYPE_DEREF: ast_print_deref(f.deref, d + 1); break;
 	}
 }
+
+void ast_print_typed_id(TypedId id, int d) {
+	printf(TREE_FMT "[TypedId]\n", TREE_ARG(0));
+	printf(TREE_FMT "[Id " SV_Fmt "]\n", TREE_ARG(1), SV_Arg(id.id));
+	printf(TREE_FMT "[Type " SV_Fmt "]\n", TREE_ARG(1), SV_Arg(id.type));
+}
+
+void ast_print_deref(Deref deref, int d) {
+	printf(TREE_FMT "[Deref %d]\n", TREE_ARG(0), deref.type);
+	switch (deref.type) {
+		case DEREF_TYPE_BRKT:
+			printf(TREE_FMT "[Id " SV_Fmt "]\n", TREE_ARG(1), SV_Arg(deref.Brkt.id));
+			ast_print_expr_list(deref.Brkt.exprList, d + 1);
+			break;
+		case DEREF_TYPE_ASTERISK: assert(0 && "Not printable yet"); break;
+	}
+}
+
 void ast_print_number(Number n, int d) {
 	printf(TREE_FMT "[Number]", TREE_ARG(0));
 	switch (n.type) {

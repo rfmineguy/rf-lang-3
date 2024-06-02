@@ -6,9 +6,7 @@ GEN_SOURCES  := src/tokenizer.c \
 						 src/arenaimpl.c\
 						 src/number_parser.c\
 						 src/lalr.c\
-						 src/ast_util.c\
-						 src/ast_free.c\
-						 src/malloc_trace.c
+						 src/ast_util.c
 MAIN_SOURCES := $(MAIN)\
 								$(GEN_SOURCES)
 TEST_SOURCES := $(TEST_MAIN)\

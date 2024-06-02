@@ -1,5 +1,4 @@
 #include "ast.h"
-#include "ast_free.h"
 #include "lalr.h"
 #include "lib/arena.h"
 #include "tokenizer.h"

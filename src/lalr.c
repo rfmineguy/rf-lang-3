@@ -7,7 +7,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "number_parser.h"
-#include "malloc_trace.h"
 
 lalr_ctx lalr_create() {
 	lalr_ctx ctx = {0};

@@ -96,6 +96,7 @@ const char* token_str(token_type t) {
 		case T_DQUOTE:      return "DQUOTE";
 		case T_EOF: 				return "EOF";
 		case T_SPACE:       return "SPACE";
+		case T_RETURN:      return "RETURN";
 		case T_UNKNOWN:  		return "UNKNOWN";
 		default:            printf("%d\n", t); assert(0 && "Unimplemented token_str conversion");
 	}

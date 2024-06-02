@@ -1,21 +1,18 @@
 
 MAIN := src/main.c
 TEST_MAIN := tests/test_main.c
-SOURCES 	:= $(MAIN)\
-						 src/tokenizer.c \
+GEN_SOURCES  := src/tokenizer.c \
 						 src/svimpl.c\
 						 src/number_parser.c\
-						 src/lalr.c\
-						 src/ast_util.c\
-						 src/ast_free.c
-TEST_SOURCES := $(TEST_MAIN)\
-						 src/tokenizer.c \
-						 src/svimpl.c\
 						 src/lalr.c\
 						 src/ast_util.c\
 						 src/ast_free.c\
-						 src/number_parser.c\
-						 tests/munit.c
+						 src/malloc_trace.c
+MAIN_SOURCES := $(MAIN)\
+								$(GEN_SOURCES)
+TEST_SOURCES := $(TEST_MAIN)\
+								$(GEN_SOURCES)\
+								tests/munit.c
 GETOPT_SOURCE := getopt/cmdline.c
 BIN          := rfc
 
@@ -35,7 +32,7 @@ clean:
 debug: always
 	docker run --rm -it -v $(shell pwd):$(shell pwd) -w $(shell pwd) alpine sh -c "gcc $(SOURCES) -ggdb -lm -o out/$(BIN)_x86"
 	docker run --rm -it -e DISPLAY=192.168.1.142:0 -v $(shell pwd):$(shell pwd) -w $(shell pwd) alpine gf2 ./out/$(BIN)_x86
-out/$(BIN): $(SOURCES) $(GETOPT_SOURCE)
+out/$(BIN): $(MAIN_SOURCES) $(GETOPT_SOURCE)
 	clang $^ -o $@ -lm -ggdb
 out/test: $(TEST_SOURCES) $(GETOPT_SOURCE)
 	clang $^ -o $@ -lm

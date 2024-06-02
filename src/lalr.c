@@ -6,6 +6,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "number_parser.h"
+#include "malloc_trace.h"
 
 lalr_ctx lalr_create() {
 	lalr_ctx ctx = {0};
@@ -179,7 +180,6 @@ int lalr_reduce(lalr_ctx* ctx, AST_Node* out_n) {
 			out_n->relate->relate = peeked[2].relate;
 			out_n->relate->mathexpr = peeked[0].mathexpr;
 			out_n->relate->op = peeked[1].token.text;
-			printf("relational (op=" SV_Fmt ") math_expr\n", SV_Arg(out_n->relate->op));
 			return 3;
 		}
 
@@ -189,7 +189,6 @@ int lalr_reduce(lalr_ctx* ctx, AST_Node* out_n) {
 				ctx->lookahead.type != T_MINUS
 			 ) {
 				//ctx->lookahead.type != T_RP) {
-			printf("Reduced math_expr -> relational\n");
 			out_n->type = NT_RELATE;
 			out_n->relate = calloc(1, sizeof(Relational));
 			out_n->relate->type = RELATIONAL_TYPE_MATH_EXPR;

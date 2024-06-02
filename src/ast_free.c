@@ -1,4 +1,5 @@
 #include "ast_free.h"
+#include "malloc_trace.h"
 #include "ast.h"
 #include <stdio.h>
 
@@ -89,6 +90,7 @@ void ast_free_relational(Relational* relate){
 }
 void ast_free_expr(Expression* expr){
 	FREE_BEGIN;
+	if (expr == NULL) return;
 	switch (expr->type) {
 		case EXPRESSION_TYPE_LOGIC_DISJ: 
 			ast_free_logical_disj(expr->disj);

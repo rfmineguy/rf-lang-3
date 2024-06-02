@@ -111,9 +111,9 @@ void ast_print_term(Term* t, int d) {
 }
 
 void ast_print_stmt(Statement* stmt, int d) {
-	printf(TREE_FMT "[Statement]\n", TREE_ARG(0));
 	switch (stmt->type) {
 		case STATEMENT_TYPE_RETURN:
+			printf(TREE_FMT "[Statement Return]\n", TREE_ARG(0));
 			ast_print_expr(stmt->Return.expr, d + 1);
 			break;
 	}

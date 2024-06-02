@@ -63,7 +63,7 @@ int compile(const char* file) {
 		pctx.lookahead = tctx_get_next(&ctx);
 		if (t.type == T_EOF) break;
 
-		AST_Node n;
+		AST_Node n = {0};
 		lalr_reduce_tok_to_term(t, &n);
 		lalr_push(&pctx, n);
 

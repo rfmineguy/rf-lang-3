@@ -36,6 +36,17 @@ int lalr_reduce(lalr_ctx* ctx, AST_Node* out_n) {
 	/**  module_header
 	 *     module_header := <id="module"> <id>
 	 */
+	{
+		if (peeked[1].type == NT_TOKEN && peeked[1].token.type == T_ID &&
+				sv_eq(peeked[1].token.text, SV("module")) &&
+				peeked[0].type == NT_TOKEN && peeked[1].token.type == T_ID) {
+			out_n->type = NT_HEADER;
+			out_n->header.type = HEADER_TYPE_MODULE;
+			out_n->header.module.name = peeked[0].token.text;
+			printf("Header %d\n", out_n->header.type);
+			return 2;
+		}
+	}
 
 	/**  factor parsing
 	 *   	 factor := "(" <expression> ")"
@@ -46,6 +57,7 @@ int lalr_reduce(lalr_ctx* ctx, AST_Node* out_n) {
 	{
 		// factor := <id>
 		if (peeked[0].type == NT_TOKEN && peeked[0].token.type == T_ID &&
+				!sv_eq(peeked[0].token.text, SV("module")) &&
 				lookahead != T_LP) {
 			out_n->type = NT_FACTOR;
 			out_n->factor.type = FACTOR_TYPE_ID;

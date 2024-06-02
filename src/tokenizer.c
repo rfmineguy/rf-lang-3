@@ -239,9 +239,6 @@ token tctx_get_next(tokenizer_ctx* ctx) {
 	RMATCH(ctx->regex_store.r_gteq, T_GTEQ);
 	RMATCH(ctx->regex_store.r_lteq, T_LTEQ);
 	RMATCH(ctx->regex_store.r_deq, T_DEQ);
-	// RMATCH(ctx->regex_store.r_comma, T_COMMA_SEQ);
-	// RMATCH(ctx->regex_store.r_period, T_PERIOD_SEQ);
-	// RMATCH(ctx->regex_store.r_semi, T_SEMI_SEQ);
 	CHMATCH('|', T_BOR);
 	CHMATCH('&', T_BAND);
 	CHMATCH('>', T_GT);

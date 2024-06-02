@@ -3,6 +3,7 @@
 #include "ast.h"
 
 void ast_print_node(AST_Node, int);
+void ast_print_header(Header, int);
 void ast_print_factor(Factor, int);
 void ast_print_number(Number, int);
 void ast_print_logical_disj(LogicalDisj*, int);

@@ -21,6 +21,16 @@ void ast_print_node(AST_Node n, int d) {
 		case NT_STATEMENT:       ast_print_stmt(n.stmt, d); break;
 		case NT_EXPRESSION_LIST: ast_print_expr_list(n.exprList, d); break;
 		case NT_FUNC_CALL:       ast_print_func_call(n.funcCall, d); break;
+		case NT_HEADER: 				 ast_print_header(n.header, d); break;
+	}
+}
+
+void ast_print_header(Header h, int d) {
+	printf(TREE_FMT "[Header]\n", TREE_ARG(0));
+	switch (h.type) {
+		case HEADER_TYPE_MODULE:
+			printf(TREE_FMT "[Module " SV_Fmt "]", TREE_ARG(1), SV_Arg(h.module.name));
+			break;
 	}
 }
 

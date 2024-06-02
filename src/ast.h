@@ -3,6 +3,11 @@
 
 #include "tokenizer.h"
 
+typedef struct Header Header;
+typedef enum {
+	HEADER_TYPE_MODULE
+} HeaderType;
+
 typedef struct Factor Factor;
 typedef enum {
 	FACTOR_TYPE_UND, FACTOR_TYPE_ID, FACTOR_TYPE_STR, FACTOR_TYPE_NUMBER, FACTOR_TYPE_EXPR, FACTOR_TYPE_LOGIC_CONJ, FACTOR_TYPE_LOGIC_DISJ, FACTOR_TYPE_FUNC_CALL 
@@ -66,10 +71,18 @@ typedef enum {
 
 typedef struct AST_Node AST_Node;
 typedef enum AST_NodeType {
-	NT_UNDEF, NT_TOKEN, NT_FACTOR, NT_NUMBER, NT_EXPRESSION, NT_EXPRESSION_LIST, NT_STATEMENT, NT_LOGIC_DISJ, NT_LOGIC_CONJ, NT_RELATE, NT_MATH_EXPR, NT_TERM, NT_FUNC_CALL
+	NT_UNDEF, NT_TOKEN, NT_FACTOR, NT_NUMBER, NT_EXPRESSION, NT_EXPRESSION_LIST, NT_STATEMENT, NT_LOGIC_DISJ, NT_LOGIC_CONJ, NT_RELATE, NT_MATH_EXPR, NT_TERM, NT_FUNC_CALL, NT_HEADER
 } AST_NodeType;
 
 
+struct Header {
+	HeaderType type;
+	union {
+		struct {
+			String_View name;
+		} module;
+	};
+};
 struct Number {
 	NumberType type;
 	union {
@@ -165,6 +178,7 @@ struct AST_Node {
 		Term* term;
 		Statement* stmt;
 		FuncCall funcCall;
+		Header header;
 	};
 };
 

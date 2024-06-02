@@ -1,7 +1,8 @@
 #include "lalr.h"
 #include "ast.h"
 #include "ast_util.h"
-#include "sv.h"
+#include "lib/arena.h"
+#include "lib/sv.h"
 #include "tokenizer.h"
 #include <stdio.h>
 #include <stdlib.h>
@@ -11,6 +12,7 @@
 lalr_ctx lalr_create() {
 	lalr_ctx ctx = {0};
 	ctx.stack_top = -1;
+	ctx.arena = (Arena){0};
 	return ctx;
 }
 
@@ -92,7 +94,8 @@ int lalr_reduce(lalr_ctx* ctx, AST_Node* out_n) {
 				(peeked[1].token.type == T_MUL || peeked[1].token.type == T_DIV || peeked[1].token.type == T_MOD) &&
 				 peeked[0].type == NT_FACTOR) {
 			out_n->type = NT_TERM;
-			out_n->term = calloc(1, sizeof(Term));
+			out_n->term = arena_alloc(&ctx->arena, sizeof(Term));
+			// out_n->term = calloc(1, sizeof(Term));
 			out_n->term->type = TERM_TYPE_TERM_OP_FACTOR;
 			out_n->term->op = peeked[1].token.text.data[0];
 			out_n->term->left = peeked[2].term;

@@ -64,7 +64,6 @@ void ast_print_logical_conj(LogicalConj* l, int d) {
 			ast_print_relational(l->relate, d + 1);
 			break;
 	}
-	free(l);
 }
 void ast_print_relational(Relational* r, int d) {
 	if (r == NULL)
@@ -85,7 +84,6 @@ void ast_print_expr(Expression* e, int d) {
 	printf(TREE_FMT "[Expression]\n", TREE_ARG(0));
 	// printf("%*c[Expression]", d * 2, ' ');
 	ast_print_logical_disj(e->disj, d + 1);
-	free(e);
 }
 void ast_print_math_expr(MathExpression* m, int d) {
 	if (!m) return;

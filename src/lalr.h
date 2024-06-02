@@ -2,6 +2,7 @@
 #define LALR_H
 #include "ast.h"
 #include "tokenizer.h"
+#include "lib/arena.h"
 
 typedef struct lalr_ctx {
 	// lalr data
@@ -12,6 +13,8 @@ typedef struct lalr_ctx {
 	// parse stack
 	AST_Node stack[255];
 	int stack_top;
+
+	Arena arena;
 } lalr_ctx;
 
 lalr_ctx  lalr_create();

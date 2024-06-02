@@ -4,9 +4,13 @@
 #include <stdio.h>
 
 static int depth = 0;
+#if 0
 #define FREE_BEGIN printf("%*c%s\n", depth * 2, ' ', __FUNCTION__); depth++
 #define FREE_NOTIF printf("%*c%s\n", (depth - 1) * 2, ' ', __FUNCTION__); depth--
-
+#else
+#define FREE_BEGIN {}
+#define FREE_NOTIF {}
+#endif
 void ast_free_node(AST_Node n){
 	FREE_BEGIN;
 	switch (n.type) {
@@ -45,15 +49,8 @@ void ast_free_number(Number n){
 void ast_free_logical_disj(LogicalDisj* disj){
 	FREE_BEGIN;
 	if (disj == NULL) return;
-	switch (disj->type) {
-		case LOGICAL_DISJ_TYPE_CONJ:
-			ast_free_logical_conj(disj->conj);
-			break;
-		case LOGICAL_DISJ_TYPE_DISJ_CONJ:
-			ast_free_logical_disj(disj->disj);
-			ast_free_logical_conj(disj->conj);
-			break;
-	}
+	if (disj->conj) ast_free_logical_conj(disj->conj);
+	if (disj->disj) ast_free_logical_disj(disj->disj);
 	free(disj);
 	FREE_NOTIF;
 }
@@ -74,7 +71,6 @@ void ast_free_logical_conj(LogicalConj* conj){
 }
 void ast_free_relational(Relational* relate){
 	FREE_BEGIN;
-	printf("%p\n", relate);
 	if (relate == NULL) return;
 	switch (relate->type) {
 		case RELATIONAL_TYPE_MATH_EXPR:
@@ -91,12 +87,7 @@ void ast_free_relational(Relational* relate){
 void ast_free_expr(Expression* expr){
 	FREE_BEGIN;
 	if (expr == NULL) return;
-	switch (expr->type) {
-		case EXPRESSION_TYPE_LOGIC_DISJ: 
-			ast_free_logical_disj(expr->disj);
-			break;
-	}
-
+	ast_free_logical_disj(expr->disj);
 	free(expr);
 	FREE_NOTIF;
 }

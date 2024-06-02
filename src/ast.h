@@ -1,7 +1,6 @@
 #ifndef AST_H
 #define AST_H
 
-#include "sv.h"
 #include "tokenizer.h"
 
 typedef struct Factor Factor;

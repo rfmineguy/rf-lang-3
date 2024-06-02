@@ -1,6 +1,6 @@
 #ifndef TEXT_PROCESSOR_H
 #define TEXT_PROCESSOR_H
-#include "sv.h"
+#include "lib/sv.h"
 #include <stdbool.h>
 
 // Args:   where to save the parsed value

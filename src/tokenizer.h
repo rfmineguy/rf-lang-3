@@ -2,8 +2,8 @@
 #define TOKENIZER_H
 #include <stddef.h>
 #include <regex.h>
-#include "sv.h"
-#include "cvector.h"
+#include "lib/sv.h"
+#include "lib/cvector.h"
 
 typedef enum token_type {
 	// Unreserved tokens

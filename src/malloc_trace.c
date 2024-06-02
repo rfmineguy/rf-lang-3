@@ -2,6 +2,8 @@
 #include <dlfcn.h>
 #include <stdio.h>
 
+static int allocs = 0, frees = 0;
+
 void* my_malloc(size_t size, const char* file, int line) {
 	static void* (*realmalloc)(size_t) = NULL;
 	if (!realmalloc) {
@@ -9,7 +11,7 @@ void* my_malloc(size_t size, const char* file, int line) {
 	}
 
 	void* p = realmalloc(size);
-	printf("malloc [%s](%d)  %p\n", file, line, p);
+	printf("malloc #%d [%s](%d)  %p\n", ++allocs, file, line, p);
 	return p;
 }
 
@@ -20,7 +22,7 @@ void* my_calloc(size_t count, size_t size, const char* file, int line) {
 	}
 
 	void* p = realcalloc(size);
-	printf("calloc [%s](%d)  %p\n", file, line, p);
+	printf("calloc #%d [%s](%d)  %p\n", ++allocs, file, line, p);
 	return p;
 }
 
@@ -34,6 +36,6 @@ void my_free(const char* file, int line, void* ptr) {
 			return;
 		}
 	}
-	printf("free [%s](%d)  %p\n", file, line, ptr);
+	printf("free #%d [%s](%d)  %p\n", ++frees, file, line, ptr);
 	realfree(ptr);
 }

@@ -3,6 +3,7 @@ MAIN := src/main.c
 TEST_MAIN := tests/test_main.c
 GEN_SOURCES  := src/tokenizer.c \
 						 src/svimpl.c\
+						 src/arenaimpl.c\
 						 src/number_parser.c\
 						 src/lalr.c\
 						 src/ast_util.c\

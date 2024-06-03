@@ -1,4 +1,10 @@
+module Main
+
 x: int
 y: char
 y: [char; 4,5,3]
 blocks[x,y,z]
+
+print("{}", x)
+
+x: int, argv: [char; 343, 4], b: bool

@@ -25,6 +25,7 @@ void ast_print_node(AST_Node n, int d) {
 		case NT_TYPED_ID:				 ast_print_typed_id(n.typed_id, d); break;
 		case NT_DEREF:           ast_print_deref(n.deref, d); break;
 		case NT_VAR_TYPE:        ast_print_vartype(n.var_type, d); break;
+		case NT_TYPED_ID_LIST:   ast_print_typed_idlist(n.typed_idlist, d); break;
 	}
 }
 
@@ -74,6 +75,21 @@ void ast_print_typed_id(TypedId id, int d) {
 	printf(TREE_FMT "[Id " SV_Fmt "]\n", TREE_ARG(1), SV_Arg(id.id));
 	ast_print_vartype(id.type, d + 1);
 	// printf(TREE_FMT "[Type " SV_Fmt "]\n", TREE_ARG(1), SV_Arg(id.type));
+}
+
+void ast_print_typed_idlist_rec(TypedIdList* list, int i, int d) {
+	if (list == NULL) {
+		printf(TREE_FMT "[TypedIdList(NULL)]\n", TREE_ARG(0));
+		return;
+	}
+
+	ast_print_typed_id(list->typedId, d + 1);
+	ast_print_typed_idlist_rec(list->next, i + 1, d + 1);
+}
+
+void ast_print_typed_idlist(TypedIdList* list, int d) {
+	printf(TREE_FMT "[TypedIdList]\n", TREE_ARG(0));
+	ast_print_typed_idlist_rec(list, 0, d);
 }
 
 void ast_print_deref(Deref deref, int d) {
@@ -174,7 +190,7 @@ void ast_print_stmt(Statement* stmt, int d) {
 
 void ast_print_expr_list_rec(ExpressionList* eList, int d, int index) {
 	if (eList == NULL) {
-		printf(TREE_FMT "NULL\n", TREE_ARG(0));
+		printf(TREE_FMT "ExpressionList(NULL)\n", TREE_ARG(0));
 		return;
 	}
 

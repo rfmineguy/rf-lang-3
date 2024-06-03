@@ -74,6 +74,22 @@ int lalr_reduce(lalr_ctx* ctx, AST_Node* out_n) {
 			out_n->var_type.type = VAR_TYPE_ARRAY;
 			out_n->var_type.Array.id = peeked[3].token.text;
 			out_n->var_type.Array.exprList = peeked[1].exprList;
+			printf("var_type_array\n");
+			return 5;
+		}
+	  // vartype := "[" <id> ";" <expression> "]"
+		if (peeked[4].type == NT_TOKEN && peeked[4].token.type == T_LBRK &&
+				peeked[3].type == NT_TOKEN && peeked[3].token.type == T_ID &&
+				peeked[2].type == NT_TOKEN && peeked[2].token.type == T_SEMI &&
+				peeked[1].type == NT_EXPRESSION &&
+				peeked[0].type == NT_TOKEN && peeked[0].token.type == T_RBRK) {
+			out_n->type = NT_VAR_TYPE;
+			out_n->var_type.type = VAR_TYPE_ARRAY;
+			out_n->var_type.Array.id = peeked[3].token.text;
+			out_n->var_type.Array.exprList = arena_alloc(&ctx->arena, sizeof(ExpressionList));
+			out_n->var_type.Array.exprList->type = EXPRESSION_LIST_TYPE_EXPR;
+			out_n->var_type.Array.exprList->expr = peeked[1].expr;
+			out_n->var_type.Array.exprList->next = NULL;
 			return 5;
 		}
 	}
@@ -89,6 +105,38 @@ int lalr_reduce(lalr_ctx* ctx, AST_Node* out_n) {
 			out_n->typed_id.type = peeked[0].var_type;
 			out_n->typed_id.id = peeked[2].token.text;
 			return 3;
+		}
+	}
+
+	/** typed_id_list parsing
+	 *    typed_id_list := <typed_id>
+	 *    typed_id_list := <typed_id_list> "," <typed_id>
+	 */
+	{
+		//   typed_id_list := <typed_id_list> "," <typed_id>
+		if (peeked[2].type == NT_TYPED_ID_LIST &&
+				peeked[1].type == NT_TOKEN &&
+				peeked[1].token.type == T_COMMA &&
+				peeked[0].type == NT_TYPED_ID) {
+			TypedIdList* list = arena_alloc(&ctx->arena, sizeof(TypedIdList));
+			list->typedId = peeked[0].typed_id;
+			list->next = NULL;
+
+			TypedIdList* curr = peeked[2].typed_idlist;
+			while (curr->next) curr = curr->next;
+			curr->next = list;
+
+			out_n->type = NT_TYPED_ID_LIST;
+			out_n->typed_idlist = peeked[2].typed_idlist;
+			return 3;
+		}
+		//   typed_id_list := <typed_id>
+		if (peeked[0].type == NT_TYPED_ID &&
+				lookahead == T_COMMA) {
+			out_n->type = NT_TYPED_ID_LIST;
+			out_n->typed_idlist = arena_alloc(&ctx->arena, sizeof(TypedIdList));
+			out_n->typed_idlist->typedId = peeked[0].typed_id;
+			return 1;
 		}
 	}
 

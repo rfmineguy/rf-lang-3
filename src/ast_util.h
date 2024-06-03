@@ -18,5 +18,6 @@ void ast_print_term(Term*, int);
 void ast_print_stmt(Statement*, int);
 void ast_print_expr_list(ExpressionList*, int);
 void ast_print_func_call(FuncCall, int);
+void ast_print_typed_idlist(TypedIdList*, int);
 
 #endif

@@ -40,7 +40,7 @@ int tokenize(const char* file) {
 	token t;
 	while ((t = tctx_get_next(&ctx)).type != T_EOF) {
 		tctx_advance(&ctx);
-		printf("%s\n", token_str(t.type));
+		printf(TOKEN_STR_FMT "\n", TOKEN_STR_ARG(t));
 		if (t.type == T_EOF) break;
 	}
 

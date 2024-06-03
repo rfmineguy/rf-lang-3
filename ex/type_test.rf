@@ -7,4 +7,7 @@ blocks[x,y,z]
 
 print("{}", x)
 
-x: int, argv: [char; 343, 4], b: bool
+x: int, argv: [char; 343, 4], b: [bool; 10]
+
+main = argc: int, argv: [char; 4] -> int {
+}

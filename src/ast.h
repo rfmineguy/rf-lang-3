@@ -14,6 +14,8 @@ typedef enum {
 	TYPED_ID_TYPE_UNUSED
 } TypedIdListType;
 
+typedef struct FunctionHeader FunctionHeader;
+
 typedef struct VarType VarType;
 typedef enum {
 	VAR_TYPE_ID, VAR_TYPE_ARRAY
@@ -87,7 +89,7 @@ typedef enum {
 
 typedef struct AST_Node AST_Node;
 typedef enum AST_NodeType {
-	NT_UNDEF, NT_TOKEN, NT_FACTOR, NT_NUMBER, NT_EXPRESSION, NT_EXPRESSION_LIST, NT_STATEMENT, NT_LOGIC_DISJ, NT_LOGIC_CONJ, NT_RELATE, NT_MATH_EXPR, NT_TERM, NT_FUNC_CALL, NT_HEADER, NT_TYPED_ID, NT_DEREF, NT_VAR_TYPE, NT_TYPED_ID_LIST
+	NT_UNDEF, NT_TOKEN, NT_FACTOR, NT_NUMBER, NT_EXPRESSION, NT_EXPRESSION_LIST, NT_STATEMENT, NT_LOGIC_DISJ, NT_LOGIC_CONJ, NT_RELATE, NT_MATH_EXPR, NT_TERM, NT_FUNC_CALL, NT_HEADER, NT_TYPED_ID, NT_DEREF, NT_VAR_TYPE, NT_TYPED_ID_LIST, NT_FUNC_HEADER
 } AST_NodeType;
 
 struct Header {
@@ -125,6 +127,15 @@ struct TypedId {
 struct TypedIdList {
 	TypedId typedId;
 	TypedIdList* next;
+};
+struct FunctionHeader {
+	TypedIdList* params;
+	VarType returnType;
+};
+struct Function {
+	String_View id;
+	FunctionHeader header;
+	// Block block
 };
 struct FuncCall {
 	String_View id;
@@ -223,6 +234,7 @@ struct AST_Node {
 		Term* term;
 		Statement* stmt;
 		FuncCall funcCall;
+		FunctionHeader funcHeader;
 		Header header;
 		TypedId typed_id;
 		TypedIdList* typed_idlist;

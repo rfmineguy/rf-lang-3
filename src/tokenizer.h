@@ -20,9 +20,13 @@ typedef enum token_type {
 	T_LBRC, T_RBRC,
 	T_LBRK, T_RBRK,
 	T_RETURN,
+	T_ARROW,
 	T_RESERVE_END,
 
 	T_BOR = 200, T_BAND, // bitwise
+
+	// Assign
+	T_EQ,
 
 	// LogicOp
 	T_LOGIC_BEG = 300,
@@ -58,7 +62,7 @@ typedef union tokenizer_regex_store {
 		regex_t r_hexlit, r_dbllit, r_declit, r_id; // 4
 		regex_t r_lor, r_land, r_gteq, r_lteq, r_deq; // 5
 		regex_t r_comma, r_period, r_semi; // 3
-		regex_t r_return; // 1
+		regex_t r_return, r_arrow; // 1
 
 		// Total : 1 + 1 + 7 + 4 + 5 + 3 + 1 = 22
 	};
@@ -81,6 +85,8 @@ typedef struct tokenizer_ctx {
 regex_t       rnew(const char*);
 int           rmatch(const char*, regex_t, int*);
 
+#define TOKEN_STR_FMT "%-20s " SV_Fmt
+#define TOKEN_STR_ARG(token) token_str(token.type), SV_Arg(token.text)
 const char*   token_str(token_type);
 
 bool 					is_token_terminal(token*);

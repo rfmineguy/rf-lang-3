@@ -64,6 +64,14 @@ int lalr_reduce(lalr_ctx* ctx, AST_Node* out_n) {
 			out_n->var_type.Id.id = peeked[0].token.text;
 			return 1;
 		}
+		if (peeked[0].type == NT_TOKEN && peeked[0].token.type == T_ID &&
+				peeked[1].type == NT_TOKEN && peeked[1].token.type == T_ARROW &&
+				lookahead != T_LP) {
+			out_n->type = NT_VAR_TYPE;
+			out_n->var_type.type = VAR_TYPE_ID;
+			out_n->var_type.Id.id = peeked[0].token.text;
+			return 1;
+		}
 	  // vartype := "[" <id> ";" <expression_list> "]"
 		if (peeked[4].type == NT_TOKEN && peeked[4].token.type == T_LBRK &&
 				peeked[3].type == NT_TOKEN && peeked[3].token.type == T_ID &&
@@ -152,7 +160,7 @@ int lalr_reduce(lalr_ctx* ctx, AST_Node* out_n) {
 		// factor := <id>
 		if (peeked[0].type == NT_TOKEN && peeked[0].token.type == T_ID &&
 				!sv_eq(peeked[0].token.text, SV("module")) &&
-				lookahead != T_LP && lookahead != T_LBRK && lookahead != T_COLON && lookahead != T_SEMI) {
+				lookahead != T_LP && lookahead != T_LBRK && lookahead != T_COLON && lookahead != T_SEMI && lookahead != T_LBRC) {
 			out_n->type = NT_FACTOR;
 			out_n->factor.type = FACTOR_TYPE_ID;
 			out_n->factor.id = peeked[0].token.text;
@@ -531,6 +539,20 @@ int lalr_reduce(lalr_ctx* ctx, AST_Node* out_n) {
 			out_n->funcCall.exprList->next = NULL;
 			return 4;
 		}
+	}
+
+	/**
+	 * function_header
+	 *    function_header := <typedid_list> "->" <var_type>
+	 */
+	if (peeked[2].type == NT_TYPED_ID_LIST &&
+			peeked[1].type == NT_TOKEN &&
+			peeked[1].token.type == T_ARROW &&
+			peeked[0].type == NT_VAR_TYPE) {
+		out_n->type = NT_FUNC_HEADER;
+		out_n->funcHeader.params = peeked[2].typed_idlist;
+		out_n->funcHeader.returnType = peeked[0].var_type;
+		return 3;
 	}
 
 	return 0;

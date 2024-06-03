@@ -78,6 +78,7 @@ const char* token_str(token_type t) {
 		case T_LAND:   			return "LAND";
 		case T_BOR:    			return "BOR";
 		case T_BAND:   			return "BAND";
+		case T_EQ: 					return "EQ";
 		case T_COLON:   		return "COLON";
 		case T_COMMA: 	    return "COMMA";
 		case T_PERIOD:	    return "PERIOD";
@@ -97,6 +98,7 @@ const char* token_str(token_type t) {
 		case T_EOF: 				return "EOF";
 		case T_SPACE:       return "SPACE";
 		case T_RETURN:      return "RETURN";
+		case T_ARROW:  			return "ARROW";
 		case T_UNKNOWN:  		return "UNKNOWN";
 		default:            printf("%d\n", t); assert(0 && "Unimplemented token_str conversion");
 	}
@@ -125,6 +127,7 @@ void tctx_internal_init_regex(tokenizer_ctx* ctx) {
 	ctx->regex_store.r_comma      = rnew(",");
 	ctx->regex_store.r_period     = rnew(".");
 	ctx->regex_store.r_semi       = rnew(";");
+	ctx->regex_store.r_arrow      = rnew("->");
 }
 
 void tctx_internal_free_regex(tokenizer_ctx* ctx) {
@@ -230,6 +233,7 @@ token tctx_get_next(tokenizer_ctx* ctx) {
 	RMATCH(ctx->regex_store.r_break, T_BREAK);
 	RMATCH(ctx->regex_store.r_default, T_DEFAULT);
 	RMATCH(ctx->regex_store.r_return, T_RETURN);
+	RMATCH(ctx->regex_store.r_arrow, T_ARROW);
 	RMATCH(ctx->regex_store.r_hexlit, T_HEX_LIT);
 	RMATCH(ctx->regex_store.r_dbllit, T_DOUBLE_LIT);
 	RMATCH(ctx->regex_store.r_declit, T_DECIMAL_LIT);
@@ -258,7 +262,7 @@ token tctx_get_next(tokenizer_ctx* ctx) {
 	CHMATCH('*', T_MUL);
 	CHMATCH('/', T_DIV);
 	CHMATCH('%', T_MOD);
-	// CHMATCH('=', T_EQ);
+	CHMATCH('=', T_EQ);
 	CHMATCH('\'', T_SQUOTE);
 	CHMATCH('\"', T_DQUOTE);
 

@@ -17,8 +17,8 @@ typed_id         := <id> ":" <var_type>
 typed_id_list    := <typed_id> | <typed_id_list> "," <typed_id>
 
 generic     		 := "<" <id> ">"
-function_header  := <typed_id_list> "," <id>
-function         := <id> { <generic> } "=" <function_header> <block>
+function_header  := <typed_id_list> "->" <vartype>
+function         := <id> { <generic> } "=" { <function_header> } <block>
 block 					 := "{" <statements> "}"
 statements       := <statement> <statements> | lambda
 statement        := <assignment>

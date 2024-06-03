@@ -26,6 +26,7 @@ void ast_print_node(AST_Node n, int d) {
 		case NT_DEREF:           ast_print_deref(n.deref, d); break;
 		case NT_VAR_TYPE:        ast_print_vartype(n.var_type, d); break;
 		case NT_TYPED_ID_LIST:   ast_print_typed_idlist(n.typed_idlist, d); break;
+		case NT_FUNC_HEADER:     ast_print_function_header(n.funcHeader, d); break;
 	}
 }
 
@@ -208,4 +209,10 @@ void ast_print_func_call(FuncCall funcCall, int d) {
 	printf(TREE_FMT "[FuncCall]\n", TREE_ARG(0));
 	printf(TREE_FMT "[Id " SV_Fmt "]\n", TREE_ARG(1), SV_Arg(funcCall.id));
 	ast_print_expr_list(funcCall.exprList, d + 1);
+}
+
+void ast_print_function_header(FunctionHeader header, int d) {
+	printf(TREE_FMT "[FunctionHeader]\n", TREE_ARG(0));
+	ast_print_typed_idlist(header.params, d + 1);
+	ast_print_vartype(header.returnType, d + 1);
 }

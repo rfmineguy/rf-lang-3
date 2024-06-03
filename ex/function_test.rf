@@ -1,4 +1,8 @@
+module Main
+
 main = argc: int, argv: [char; 4] -> void {
+	a: int = 2 - argc
+	b: char = 9
 	if 5 == 5 {
 		if 3 == 3 {}
 	}

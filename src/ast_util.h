@@ -18,6 +18,7 @@ void ast_print_term(Term*, int);
 void ast_print_block(Block, int);
 void ast_print_stmt(Statement, int);
 void ast_print_if(IfStatement, int);
+void ast_print_assignment(AssignStatement, int);
 void ast_print_stmt_list(StatementList*, int);
 void ast_print_expr_list(ExpressionList*, int);
 void ast_print_func_call(FuncCall, int);

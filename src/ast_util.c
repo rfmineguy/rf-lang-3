@@ -31,6 +31,7 @@ void ast_print_node(AST_Node n, int d) {
 		case NT_IF: 						 ast_print_if(n.iff, d); break;
 		case NT_STATEMENT_LIST:  ast_print_stmt_list(n.stmtList, d); break;
 		case NT_FUNCTION:        ast_print_function(n.function, d); break;
+		case NT_ASSIGNMENT:      ast_print_assignment(n.assign, d); break;
 	}
 }
 
@@ -217,6 +218,9 @@ void ast_print_stmt(Statement stmt, int d) {
 		case STATEMENT_TYPE_IF:
 			ast_print_if(stmt.iff, d + 1);
 			break;
+		case STATEMENT_TYPE_ASSIGN:
+			ast_print_assignment(stmt.assign, d + 1);
+			break;
 	}
 }
 
@@ -224,6 +228,20 @@ void ast_print_if(IfStatement iff, int d) {
 	printf(TREE_FMT "[If]\n", TREE_ARG(0));
 	ast_print_expr(iff.expr, d + 1);
 	ast_print_block(iff.block, d + 1);
+}
+
+void ast_print_assignment(AssignStatement assign, int d) {
+	printf(TREE_FMT "[Assign]\n", TREE_ARG(0));
+	switch (assign.type) {
+		case ASSIGN_TYPE_UNTYPED_ID:
+			printf(TREE_FMT "[UntypedId " SV_Fmt "]\n", TREE_ARG(1), SV_Arg(assign.untypedId));
+			ast_print_expr(assign.expr, d + 1);
+			break;
+		case ASSIGN_TYPE_TYPED_ID:
+			ast_print_typed_id(assign.typedId, d + 1);
+			ast_print_expr(assign.expr, d + 1);
+			break;
+	}
 }
 
 void ast_print_expr_list_rec(ExpressionList* eList, int d, int index) {

@@ -80,7 +80,7 @@ typedef enum {
 
 typedef struct Statement Statement;
 typedef enum {
-	STATEMENT_TYPE_RETURN, STATEMENT_TYPE_IF
+	STATEMENT_TYPE_RETURN, STATEMENT_TYPE_IF, STATEMENT_TYPE_ASSIGN
 } StatementType;
 
 typedef struct StatementList StatementList;
@@ -90,6 +90,11 @@ typedef enum {
 } StatementListType;
 
 typedef struct IfStatement IfStatement;
+typedef struct AssignStatement AssignStatement;
+typedef enum {
+	ASSIGN_TYPE_UNTYPED_ID,
+	ASSIGN_TYPE_TYPED_ID
+} AssignStatementType;
 typedef struct Block Block;
 
 typedef struct FuncCall FuncCall;
@@ -99,7 +104,7 @@ typedef enum {
 
 typedef struct AST_Node AST_Node;
 typedef enum AST_NodeType {
-	NT_UNDEF, NT_TOKEN, NT_FACTOR, NT_NUMBER, NT_EXPRESSION, NT_EXPRESSION_LIST, NT_STATEMENT, NT_LOGIC_DISJ, NT_LOGIC_CONJ, NT_RELATE, NT_MATH_EXPR, NT_TERM, NT_FUNC_CALL, NT_HEADER, NT_TYPED_ID, NT_DEREF, NT_VAR_TYPE, NT_TYPED_ID_LIST, NT_FUNC_HEADER, NT_IF, NT_BLOCK, NT_STATEMENT_LIST, NT_FUNCTION
+	NT_UNDEF, NT_TOKEN, NT_FACTOR, NT_NUMBER, NT_EXPRESSION, NT_EXPRESSION_LIST, NT_STATEMENT, NT_LOGIC_DISJ, NT_LOGIC_CONJ, NT_RELATE, NT_MATH_EXPR, NT_TERM, NT_FUNC_CALL, NT_HEADER, NT_TYPED_ID, NT_DEREF, NT_VAR_TYPE, NT_TYPED_ID_LIST, NT_FUNC_HEADER, NT_IF, NT_BLOCK, NT_STATEMENT_LIST, NT_FUNCTION, NT_ASSIGNMENT
 } AST_NodeType;
 
 struct Header {
@@ -229,6 +234,15 @@ struct IfStatement {
 	Block block;
 };
 
+struct AssignStatement {
+	AssignStatementType type;
+	union {
+		TypedId typedId;
+		String_View untypedId;
+	};
+	Expression* expr;
+};
+
 struct Statement {
 	StatementType type;
 	union {
@@ -236,6 +250,7 @@ struct Statement {
 			Expression* expr;
 		} Return;
 		IfStatement iff;
+		AssignStatement assign;
 	};
 };
 
@@ -263,6 +278,7 @@ struct AST_Node {
 		Statement stmt;
 		StatementList* stmtList;
 		IfStatement iff;
+		AssignStatement assign;
 		FuncCall funcCall;
 		FunctionHeader funcHeader;
 		Function function;

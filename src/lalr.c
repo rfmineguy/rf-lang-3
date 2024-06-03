@@ -579,6 +579,30 @@ int lalr_reduce(lalr_ctx* ctx, AST_Node* out_n) {
 		}
 	}
 
+	/** assignment
+	 *    assignment := { <typed_id> | <id> } "=" <expression>
+	 */
+	{
+		if (peeked[2].type == NT_TYPED_ID &&
+				peeked[1].type == NT_TOKEN && peeked[1].token.type == T_EQ &&
+				peeked[0].type == NT_EXPRESSION) {
+			out_n->type = NT_ASSIGNMENT;
+			out_n->assign.type = ASSIGN_TYPE_TYPED_ID;
+			out_n->assign.typedId = peeked[2].typed_id;
+			out_n->assign.expr = peeked[0].expr;
+			return 3;
+		}
+		if (peeked[2].type == NT_TOKEN && peeked[2].token.type == T_ID &&
+				peeked[1].type == NT_TOKEN && peeked[1].token.type == T_EQ &&
+				peeked[0].type == NT_EXPRESSION) {
+			out_n->type = NT_ASSIGNMENT;
+			out_n->assign.type = ASSIGN_TYPE_UNTYPED_ID;
+			out_n->assign.untypedId = peeked[2].token.text;
+			out_n->assign.expr = peeked[0].expr;
+			return 3;
+		}
+	}
+
 	/** statement_list
 	 *    statement_list := <statemenet_list> <statement>
 	 *    statement_list := <statement>
@@ -618,6 +642,13 @@ int lalr_reduce(lalr_ctx* ctx, AST_Node* out_n) {
 	 *    statement := <switch>
 	 */
 	{
+		// statement := <assignment>
+		if (peeked[0].type == NT_ASSIGNMENT) {
+			out_n->type = NT_STATEMENT;
+			out_n->stmt.type = STATEMENT_TYPE_ASSIGN;
+			out_n->stmt.assign = peeked[0].assign;
+			return 1;
+		}
 		// statement := <if>
 		if (peeked[0].type == NT_IF) {
 			out_n->type = NT_STATEMENT;

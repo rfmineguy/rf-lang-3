@@ -1,0 +1,4 @@
+x: int
+y: char
+y: [char; 4,5,3]
+blocks[x,y,z]

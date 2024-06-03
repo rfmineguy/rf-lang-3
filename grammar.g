@@ -11,7 +11,9 @@ module_header    := <id="module"> <id>
 use_header       := <id="use"> <id> "{" <idlist> "}"
 idlist           := <id> | <idlist> "," <id>
 
-typed_id         := <id> ":" <id>
+vartype          := <id>
+									| "[" <id> ";" <expression_list> "]"
+typed_id         := <id> ":" <var_type>
 typed_id_list    := <typed_id> | <typed_id_list> "," <typed_id>
 
 generic     		 := "<" <id> ">"

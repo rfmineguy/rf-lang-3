@@ -9,6 +9,6 @@ add<T> = values: [T], length: int, T {
 	return sum
 }
 
-main = argc: int, argv: [char, 2], int {
+main = argc: int, argv: [char], int {
 	print("{} args supplied", argc)
 }

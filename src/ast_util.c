@@ -24,6 +24,7 @@ void ast_print_node(AST_Node n, int d) {
 		case NT_HEADER: 				 ast_print_header(n.header, d); break;
 		case NT_TYPED_ID:				 ast_print_typed_id(n.typed_id, d); break;
 		case NT_DEREF:           ast_print_deref(n.deref, d); break;
+		case NT_VAR_TYPE:        ast_print_vartype(n.var_type, d); break;
 	}
 }
 
@@ -55,10 +56,24 @@ void ast_print_factor(Factor f, int d) {
 	}
 }
 
+void ast_print_vartype(VarType type, int d) {
+	printf(TREE_FMT "[VarType]\n", TREE_ARG(0));
+	switch (type.type) {
+		case VAR_TYPE_ID:
+			printf(TREE_FMT "[Id " SV_Fmt "]\n", TREE_ARG(1), SV_Arg(type.Id.id));
+			break;
+		case VAR_TYPE_ARRAY:
+			printf(TREE_FMT "[Id " SV_Fmt "]\n", TREE_ARG(1), SV_Arg(type.Array.id));
+			ast_print_expr_list(type.Array.exprList, d + 1);
+			break;
+	}
+}
+
 void ast_print_typed_id(TypedId id, int d) {
 	printf(TREE_FMT "[TypedId]\n", TREE_ARG(0));
 	printf(TREE_FMT "[Id " SV_Fmt "]\n", TREE_ARG(1), SV_Arg(id.id));
-	printf(TREE_FMT "[Type " SV_Fmt "]\n", TREE_ARG(1), SV_Arg(id.type));
+	ast_print_vartype(id.type, d + 1);
+	// printf(TREE_FMT "[Type " SV_Fmt "]\n", TREE_ARG(1), SV_Arg(id.type));
 }
 
 void ast_print_deref(Deref deref, int d) {

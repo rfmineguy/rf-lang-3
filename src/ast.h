@@ -9,6 +9,10 @@ typedef enum {
 } HeaderType;
 
 typedef struct TypedId TypedId;
+typedef struct VarType VarType;
+typedef enum {
+	VAR_TYPE_ID, VAR_TYPE_ARRAY
+} VarTypeType;
 
 typedef struct Deref Deref;
 typedef enum {
@@ -78,7 +82,7 @@ typedef enum {
 
 typedef struct AST_Node AST_Node;
 typedef enum AST_NodeType {
-	NT_UNDEF, NT_TOKEN, NT_FACTOR, NT_NUMBER, NT_EXPRESSION, NT_EXPRESSION_LIST, NT_STATEMENT, NT_LOGIC_DISJ, NT_LOGIC_CONJ, NT_RELATE, NT_MATH_EXPR, NT_TERM, NT_FUNC_CALL, NT_HEADER, NT_TYPED_ID, NT_DEREF
+	NT_UNDEF, NT_TOKEN, NT_FACTOR, NT_NUMBER, NT_EXPRESSION, NT_EXPRESSION_LIST, NT_STATEMENT, NT_LOGIC_DISJ, NT_LOGIC_CONJ, NT_RELATE, NT_MATH_EXPR, NT_TERM, NT_FUNC_CALL, NT_HEADER, NT_TYPED_ID, NT_DEREF, NT_VAR_TYPE
 } AST_NodeType;
 
 struct Header {
@@ -97,8 +101,21 @@ struct Number {
 		float f;
 	};
 };
+struct VarType {
+	VarTypeType type;
+	union {
+		struct {
+			String_View id;
+		} Id;
+		struct {
+			String_View id;
+			ExpressionList* exprList;
+		} Array;
+	};
+};
 struct TypedId {
-	String_View id, type;
+	String_View id;
+	VarType type;
 };
 struct FuncCall {
 	String_View id;
@@ -184,6 +201,7 @@ struct Statement {
 struct AST_Node {
 	AST_NodeType type;
 	union {
+		VarType var_type;
 		token token;
 		Factor factor;
 		Number number;

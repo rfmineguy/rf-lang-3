@@ -30,7 +30,7 @@ int lalr_reduce_tok_to_term(token tok, AST_Node* out_n) {
 }
 
 int lalr_reduce(lalr_ctx* ctx, AST_Node* out_n) {
-	AST_Node peeked[4] = {lalr_peek_n(ctx, 0), lalr_peek_n(ctx, 1), lalr_peek_n(ctx, 2), lalr_peek_n(ctx, 3)};
+	AST_Node peeked[5] = {lalr_peek_n(ctx, 0), lalr_peek_n(ctx, 1), lalr_peek_n(ctx, 2), lalr_peek_n(ctx, 3),  lalr_peek_n(ctx, 4)};
 	token_type lookahead = ctx->lookahead.type;
 
 	/**  header
@@ -50,15 +50,43 @@ int lalr_reduce(lalr_ctx* ctx, AST_Node* out_n) {
 		}
 	}
 
+	/** vartype parsing
+	 *    vartype := <id>       NOTE: with context of previous and next tokens
+	 *    vartype := "[" <id> ";" <expression_list> "]"
+	 */
+	{
+	  // vartype := <id>       NOTE: with context of previous and next tokens
+		if (peeked[0].type == NT_TOKEN && peeked[0].token.type == T_ID &&
+				peeked[1].type == NT_TOKEN && peeked[1].token.type == T_COLON &&
+				lookahead != T_LP) {
+			out_n->type = NT_VAR_TYPE;
+			out_n->var_type.type = VAR_TYPE_ID;
+			out_n->var_type.Id.id = peeked[0].token.text;
+			return 1;
+		}
+	  // vartype := "[" <id> ";" <expression_list> "]"
+		if (peeked[4].type == NT_TOKEN && peeked[4].token.type == T_LBRK &&
+				peeked[3].type == NT_TOKEN && peeked[3].token.type == T_ID &&
+				peeked[2].type == NT_TOKEN && peeked[2].token.type == T_SEMI &&
+				peeked[1].type == NT_EXPRESSION_LIST &&
+				peeked[0].type == NT_TOKEN && peeked[0].token.type == T_RBRK) {
+			out_n->type = NT_VAR_TYPE;
+			out_n->var_type.type = VAR_TYPE_ARRAY;
+			out_n->var_type.Array.id = peeked[3].token.text;
+			out_n->var_type.Array.exprList = peeked[1].exprList;
+			return 5;
+		}
+	}
+
 	/** typed_id parsing
-	 * 		typed_id := <id> ":" <id>
+	 * 		typed_id := <id> ":" <vartype>
 	 */
 	{
 		if (peeked[2].type == NT_TOKEN && peeked[2].token.type == T_ID &&
 				peeked[1].type == NT_TOKEN && peeked[1].token.type == T_COLON &&
-				peeked[0].type == NT_TOKEN && peeked[0].token.type == T_ID) {
+				peeked[0].type == NT_VAR_TYPE) {
 			out_n->type = NT_TYPED_ID;
-			out_n->typed_id.type = peeked[0].token.text;
+			out_n->typed_id.type = peeked[0].var_type;
 			out_n->typed_id.id = peeked[2].token.text;
 			return 3;
 		}
@@ -76,7 +104,7 @@ int lalr_reduce(lalr_ctx* ctx, AST_Node* out_n) {
 		// factor := <id>
 		if (peeked[0].type == NT_TOKEN && peeked[0].token.type == T_ID &&
 				!sv_eq(peeked[0].token.text, SV("module")) &&
-				lookahead != T_LP && lookahead != T_LBRK && lookahead != T_COLON) {
+				lookahead != T_LP && lookahead != T_LBRK && lookahead != T_COLON && lookahead != T_SEMI) {
 			out_n->type = NT_FACTOR;
 			out_n->factor.type = FACTOR_TYPE_ID;
 			out_n->factor.id = peeked[0].token.text;

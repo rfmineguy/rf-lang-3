@@ -17,7 +17,7 @@ $ make
 $ make install     # INSTALL_DIR = /usr/local/bin (default)
                    # export INSTALL_DIR=dir       (custom)
 ```
-- The executable is located in `out/`
+- The executable is located in `out/` and/or where `INSTALL_DIR` points
 
 # Libraries
 - [cvector](https://github.com/eteran/c-vector)

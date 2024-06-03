@@ -72,6 +72,9 @@ void ast_print_vartype(VarType type, int d) {
 			printf(TREE_FMT "[Id " SV_Fmt "]\n", TREE_ARG(1), SV_Arg(type.Array.id));
 			ast_print_expr_list(type.Array.exprList, d + 1);
 			break;
+		case VAR_TYPE_NONE: 
+			printf(TREE_FMT "None\n", TREE_ARG(0));
+			break;
 	}
 }
 
@@ -89,7 +92,7 @@ void ast_print_typed_idlist_rec(TypedIdList* list, int i, int d) {
 	}
 
 	ast_print_typed_id(list->typedId, d + 1);
-	ast_print_typed_idlist_rec(list->next, i + 1, d + 1);
+	ast_print_typed_idlist_rec(list->next, i + 1, d);
 }
 
 void ast_print_typed_idlist(TypedIdList* list, int d) {
@@ -253,6 +256,7 @@ void ast_print_function_header(FunctionHeader header, int d) {
 
 void ast_print_function(Function function, int d) {
 	printf(TREE_FMT "[Function]\n", TREE_ARG(0));
+	printf(TREE_FMT "[Id " SV_Fmt "]\n", TREE_ARG(1), SV_Arg(function.id));
 	ast_print_function_header(function.header, d + 1);
 	ast_print_block(function.block, d + 1);
 }

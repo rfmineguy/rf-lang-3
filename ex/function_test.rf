@@ -4,3 +4,8 @@ main = argc: int, argv: [char; 4] -> void {
 	}
 }
 
+print = str: [char; len], args: int -> void {
+}
+
+noparam = _ -> void {
+}

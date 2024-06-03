@@ -99,6 +99,7 @@ const char* token_str(token_type t) {
 		case T_SPACE:       return "SPACE";
 		case T_RETURN:      return "RETURN";
 		case T_ARROW:  			return "ARROW";
+		case T_UNDERSCORE:  return "UNDERSCORE";
 		case T_UNKNOWN:  		return "UNKNOWN";
 		default:            printf("%d\n", t); assert(0 && "Unimplemented token_str conversion");
 	}
@@ -118,7 +119,7 @@ void tctx_internal_init_regex(tokenizer_ctx* ctx) {
 	ctx->regex_store.r_hexlit     = rnew("0x[0-9a-fA-F]+");
 	ctx->regex_store.r_dbllit     = rnew("[0-9]+\\.[0-9]+");
 	ctx->regex_store.r_declit     = rnew("[0-9]+");
-	ctx->regex_store.r_id         = rnew("[a-zA-Z_][a-zA-Z0-9_]*");
+	ctx->regex_store.r_id         = rnew("[a-zA-Z][a-zA-Z0-9_]*");
 	ctx->regex_store.r_lor        = rnew("\\|\\|");
 	ctx->regex_store.r_land       = rnew("&&");
 	ctx->regex_store.r_gteq       = rnew(">=");
@@ -257,6 +258,7 @@ token tctx_get_next(tokenizer_ctx* ctx) {
 	CHMATCH('}', T_RBRC);
 	CHMATCH('[', T_LBRK);
 	CHMATCH(']', T_RBRK);
+	CHMATCH('_', T_UNDERSCORE);
 	CHMATCH('-', T_MINUS);
 	CHMATCH('+', T_PLUS);
 	CHMATCH('*', T_MUL);

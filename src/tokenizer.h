@@ -21,6 +21,7 @@ typedef enum token_type {
 	T_LBRK, T_RBRK,
 	T_RETURN,
 	T_ARROW,
+	T_UNDERSCORE,
 	T_RESERVE_END,
 
 	T_BOR = 200, T_BAND, // bitwise

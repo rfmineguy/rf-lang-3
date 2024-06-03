@@ -52,6 +52,7 @@ int lalr_reduce(lalr_ctx* ctx, AST_Node* out_n) {
 
 	/** vartype parsing
 	 *    vartype := <id>       NOTE: with context of previous and next tokens
+	 *    vartype := <id="_">
 	 *    vartype := "[" <id> ";" <expression_list> "]"
 	 */
 	{
@@ -72,7 +73,15 @@ int lalr_reduce(lalr_ctx* ctx, AST_Node* out_n) {
 			out_n->var_type.Id.id = peeked[0].token.text;
 			return 1;
 		}
-	  // vartype := "[" <id> ";" <expression_list> "]"
+	  // vartype := <id="_">
+		if (peeked[0].type == NT_TOKEN && peeked[0].token.type == T_UNDERSCORE &&
+				lookahead == T_ARROW) {
+			out_n->type = NT_VAR_TYPE;
+			out_n->var_type.type = VAR_TYPE_NONE;
+			return 1;
+		}
+
+		// vartype := "[" <id> ";" <expression_list> "]"
 		if (peeked[4].type == NT_TOKEN && peeked[4].token.type == T_LBRK &&
 				peeked[3].type == NT_TOKEN && peeked[3].token.type == T_ID &&
 				peeked[2].type == NT_TOKEN && peeked[2].token.type == T_SEMI &&
@@ -530,6 +539,7 @@ int lalr_reduce(lalr_ctx* ctx, AST_Node* out_n) {
 
 	/** function_header
 	 *    function_header := <typedid_list> "->" <var_type>
+	 *    function_header := <vartype> "->" <var_type>                       // context required
 	 */
 	{
 		if (peeked[2].type == NT_TYPED_ID_LIST &&
@@ -538,6 +548,18 @@ int lalr_reduce(lalr_ctx* ctx, AST_Node* out_n) {
 				peeked[0].type == NT_VAR_TYPE) {
 			out_n->type = NT_FUNC_HEADER;
 			out_n->funcHeader.params = peeked[2].typed_idlist;
+			out_n->funcHeader.returnType = peeked[0].var_type;
+			return 3;
+		}
+		if (peeked[2].type == NT_VAR_TYPE &&
+				peeked[1].type == NT_TOKEN &&
+				peeked[1].token.type == T_ARROW &&
+				peeked[0].type == NT_VAR_TYPE) {
+			out_n->type = NT_FUNC_HEADER;
+			TypedIdList* idlist = arena_alloc(&ctx->arena, sizeof(TypedIdList));
+			idlist->typedId.type = peeked[2].var_type;
+			idlist->next = NULL;
+			out_n->funcHeader.params = idlist;
 			out_n->funcHeader.returnType = peeked[0].var_type;
 			return 3;
 		}

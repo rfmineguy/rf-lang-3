@@ -19,7 +19,7 @@ typedef struct Function Function;
 
 typedef struct VarType VarType;
 typedef enum {
-	VAR_TYPE_ID, VAR_TYPE_ARRAY
+	VAR_TYPE_ID, VAR_TYPE_ARRAY, VAR_TYPE_NONE
 } VarTypeType;
 
 typedef struct Deref Deref;

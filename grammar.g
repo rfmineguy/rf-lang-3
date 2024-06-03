@@ -12,12 +12,14 @@ use_header       := <id="use"> <id> "{" <idlist> "}"
 idlist           := <id> | <idlist> "," <id>
 
 vartype          := <id>
+									| <id="_">
 									| "[" <id> ";" <expression_list> "]"
 typed_id         := <id> ":" <var_type>
 typed_id_list    := <typed_id> | <typed_id_list> "," <typed_id>
 
 generic     		 := "<" <id> ">"
 function_header  := <typed_id_list> "->" <vartype>
+									| <vartype>
 function         := <id> { <generic> } "=" { <function_header> } <block>
 block 					 := "{" <statements> "}"
 statements       := <statements> <statement>

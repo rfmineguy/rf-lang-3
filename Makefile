@@ -17,6 +17,11 @@ BIN          := rfc
 
 .PHONY: always clean build debug
 .PHONY: build-test build-project build-getopt
+.PHONY: install
+
+# =====================
+# PHONY targets
+# =====================
 build: always build-getopt build-project
 build-project: always out/$(BIN)
 build-test: always out/test
@@ -31,7 +36,21 @@ clean:
 debug: always
 	docker run --rm -it -v $(shell pwd):$(shell pwd) -w $(shell pwd) alpine sh -c "gcc $(SOURCES) -ggdb -lm -o out/$(BIN)_x86"
 	docker run --rm -it -e DISPLAY=192.168.1.142:0 -v $(shell pwd):$(shell pwd) -w $(shell pwd) alpine gf2 ./out/$(BIN)_x86
+
+# =====================
+# BUILD targets
+# =====================
 out/$(BIN): $(MAIN_SOURCES) $(GETOPT_SOURCE)
 	clang $^ -o $@ -lm -ggdb
 out/test: $(TEST_SOURCES) $(GETOPT_SOURCE)
 	clang $^ -o $@ -lm
+
+# =====================
+# INSTALL targets
+# =====================
+install:
+ifdef INSTALL_DIR
+	install -m 557 out/$(BIN) $(INSTALL_DIR)
+else
+	install -m 557 out/$(BIN) /usr/local/bin
+endif

@@ -1,5 +1,6 @@
 main = argc: int, argv: [char; 4] -> void {
-	if argc == 1 {
-		return 4
+	if 5 == 5 {
+		if 3 == 3 {}
 	}
 }
+

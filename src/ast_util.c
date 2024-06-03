@@ -30,6 +30,7 @@ void ast_print_node(AST_Node n, int d) {
 		case NT_BLOCK:           ast_print_block(n.block, d); break;
 		case NT_IF: 						 ast_print_if(n.iff, d); break;
 		case NT_STATEMENT_LIST:  ast_print_stmt_list(n.stmtList, d); break;
+		case NT_FUNCTION:        ast_print_function(n.function, d); break;
 	}
 }
 
@@ -207,7 +208,8 @@ void ast_print_stmt(Statement stmt, int d) {
 	printf(TREE_FMT "[Statement]\n", TREE_ARG(0));
 	switch (stmt.type) {
 		case STATEMENT_TYPE_RETURN:
-			ast_print_expr(stmt.Return.expr, d + 1);
+			printf(TREE_FMT "[Return]\n", TREE_ARG(1));
+			ast_print_expr(stmt.Return.expr, d + 2);
 			break;
 		case STATEMENT_TYPE_IF:
 			ast_print_if(stmt.iff, d + 1);
@@ -247,4 +249,10 @@ void ast_print_function_header(FunctionHeader header, int d) {
 	printf(TREE_FMT "[FunctionHeader]\n", TREE_ARG(0));
 	ast_print_typed_idlist(header.params, d + 1);
 	ast_print_vartype(header.returnType, d + 1);
+}
+
+void ast_print_function(Function function, int d) {
+	printf(TREE_FMT "[Function]\n", TREE_ARG(0));
+	ast_print_function_header(function.header, d + 1);
+	ast_print_block(function.block, d + 1);
 }

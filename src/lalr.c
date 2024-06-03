@@ -574,7 +574,7 @@ int lalr_reduce(lalr_ctx* ctx, AST_Node* out_n) {
 			curr->next = list;
 
 			out_n->type = NT_STATEMENT_LIST;
-			out_n->stmtList = peeked[2].stmtList;
+			out_n->stmtList = peeked[1].stmtList;
 			return 2;
 		}
 
@@ -639,6 +639,20 @@ int lalr_reduce(lalr_ctx* ctx, AST_Node* out_n) {
 			out_n->block.stmts = peeked[1].stmtList;
 			return 3;
 		}
+	}
+
+	/** function
+	 *     function := <id> "=" <function_header> <block>
+	 */
+	if (peeked[3].type == NT_TOKEN && peeked[3].token.type == T_ID &&
+			peeked[2].type == NT_TOKEN && peeked[2].token.type == T_EQ &&
+			peeked[1].type == NT_FUNC_HEADER && 
+			peeked[0].type == NT_BLOCK) {
+		out_n->type = NT_FUNCTION;
+		out_n->function.id = peeked[3].token.text;
+		out_n->function.header = peeked[1].funcHeader;
+		out_n->function.block = peeked[0].block;
+		return 4;
 	}
 
 	return 0;

@@ -23,5 +23,6 @@ void ast_print_expr_list(ExpressionList*, int);
 void ast_print_func_call(FuncCall, int);
 void ast_print_typed_idlist(TypedIdList*, int);
 void ast_print_function_header(FunctionHeader, int);
+void ast_print_function(Function, int);
 
 #endif

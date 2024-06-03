@@ -16,8 +16,8 @@ GETOPT_SOURCE := getopt/cmdline.c
 BIN          := rfc
 
 .PHONY: always clean build debug
-.PHONY: build-test build-project uild-getopt
-build: always build-getopt build-project build-test
+.PHONY: build-test build-project build-getopt
+build: always build-getopt build-project
 build-project: always out/$(BIN)
 build-test: always out/test
 build-getopt:

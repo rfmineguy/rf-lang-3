@@ -11,6 +11,11 @@ If you want to look at the grammar, take a look at the `grammar.g` file. (Note: 
 > **Fun Fact**
 > There is no parser generator used in this language
 
+# Building
+```sh
+$ make
+```
+
 # Libraries
 - [cvector](https://github.com/eteran/c-vector)
 - [arena](https://github.com/tsoding/arena)

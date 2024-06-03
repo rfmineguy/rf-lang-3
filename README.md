@@ -12,9 +12,10 @@ If you want to look at the grammar, take a look at the `grammar.g` file. (Note: 
 > There is no parser generator used in this language
 
 # Building
-```sh
+```bash
 $ make
 ```
+- The executable is located in `out/`
 
 # Libraries
 - [cvector](https://github.com/eteran/c-vector)

@@ -82,6 +82,7 @@ int compile(const char* file) {
 	printf("End Stack\n");
 	lalr_show_stack(&pctx);
 
+	printf("bytes used : %lu\n", arena_bytes(&pctx.arena));
 	arena_free(&pctx.arena);
 
 	tctx_free(&ctx);

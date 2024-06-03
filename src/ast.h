@@ -79,8 +79,17 @@ typedef enum {
 
 typedef struct Statement Statement;
 typedef enum {
-	STATEMENT_TYPE_RETURN
+	STATEMENT_TYPE_RETURN, STATEMENT_TYPE_IF
 } StatementType;
+
+typedef struct StatementList StatementList;
+typedef enum {
+	STATEMENT_LIST_TYPE_STMT_LIST_STMT,
+	STATEMENT_LIST_TYPE_STMT
+} StatementListType;
+
+typedef struct IfStatement IfStatement;
+typedef struct Block Block;
 
 typedef struct FuncCall FuncCall;
 typedef enum {
@@ -89,7 +98,7 @@ typedef enum {
 
 typedef struct AST_Node AST_Node;
 typedef enum AST_NodeType {
-	NT_UNDEF, NT_TOKEN, NT_FACTOR, NT_NUMBER, NT_EXPRESSION, NT_EXPRESSION_LIST, NT_STATEMENT, NT_LOGIC_DISJ, NT_LOGIC_CONJ, NT_RELATE, NT_MATH_EXPR, NT_TERM, NT_FUNC_CALL, NT_HEADER, NT_TYPED_ID, NT_DEREF, NT_VAR_TYPE, NT_TYPED_ID_LIST, NT_FUNC_HEADER
+	NT_UNDEF, NT_TOKEN, NT_FACTOR, NT_NUMBER, NT_EXPRESSION, NT_EXPRESSION_LIST, NT_STATEMENT, NT_LOGIC_DISJ, NT_LOGIC_CONJ, NT_RELATE, NT_MATH_EXPR, NT_TERM, NT_FUNC_CALL, NT_HEADER, NT_TYPED_ID, NT_DEREF, NT_VAR_TYPE, NT_TYPED_ID_LIST, NT_FUNC_HEADER, NT_IF, NT_BLOCK, NT_STATEMENT_LIST
 } AST_NodeType;
 
 struct Header {
@@ -210,13 +219,30 @@ struct LogicalDisj {
 	LogicalConj* conj;
 };
 
+struct Block {
+	StatementList* stmts;
+};
+
+struct IfStatement {
+	Expression* expr;
+	Block block;
+};
+
 struct Statement {
 	StatementType type;
 	union {
-		Expression* expr;
-	} Return;
+		struct {
+			Expression* expr;
+		} Return;
+		IfStatement iff;
+	};
 };
 
+struct StatementList {
+	StatementListType type;
+	Statement stmt;
+	StatementList* next;
+};
 
 struct AST_Node {
 	AST_NodeType type;
@@ -232,7 +258,10 @@ struct AST_Node {
 		Relational* relate;
 		MathExpression* mathexpr;
 		Term* term;
-		Statement* stmt;
+		Block block;
+		Statement stmt;
+		StatementList* stmtList;
+		IfStatement iff;
 		FuncCall funcCall;
 		FunctionHeader funcHeader;
 		Header header;

@@ -160,7 +160,7 @@ int lalr_reduce(lalr_ctx* ctx, AST_Node* out_n) {
 		// factor := <id>
 		if (peeked[0].type == NT_TOKEN && peeked[0].token.type == T_ID &&
 				!sv_eq(peeked[0].token.text, SV("module")) &&
-				lookahead != T_LP && lookahead != T_LBRK && lookahead != T_COLON && lookahead != T_SEMI && lookahead != T_LBRC) {
+				lookahead != T_LP && lookahead != T_LBRK && lookahead != T_COLON && lookahead != T_SEMI && lookahead != T_LBRC && lookahead != T_EQ) {
 			out_n->type = NT_FACTOR;
 			out_n->factor.type = FACTOR_TYPE_ID;
 			out_n->factor.id = peeked[0].token.text;
@@ -404,28 +404,18 @@ int lalr_reduce(lalr_ctx* ctx, AST_Node* out_n) {
 		}
 	}
 
-	/**
-	 * return
+	/** return
 	 *    return <expression>
 	 */
 	{
-		if (peeked[1].type == NT_TOKEN &&
-				peeked[1].token.type == T_RETURN &&
-				peeked[0].type == NT_EXPRESSION) {
-			out_n->type = NT_STATEMENT;
-			out_n->stmt = arena_alloc(&ctx->arena, sizeof(Statement));
-			out_n->stmt->type = STATEMENT_TYPE_RETURN;
-			out_n->stmt->Return.expr = peeked[0].expr;
-			return 2;
-		}
 	}
 
-	/**
-	 * expression_list
+	/** expression_list
 	 *    expression_list := <expression_list> , <expression>
 	 *    expression_list := <expression>
 	 */
 	{ 
+		//   expression_list := <expression_list> , <expression>
 		if (peeked[2].type == NT_EXPRESSION_LIST &&
 				peeked[1].type == NT_TOKEN &&
 				peeked[1].token.type == T_COMMA && 
@@ -454,8 +444,7 @@ int lalr_reduce(lalr_ctx* ctx, AST_Node* out_n) {
 		}
 	}
 
-	/**
-	 * deref
+	/** deref
 	 *    deref := <id> "[" <expression_list> "]"
 	 *    deref := <id> "[" <expression> "]"
 	 */
@@ -494,9 +483,7 @@ int lalr_reduce(lalr_ctx* ctx, AST_Node* out_n) {
 		}
 	}
 
-
-	/**
-	 * func_call
+	/** func_call
 	 *    func_call := <id> "(" <expression_list> ")"
 	 *    func_call := <id> "(" ")"
 	 *    func_call := <id> "(" <expression> ")"
@@ -541,18 +528,117 @@ int lalr_reduce(lalr_ctx* ctx, AST_Node* out_n) {
 		}
 	}
 
-	/**
-	 * function_header
+	/** function_header
 	 *    function_header := <typedid_list> "->" <var_type>
 	 */
-	if (peeked[2].type == NT_TYPED_ID_LIST &&
-			peeked[1].type == NT_TOKEN &&
-			peeked[1].token.type == T_ARROW &&
-			peeked[0].type == NT_VAR_TYPE) {
-		out_n->type = NT_FUNC_HEADER;
-		out_n->funcHeader.params = peeked[2].typed_idlist;
-		out_n->funcHeader.returnType = peeked[0].var_type;
-		return 3;
+	{
+		if (peeked[2].type == NT_TYPED_ID_LIST &&
+				peeked[1].type == NT_TOKEN &&
+				peeked[1].token.type == T_ARROW &&
+				peeked[0].type == NT_VAR_TYPE) {
+			out_n->type = NT_FUNC_HEADER;
+			out_n->funcHeader.params = peeked[2].typed_idlist;
+			out_n->funcHeader.returnType = peeked[0].var_type;
+			return 3;
+		}
+	}
+
+	/** if
+	 *    if := "if" <expression> <block>
+	 */
+	{
+		if (peeked[2].type == NT_TOKEN && peeked[2].token.type == T_IF &&
+				peeked[1].type == NT_EXPRESSION &&
+				peeked[0].type == NT_BLOCK) {
+			out_n->type = NT_IF;
+			out_n->iff.expr = peeked[1].expr;
+			out_n->iff.block = peeked[0].block;
+			return 3;
+		}
+	}
+
+	/** statement_list
+	 *    statement_list := <statemenet_list> <statement>
+	 *    statement_list := <statement>
+	 */
+	{
+		if (peeked[1].type == NT_STATEMENT_LIST &&
+				peeked[0].type == NT_STATEMENT) {
+			StatementList* list = arena_alloc(&ctx->arena, sizeof(StatementList));
+			list->type = STATEMENT_LIST_TYPE_STMT_LIST_STMT;
+			list->stmt = peeked[0].stmt;
+			list->next = NULL;
+
+			StatementList* curr = peeked[1].stmtList;
+			while (curr->next) curr = curr->next;
+			curr->next = list;
+
+			out_n->type = NT_STATEMENT_LIST;
+			out_n->stmtList = peeked[2].stmtList;
+			return 2;
+		}
+
+		if (peeked[0].type == NT_STATEMENT) {
+			out_n->type = NT_STATEMENT_LIST;
+			out_n->stmtList = arena_alloc(&ctx->arena, sizeof(StatementList));
+			out_n->stmtList->stmt = peeked[0].stmt;
+			out_n->stmtList->next = NULL;
+			return 1;
+		}
+	}
+
+	/** statement
+	 *    statement := <assignment>
+	 *    statement := return <expression>
+	 *    statement := <if>
+	 *    statement := <for>
+	 *    statement := <while>
+	 *    statement := <switch>
+	 */
+	{
+		// statement := <if>
+		if (peeked[0].type == NT_IF) {
+			out_n->type = NT_STATEMENT;
+			out_n->stmt.type = STATEMENT_TYPE_IF;
+			out_n->stmt.iff = peeked[0].iff;
+			return 1;
+		}
+		// statement := return <expression>
+		if (peeked[1].type == NT_TOKEN &&
+				peeked[1].token.type == T_RETURN &&
+				peeked[0].type == NT_EXPRESSION) {
+			out_n->type = NT_STATEMENT;
+			out_n->stmt.type = STATEMENT_TYPE_RETURN;
+			out_n->stmt.Return.expr = peeked[0].expr;
+			return 2;
+		}
+	}
+
+	/** block
+	 * 		 block := '{' '}'
+	 *     block := '{' statement_list '}'
+	 */
+	{
+		//	 block := '{' '}'
+		if (peeked[1].type == NT_TOKEN &&
+				peeked[1].token.type == T_LBRC && 
+				peeked[0].type == NT_TOKEN &&
+				peeked[0].token.type == T_RBRC) {
+			out_n->type = NT_BLOCK;
+			out_n->block.stmts = NULL;
+			return 2;
+		}
+
+		//   block := '{' statement_list '}'
+		if (peeked[2].type == NT_TOKEN &&
+				peeked[2].token.type == T_LBRC &&
+				peeked[1].type == NT_STATEMENT_LIST &&
+				peeked[0].type == NT_TOKEN &&
+				peeked[0].token.type == T_RBRC) {
+			out_n->type = NT_BLOCK;
+			out_n->block.stmts = peeked[1].stmtList;
+			return 3;
+		}
 	}
 
 	return 0;

@@ -27,6 +27,9 @@ void ast_print_node(AST_Node n, int d) {
 		case NT_VAR_TYPE:        ast_print_vartype(n.var_type, d); break;
 		case NT_TYPED_ID_LIST:   ast_print_typed_idlist(n.typed_idlist, d); break;
 		case NT_FUNC_HEADER:     ast_print_function_header(n.funcHeader, d); break;
+		case NT_BLOCK:           ast_print_block(n.block, d); break;
+		case NT_IF: 						 ast_print_if(n.iff, d); break;
+		case NT_STATEMENT_LIST:  ast_print_stmt_list(n.stmtList, d); break;
 	}
 }
 
@@ -180,13 +183,42 @@ void ast_print_term(Term* t, int d) {
 	}
 }
 
-void ast_print_stmt(Statement* stmt, int d) {
-	switch (stmt->type) {
+void ast_print_block(Block b, int d) {
+	printf(TREE_FMT "[Block]\n", TREE_ARG(0));
+	ast_print_stmt_list(b.stmts, d + 1);
+}
+
+void ast_print_stmt_list_rec(StatementList* stmt, int d, int i) {
+	if (stmt == NULL) {
+		printf(TREE_FMT "StatmentList(NULL)\n", TREE_ARG(0));
+		return;
+	}
+
+	ast_print_stmt(stmt->stmt, d + 1);
+	ast_print_stmt_list_rec(stmt->next, d, i + 1);
+}
+
+void ast_print_stmt_list(StatementList* stmts, int d) {
+	printf(TREE_FMT "[StatementList]\n", TREE_ARG(0));
+	ast_print_stmt_list_rec(stmts, d, 0);
+}
+
+void ast_print_stmt(Statement stmt, int d) {
+	printf(TREE_FMT "[Statement]\n", TREE_ARG(0));
+	switch (stmt.type) {
 		case STATEMENT_TYPE_RETURN:
-			printf(TREE_FMT "[Statement Return]\n", TREE_ARG(0));
-			ast_print_expr(stmt->Return.expr, d + 1);
+			ast_print_expr(stmt.Return.expr, d + 1);
+			break;
+		case STATEMENT_TYPE_IF:
+			ast_print_if(stmt.iff, d + 1);
 			break;
 	}
+}
+
+void ast_print_if(IfStatement iff, int d) {
+	printf(TREE_FMT "[If]\n", TREE_ARG(0));
+	ast_print_expr(iff.expr, d + 1);
+	ast_print_block(iff.block, d + 1);
 }
 
 void ast_print_expr_list_rec(ExpressionList* eList, int d, int index) {

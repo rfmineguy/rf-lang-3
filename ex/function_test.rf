@@ -1,0 +1,5 @@
+main = argc: int, argv: [char; 4] -> void {
+	if argc == 1 {
+		return 4
+	}
+}

@@ -20,7 +20,8 @@ generic     		 := "<" <id> ">"
 function_header  := <typed_id_list> "->" <vartype>
 function         := <id> { <generic> } "=" { <function_header> } <block>
 block 					 := "{" <statements> "}"
-statements       := <statement> <statements> | lambda
+statements       := <statements> <statement>
+									| <statement>
 statement        := <assignment>
 									| <return>
 									| <if>

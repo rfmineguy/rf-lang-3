@@ -14,6 +14,8 @@ If you want to look at the grammar, take a look at the `grammar.g` file. (Note: 
 # Building
 ```bash
 $ make
+$ make install     # INSTALL_DIR = /usr/local/bin (default)
+                   # export INSTALL_DIR=dir       (custom)
 ```
 - The executable is located in `out/`
 

@@ -8,7 +8,8 @@ RFLang is a programming language that has been in development for a number of mo
 I didn't realize how much the grammar would evolve over the development of the language, which is really interesting.
 If you want to look at the grammar, take a look at the `grammar.g` file. (Note: this is just a scratch text file that I used to experiment with various reduction rules.
 
-** There is no parser generator used in this language **
+> **Fun Fact**
+> There is no parser generator used in this language
 
 # Libraries
 - [cvector](https://github.com/eteran/c-vector)

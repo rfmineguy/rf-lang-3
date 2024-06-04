@@ -134,6 +134,7 @@ struct VarType {
 			ExpressionList* exprList;
 		} Array;
 	};
+	int pointerDepth;
 };
 struct TypedId {
 	String_View id;

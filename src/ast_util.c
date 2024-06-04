@@ -65,6 +65,7 @@ void ast_print_factor(Factor f, int d) {
 
 void ast_print_vartype(VarType type, int d) {
 	printf(TREE_FMT "[VarType]\n", TREE_ARG(0));
+	printf(TREE_FMT "[ptrdepth=%d]\n", TREE_ARG(1), type.pointerDepth);
 	switch (type.type) {
 		case VAR_TYPE_ID:
 			printf(TREE_FMT "[Id " SV_Fmt "]\n", TREE_ARG(1), SV_Arg(type.Id.id));

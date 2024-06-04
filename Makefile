@@ -1,4 +1,3 @@
-
 MAIN := src/main.c
 TEST_MAIN := tests/test_main.c
 GEN_SOURCES  := src/tokenizer.c \
@@ -14,6 +13,8 @@ TEST_SOURCES := $(TEST_MAIN)\
 								tests/munit.c
 GETOPT_SOURCE := getopt/cmdline.c
 BIN          := rfc
+# CFLAGS       := -ggdb
+CFLAGS       :=
 
 .PHONY: always clean build debug
 .PHONY: build-test build-project build-getopt
@@ -34,16 +35,16 @@ always:
 clean:
 	rm -r out
 debug: always
-	docker run --rm -it -v $(shell pwd):$(shell pwd) -w $(shell pwd) alpine sh -c "gcc $(SOURCES) -ggdb -lm -o out/$(BIN)_x86"
+	docker run --rm -it -v $(shell pwd):$(shell pwd) -w $(shell pwd) alpine sh -c "gcc $(MAIN_SOURCES) $(GETOPT_SOURCE) -ggdb -lm -o out/$(BIN)_x86"
 	docker run --rm -it -e DISPLAY=192.168.1.142:0 -v $(shell pwd):$(shell pwd) -w $(shell pwd) alpine gf2 ./out/$(BIN)_x86
 
 # =====================
 # BUILD targets
 # =====================
 out/$(BIN): $(MAIN_SOURCES) $(GETOPT_SOURCE)
-	clang $^ -o $@ -lm -ggdb
+	clang $^ -o $@ -lm $(CFLAGS)
 out/test: $(TEST_SOURCES) $(GETOPT_SOURCE)
-	clang $^ -o $@ -lm
+	clang $^ -o $@ -lm $(CFLAGS)
 
 # =====================
 # INSTALL targets

@@ -1,7 +1,9 @@
 #include "codegen_arm64.h"
 #define ARCH arm64
 
-void codegen_entry_point(ARCH, node) {
+void codegen_entry_point(ARCH, node, FILE* f) {
+	arm64_codegen_ctx ctx = {0};
+	ctx.f = f;
 	assert(0 && "Arm64 codegen not supported");
 }
 

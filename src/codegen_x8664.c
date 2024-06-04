@@ -2,7 +2,9 @@
 
 #define ARCH x86_64
 
-void codegen_entry_point(ARCH, node)  {
+void codegen_entry_point(ARCH, node, FILE* f)  {
+	x86_64_codegen_ctx ctx = {0};
+	ctx.f = f;
 	assert(0 && "x86_64 codegen not supported");
 }
 

@@ -3,6 +3,7 @@
 #include "lib/arena.h"
 #include "tokenizer.h"
 #include <stdio.h>
+#include <string.h>
 #include "../getopt/cmdline.h"
 
 int tokenize(const char* file);
@@ -14,17 +15,21 @@ int main(int argc, char **argv) {
 		return 1;
 	}
 
+	// getopt is setup so that `args_info.file_arg` is a required field
+	//    it also enforces a set of supported arguments
+	//    see config.ggo
 	if (strcmp(args_info.action_arg, "tokenize") == 0) {
-		return tokenize(args_info.file_arg);
+		int ret = tokenize(args_info.file_arg);
+		cmdline_parser_free(&args_info);
+		return ret;
 	}
-
-	if (args_info.file_given) {
+	else if (strcmp(args_info.action_arg, "parse") == 0) {
 		int ret = compile(args_info.file_arg);
 		cmdline_parser_free(&args_info);
 		return ret;
 	}
 
-	return 0;
+	return 2;
 }
 
 int tokenize(const char* file) {

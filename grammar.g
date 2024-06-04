@@ -14,6 +14,8 @@ idlist           := <id> | <idlist> "," <id>
 vartype          := <id>
 									| <id="_">
 									| "[" <id> ";" <expression_list> "]"
+									| <vartype> "*"
+
 typed_id         := <id> ":" <var_type>
 typed_id_list    := <typed_id> | <typed_id_list> "," <typed_id>
 

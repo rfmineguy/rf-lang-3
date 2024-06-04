@@ -5,4 +5,9 @@ usage "rfc <options>"
 description "Compiler for the rflang programming language"
 
 option "file" f "Supply file to compile" string
-option "action" a "Choose action to perform" required string values="tokenize","parse"
+option "target" t "Choose a target to codegen for" string values="x86" dependon="codegen"
+
+section "actions" sectiondesc="The actions that can be performed on file"
+option "tokenize" - "Tokenize the file" flag off
+option "parse" - "Parse the file" flag off
+option "codegen" - "Codegen the file" flag off

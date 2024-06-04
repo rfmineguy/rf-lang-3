@@ -1,34 +1,31 @@
 #include "codegen_x8664.h"
 
-#define ARCH x86_64
-
-void codegen_entry_point(ARCH, node, FILE* f)  {
-	x86_64_codegen_ctx ctx = {0};
+void codegen_entry_x86_64(lalr_ctx* pctx, FILE* f) {
+	codegen_x86_64_ctx ctx = {0};
 	ctx.f = f;
 	assert(0 && "x86_64 codegen not supported");
 }
 
-void codegen_header(ARCH, header, x86_64_codegen_ctx* ctx) {
+void codegen_header_x86_64(codegen_x86_64_ctx* ctx, Header header) {
 
 }
 
-void codegen_assign(ARCH, assign, x86_64_codegen_ctx* ctx) {
+void codegen_assign_x86_64(codegen_x86_64_ctx* ctx, AssignStatement assign) {
 
 }
 
-void codegen_expr(ARCH, expr, x86_64_codegen_ctx* ctx) {
+void codegen_expr_x86_64(codegen_x86_64_ctx* ctx, Expression* expr) {
 
 }
 
-void codegen_stmt(ARCH, stmt, x86_64_codegen_ctx* ctx) {
+void codegen_stmt_x86_64(codegen_x86_64_ctx* ctx, Statement stmt) {
 
 }
 
-void codegen_if_stmt(ARCH, iff, x86_64_codegen_ctx* ctx) {
+void codegen_if_stmt_x86_64(codegen_x86_64_ctx* ctx, IfStatement iff) {
 
 }
 
-void codegen_function(ARCH, func, x86_64_codegen_ctx* ctx) {
+void codegen_function_x86_64(codegen_x86_64_ctx* ctx, Function func) {
 
 }
-

@@ -11,7 +11,7 @@
 
 int tokenize(const char* file);
 int compile(const char* file);
-int codegen(const char* file, const char* target);
+int codegen(const char* file, const char* output, const char* target);
 
 int main(int argc, char **argv) {
 	struct gengetopt_args_info args_info;
@@ -37,7 +37,7 @@ int main(int argc, char **argv) {
 			fprintf(stderr, "Must provide a target for codegen\n");
 			return -1;
 		}
-		int ret = codegen(args_info.file_arg, args_info.target_arg);
+		int ret = codegen(args_info.file_arg, args_info.output_arg, args_info.target_arg);
 		cmdline_parser_free(&args_info);
 		return ret;
 	}
@@ -107,7 +107,7 @@ int compile(const char* file) {
 	return 1;
 }
 
-int codegen(const char* file, const char* target) {
+int codegen(const char* file, const char* output, const char* target) {
 	tokenizer_ctx ctx = tctx_from_file(file);
 	if (ctx.fail) {
 		fprintf(stderr, "Failed to open file\n");
@@ -140,7 +140,7 @@ int codegen(const char* file, const char* target) {
 		}
 	}
 
-	FILE* f = fopen("output.s", "w");
+	FILE* f = fopen(output, "w");
 	if (!f) {
 		fprintf(stderr, "Failed to open output.s\n");
 	}

@@ -71,8 +71,4 @@ expression_list  := <expression_list> "," <expression>
 assignment 			 := { <typed_id> | <id> } "=" <expression>
 return 					 := "return" <expression>
 if 							 := "if" <expression> <block>
-for              := <range_for>
-									| <i_for>
-
-i_for   				 := "for" <assignment> ";" <expression> ";" <expression> <block>
-range_for 			 := undefined
+for              := "for" <assignment> ";" <expression> ";" <expression> <block>

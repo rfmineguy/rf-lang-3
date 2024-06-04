@@ -15,8 +15,9 @@ GETOPT_SOURCE := getopt/cmdline.c
 BIN          := rfc
 # CFLAGS       := -ggdb
 CFLAGS       :=
+DOCKER_IMAGE := rfmineguy/rflang-x86-testing
 
-.PHONY: always clean build debug
+.PHONY: always clean build build-x86
 .PHONY: build-test build-project build-getopt
 .PHONY: install
 
@@ -34,9 +35,8 @@ always:
 	mkdir -p out
 clean:
 	rm -r out
-debug: always
-	docker run --rm -it -v $(shell pwd):$(shell pwd) -w $(shell pwd) alpine sh -c "gcc $(MAIN_SOURCES) $(GETOPT_SOURCE) -ggdb -lm -o out/$(BIN)_x86"
-	docker run --rm -it -e DISPLAY=192.168.1.142:0 -v $(shell pwd):$(shell pwd) -w $(shell pwd) alpine gf2 ./out/$(BIN)_x86
+build-x86: always
+	docker run --rm -it -v $(shell pwd):$(shell pwd) -w $(shell pwd) $(DOCKER_IMAGE) sh -c "gcc $(MAIN_SOURCES) $(GETOPT_SOURCE) -ggdb -lm -o out/$(BIN)_x86"
 
 # =====================
 # BUILD targets

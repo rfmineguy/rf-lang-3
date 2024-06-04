@@ -19,6 +19,14 @@ $ make install     # INSTALL_DIR = /usr/local/bin (default)
 ```
 - The executable is located in `out/` and/or where `INSTALL_DIR` points
 
+# CodeGen (Very WIP)
+```bash
+docker pull rfmineguy/rflang-x86-testing:latest
+make build-x86
+docker run --rm -t -v $(pwd):$(pwd) -w $(pwd) rfmineguy/rflang-x86-testing:latest
+./out/rfc_x86 -f <file> -a codegen -t x86
+```
+
 # Libraries
 - [cvector](https://github.com/eteran/c-vector)
 - [arena](https://github.com/tsoding/arena)

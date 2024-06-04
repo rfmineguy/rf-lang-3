@@ -146,18 +146,19 @@ int codegen(const char* file, const char* target) {
 	}
 	else {
 		if (strcmp(target, "x86_32") == 0) {
-			codegen_entry_x86_32(pctx.stack[0], f);
+			codegen_entry_x86_32(&pctx, f);
 		}
 		else if (strcmp(target, "x86_64") == 0) {
-			codegen_entry_x86_64(pctx.stack[0], f);
+			codegen_entry_x86_64(&pctx, f);
 		}
 		else if (strcmp(target, "arm64") == 0) {
-			codegen_entry_arm64(pctx.stack[0], f);
+			codegen_entry_arm64(&pctx, f);
 		}
 		else {
 			fprintf(stderr, "%s not a supported target\n", target);
 		}
 	}
+	fclose(f);
 
 	arena_free(&pctx.arena);
 

@@ -54,6 +54,7 @@ int lalr_reduce(lalr_ctx* ctx, AST_Node* out_n) {
 	 *    vartype := <id>       NOTE: with context of previous and next tokens
 	 *    vartype := <id="_">
 	 *    vartype := "[" <id> ";" <expression_list> "]"
+	 *    vartype := <vartype> "*"
 	 */
 	{
 	  // vartype := <id>       NOTE: with context of previous and next tokens
@@ -109,6 +110,16 @@ int lalr_reduce(lalr_ctx* ctx, AST_Node* out_n) {
 			out_n->var_type.Array.exprList->next = NULL;
 			return 5;
 		}
+
+	  // vartype := <vartype> "*"
+		if (peeked[1].type == NT_VAR_TYPE &&
+				peeked[0].type == NT_TOKEN && peeked[0].token.type == T_MUL) {
+			peeked[1].var_type.pointerDepth++;
+			printf("vartype \"*\"\n");
+			out_n->type = NT_VAR_TYPE;
+			out_n->var_type = peeked[1].var_type;
+			return 2;
+		}
 	}
 
 	/** typed_id parsing
@@ -117,7 +128,8 @@ int lalr_reduce(lalr_ctx* ctx, AST_Node* out_n) {
 	{
 		if (peeked[2].type == NT_TOKEN && peeked[2].token.type == T_ID &&
 				peeked[1].type == NT_TOKEN && peeked[1].token.type == T_COLON &&
-				peeked[0].type == NT_VAR_TYPE) {
+				peeked[0].type == NT_VAR_TYPE &&
+				lookahead != T_MUL) {
 			out_n->type = NT_TYPED_ID;
 			out_n->typed_id.type = peeked[0].var_type;
 			out_n->typed_id.id = peeked[2].token.text;

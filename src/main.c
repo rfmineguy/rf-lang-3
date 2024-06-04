@@ -1,5 +1,7 @@
 #include "ast.h"
-#include "codegen.h"
+#include "codegen_x8632.h"
+#include "codegen_x8664.h"
+#include "codegen_arm64.h"
 #include "lalr.h"
 #include "lib/arena.h"
 #include "tokenizer.h"
@@ -11,7 +13,16 @@ int tokenize(const char* file);
 int compile(const char* file);
 int codegen(const char* file, const char* target);
 
+#define X86_32_CODEGEN 0
+#define X86_64_CODEGEN 1
+#define ARM64_CODEGEN  2
+void (*codegen_ptrs[3])(AST_Node);
+
 int main(int argc, char **argv) {
+	codegen_ptrs[X86_32_CODEGEN] = codegen_entry_x86_32;
+	codegen_ptrs[X86_64_CODEGEN] = codegen_entry_x86_64;
+	codegen_ptrs[ARM64_CODEGEN]  = codegen_entry_arm64;
+
 	struct gengetopt_args_info args_info;
 	if (cmdline_parser(argc, argv, &args_info) != 0) {
 		return 1;
@@ -106,11 +117,6 @@ int compile(const char* file) {
 }
 
 int codegen(const char* file, const char* target) {
-	if (strcmp(target, "x86") != 0) {
-		fprintf(stderr, "Target [%s] not supported for codegen\n", target);
-		return -1;
-	}
-
 	tokenizer_ctx ctx = tctx_from_file(file);
 	if (ctx.fail) {
 		fprintf(stderr, "Failed to open file\n");
@@ -143,7 +149,20 @@ int codegen(const char* file, const char* target) {
 		}
 	}
 
-	codegen_x86(pctx.stack[0]);
+	if (strcmp(target, "x86_32") == 0) {
+		codegen_entry_x86_32(pctx.stack[0]);
+	}
+	else if (strcmp(target, "x86_64") == 0) {
+		fprintf(stderr, "x86_64 codegen not supported\n");
+		// codegen_entry_x86_64(pctx.stack[0]);
+	}
+	else if (strcmp(target, "arm64") == 0) {
+		fprintf(stderr, "arm64 codegen not supported\n");
+		// codegen_entry_arm64(pctx.stack[0]);
+	}
+	else {
+		fprintf(stderr, "%s not a supported target\n", target);
+	}
 
 	arena_free(&pctx.arena);
 

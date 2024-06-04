@@ -6,7 +6,9 @@ GEN_SOURCES  := src/tokenizer.c \
 						 src/number_parser.c\
 						 src/lalr.c\
 						 src/ast_util.c\
-						 src/codegen.c
+						 src/codegen_x8632.c\
+						 src/codegen_x8664.c\
+						 src/codegen_arm64.c
 MAIN_SOURCES := $(MAIN)\
 								$(GEN_SOURCES)
 TEST_SOURCES := $(TEST_MAIN)\

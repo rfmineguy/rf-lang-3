@@ -5,8 +5,8 @@ usage "rfc <options>"
 description "Compiler for the rflang programming language"
 
 option "file" f "Supply file to compile" string
-option "target" t "Choose a target to codegen for" string values="x86_32","x86_64","arm64" dependon="codegen"
-option "output" o "Supply output file name" string dependon="codegen"
+option "target" t "Choose a target to codegen for" optional string values="x86_32","x86_64","arm64" dependon="codegen"
+option "output" o "Supply output file name" optional string dependon="codegen"
 
 section "actions" sectiondesc="The actions that can be performed on file"
 option "tokenize" - "Tokenize the file" flag off

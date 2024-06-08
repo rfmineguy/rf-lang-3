@@ -17,7 +17,6 @@ TEST_SOURCES := $(TEST_MAIN)\
 GETOPT_SOURCE := getopt/cmdline.c
 BIN          := rfc
 # CFLAGS       := -ggdb
-CFLAGS       :=
 DOCKER_IMAGE := rfmineguy/rflang-x86-testing
 
 .PHONY: always clean build build-x86

@@ -74,6 +74,9 @@ void ast_print_vartype(VarType type, int d) {
 			printf(TREE_FMT "[Id " SV_Fmt "]\n", TREE_ARG(1), SV_Arg(type.Array.id));
 			ast_print_expr_list(type.Array.exprList, d + 1);
 			break;
+		case VAR_TYPE_NESTED:
+			ast_print_vartype(*type.nested, d + 1);
+			break;
 		case VAR_TYPE_NONE: 
 			printf(TREE_FMT "None\n", TREE_ARG(0));
 			break;

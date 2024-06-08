@@ -19,7 +19,7 @@ typedef struct Function Function;
 
 typedef struct VarType VarType;
 typedef enum {
-	VAR_TYPE_ID, VAR_TYPE_ARRAY, VAR_TYPE_NONE
+	VAR_TYPE_ID, VAR_TYPE_ARRAY, VAR_TYPE_NESTED, VAR_TYPE_NONE
 } VarTypeType;
 
 typedef struct Deref Deref;
@@ -134,6 +134,7 @@ struct VarType {
 			ExpressionList* exprList;
 		} Array;
 	};
+	VarType* nested;
 	int pointerDepth;
 };
 struct TypedId {

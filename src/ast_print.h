@@ -1,5 +1,5 @@
-#ifndef AST_UTIL_H
-#define AST_UTIL_H
+#ifndef AST_PRINT_H
+#define AST_PRINT_H
 #include "ast.h"
 
 void ast_print_node(AST_Node, int);

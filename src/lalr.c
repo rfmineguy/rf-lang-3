@@ -1,6 +1,6 @@
 #include "lalr.h"
 #include "ast.h"
-#include "ast_util.h"
+#include "ast_print.h"
 #include "lib/arena.h"
 #include "lib/sv.h"
 #include "tokenizer.h"

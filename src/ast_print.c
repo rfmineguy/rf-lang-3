@@ -1,4 +1,4 @@
-#include "ast_util.h"
+#include "ast_print.h"
 #include "ast.h"
 #include "tokenizer.h"
 #include <stdio.h>

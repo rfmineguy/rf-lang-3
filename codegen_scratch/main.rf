@@ -3,4 +3,5 @@ module Main
 main = argc: int, argv: char -> int {
 	x: int = 4
 	c: char = 38
+	y: int = 8 * 3 - 9 / 4
 }

@@ -210,7 +210,6 @@ struct Relational {
 struct Expression {
 	ExpressionType type;
 	LogicalDisj* disj;
-	FuncCall funcCall;
 };
 
 struct ExpressionList {

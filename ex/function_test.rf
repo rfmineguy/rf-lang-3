@@ -3,6 +3,7 @@ module Main
 main = argc: int, argv: char** -> void {
 	a: int = 2 - argc
 	b: char = 5 + 6 * 7 / 3
+	c: int = 5 + 2 * 6 + 7
 	if 5 == 5 {}
 	if 3 == 3 {}
 }

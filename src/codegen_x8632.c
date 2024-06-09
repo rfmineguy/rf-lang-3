@@ -1,5 +1,6 @@
 #include "codegen_x8632.h"
 #include "ast.h"
+#include "ast_util.h"
 #include "lalr.h"
 #include <assert.h>
 #include <stdio.h>
@@ -18,6 +19,13 @@ void codegen_entry_x86_32(lalr_ctx* lctx, FILE* f) {
 			case NT_FUNCTION: 
 				codegen_function_x86_32(&ctx, n.function);
 				break;
+			case NT_STATEMENT_LIST:
+				codegen_stmt_list_x86_32(&ctx, n.stmtList);
+				break;
+				// NOTE: temporary
+				printf("Expression codegen\n");
+				codegen_expr_x86_32(&ctx, n.expr);
+				break;
 			default: break;
 		}
 	}
@@ -35,11 +43,42 @@ void codegen_header_x86_32(codegen_x86_32_ctx* ctx, Header header) {
 }
 
 void codegen_assign_x86_32(codegen_x86_32_ctx* ctx, AssignStatement assign) {
-	assert(0 && "Assign codegen not implemented");
+	codegen_expr_x86_32(ctx, assign.expr);
 }
 
 void codegen_expr_x86_32(codegen_x86_32_ctx* ctx, Expression* expr) {
-	assert(0 && "Expression codegen not implemented");
+	printf("Expr\n");
+	LogicalDisj* disj = expr->disj;
+	switch (disj->type) {
+		case LOGICAL_DISJ_TYPE_DISJ_CONJ: {
+			LogicalDisj* d = disj->disj;
+			LogicalConj* c = disj->conj;
+		}
+	}
+}
+
+void codegen_term_x86_32(codegen_x86_32_ctx* ctx, Term t) {
+	char op = t.op;
+	if (t.type == TERM_TYPE_TERM_OP_FACTOR) {
+		Term t = *t.left;
+		Factor f = t.right;
+		char op = t.op;
+		switch (f.type) {
+			case FACTOR_TYPE_NUMBER:
+				switch (op) {
+					case '*': {
+						fprintf(ctx->file, "mov eax, %d\n", f.number.i);
+					}
+				}
+				break;
+			default: assert(0 && "Factor type unsupported");
+		}
+		switch (op) {
+			case '*': {
+				fprintf(ctx->file, "", ...)
+			}
+		}
+	}
 }
 
 void codegen_function_x86_32(codegen_x86_32_ctx* ctx, Function func) {
@@ -75,11 +114,7 @@ void codegen_function_x86_32(codegen_x86_32_ctx* ctx, Function func) {
 }
 
 void codegen_block_x86_32(codegen_x86_32_ctx* ctx, Block block) {
-	StatementList* curr = block.stmts;
-	while (curr) {
-		codegen_stmt_x86_32(ctx, curr->stmt);
-		curr = curr->next;
-	}
+	codegen_stmt_list_x86_32(ctx, block.stmts);
 }
 
 void codegen_stmt_x86_32(codegen_x86_32_ctx* ctx, Statement stmt) {
@@ -95,6 +130,14 @@ void codegen_stmt_x86_32(codegen_x86_32_ctx* ctx, Statement stmt) {
 			break;
 	}
 
+}
+
+void codegen_stmt_list_x86_32	(codegen_x86_32_ctx* ctx, StatementList* stmts) {
+	StatementList* curr = stmts;
+	while (curr) {
+		codegen_stmt_x86_32(ctx, curr->stmt);
+		curr = curr->next;
+	}
 }
 
 void codegen_if_stmt_x86_32(codegen_x86_32_ctx* ctx, IfStatement iff) {

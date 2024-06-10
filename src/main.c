@@ -1,17 +1,22 @@
 #include "ast.h"
+#include "ast_util.h"
 #include "codegen_x8632.h"
 #include "codegen_x8664.h"
 #include "codegen_arm64.h"
 #include "lalr.h"
 #include "lib/arena.h"
 #include "tokenizer.h"
+#include <regex.h>
 #include <stdio.h>
 #include <string.h>
 #include "../getopt/cmdline.h"
 
+int parse(const char* file, lalr_ctx* ctx);
+
 int tokenize(const char* file);
 int compile(const char* file);
 int codegen(const char* file, const char* output, const char* target);
+int reconstruct(const char* file);
 
 int main(int argc, char **argv) {
 	struct gengetopt_args_info args_info;
@@ -32,6 +37,11 @@ int main(int argc, char **argv) {
 		cmdline_parser_free(&args_info);
 		return ret;
 	}
+	else if (args_info.reconstruct_flag) {
+		int ret = reconstruct(args_info.file_arg);
+		cmdline_parser_free(&args_info);
+		return ret;
+	}
 	else if (args_info.codegen_flag) {
 		if (!args_info.target_given) {
 			fprintf(stderr, "Must provide a target for codegen\n");
@@ -45,7 +55,12 @@ int main(int argc, char **argv) {
 	return 2;
 }
 
-int tokenize(const char* file) {
+/*
+ * Param (file): input file to parse
+ * Param (lctx): pointer to an empty lalr parsing context
+ * Return (int): status of the parse
+ */
+int parse(const char* file, lalr_ctx* lctx) {
 	tokenizer_ctx ctx = tctx_from_file(file);
 	if (ctx.fail) {
 		fprintf(stderr, "Failed to open file\n");
@@ -53,7 +68,43 @@ int tokenize(const char* file) {
 		return 2;
 	}
 
-	lalr_ctx pctx = lalr_create();
+	*lctx = lalr_create();
+
+	token t;
+	while ((t = tctx_get_next(&ctx)).type != T_EOF) {
+		tctx_advance(&ctx);
+		lctx->lookahead = tctx_get_next(&ctx);
+		if (t.type == T_EOF) break;
+
+		AST_Node n = {0};
+		lalr_reduce_tok_to_term(t, &n);
+		lalr_push(lctx, n);
+
+		int popped = 0;
+		while ((popped = lalr_reduce(lctx, &n)) != 0) {
+			lalr_pop_n(lctx, popped);
+			lalr_push(lctx, n);
+			if (lctx->skip_next == 1) {
+				tctx_advance(&ctx);
+				lctx->lookahead = tctx_get_next(&ctx);
+				lctx->skip_next = 0;
+				break;
+			}
+		}
+	}
+
+	tctx_free(&ctx);
+
+	return 1;
+}
+
+int tokenize(const char* file) {
+	tokenizer_ctx ctx = tctx_from_file(file);
+	if (ctx.fail) {
+		fprintf(stderr, "Failed to open file\n");
+		tctx_free(&ctx);
+		return 2;
+	}
 
 	token t;
 	while ((t = tctx_get_next(&ctx)).type != T_EOF) {
@@ -66,79 +117,21 @@ int tokenize(const char* file) {
 }
 
 int compile(const char* file) {
-	tokenizer_ctx ctx = tctx_from_file(file);
-	if (ctx.fail) {
-		fprintf(stderr, "Failed to open file\n");
-		tctx_free(&ctx);
-		return 2;
-	}
-
 	lalr_ctx pctx = lalr_create();
 
-	token t;
-	while ((t = tctx_get_next(&ctx)).type != T_EOF) {
-		tctx_advance(&ctx);
-		pctx.lookahead = tctx_get_next(&ctx);
-		if (t.type == T_EOF) break;
-
-		AST_Node n = {0};
-		lalr_reduce_tok_to_term(t, &n);
-		lalr_push(&pctx, n);
-
-		int popped = 0;
-		while ((popped = lalr_reduce(&pctx, &n)) != 0) {
-			lalr_pop_n(&pctx, popped);
-			lalr_push(&pctx, n);
-			if (pctx.skip_next == 1) {
-				tctx_advance(&ctx);
-				pctx.lookahead = tctx_get_next(&ctx);
-				pctx.skip_next = 0;
-				break;
-			}
-		}
-	}
+	parse(file, &pctx);
 	printf("End Stack\n");
 	lalr_show_stack(&pctx);
 
 	printf("bytes used : %lu\n", arena_bytes(&pctx.arena));
 	arena_free(&pctx.arena);
-
-	tctx_free(&ctx);
 	return 1;
 }
 
 int codegen(const char* file, const char* output, const char* target) {
-	tokenizer_ctx ctx = tctx_from_file(file);
-	if (ctx.fail) {
-		fprintf(stderr, "Failed to open file\n");
-		tctx_free(&ctx);
-		return 2;
-	}
-
 	lalr_ctx pctx = lalr_create();
 
-	token t;
-	while ((t = tctx_get_next(&ctx)).type != T_EOF) {
-		tctx_advance(&ctx);
-		pctx.lookahead = tctx_get_next(&ctx);
-		if (t.type == T_EOF) break;
-
-		AST_Node n = {0};
-		lalr_reduce_tok_to_term(t, &n);
-		lalr_push(&pctx, n);
-
-		int popped = 0;
-		while ((popped = lalr_reduce(&pctx, &n)) != 0) {
-			lalr_pop_n(&pctx, popped);
-			lalr_push(&pctx, n);
-			if (pctx.skip_next == 1) {
-				tctx_advance(&ctx);
-				pctx.lookahead = tctx_get_next(&ctx);
-				pctx.skip_next = 0;
-				break;
-			}
-		}
-	}
+	parse(file, &pctx);
 
 	FILE* f = fopen(output, "w");
 	if (!f) {
@@ -161,8 +154,18 @@ int codegen(const char* file, const char* output, const char* target) {
 	fclose(f);
 
 	arena_free(&pctx.arena);
-
-	tctx_free(&ctx);
 	
+	return 0;
+}
+
+int reconstruct(const char* file) {
+	lalr_ctx pctx = lalr_create();
+
+	parse(file, &pctx);
+
+	for (int i = 0; i <= pctx.stack_top; i++) {
+		AST_Node n = pctx.stack[i];
+		ast_util_reconstruct_ast_node(n);
+	}
 	return 0;
 }

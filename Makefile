@@ -6,6 +6,7 @@ GEN_SOURCES  := src/tokenizer.c \
 						 src/number_parser.c\
 						 src/lalr.c\
 						 src/ast_print.c\
+						 src/ast_util.c\
 						 src/codegen_x8632.c\
 						 src/codegen_x8664.c\
 						 src/codegen_arm64.c
@@ -16,7 +17,7 @@ TEST_SOURCES := $(TEST_MAIN)\
 								tests/munit.c
 GETOPT_SOURCE := getopt/cmdline.c
 BIN          := rfc
-# CFLAGS       := -ggdb
+# CFLAGS       := -ggdb -fsanitize=address
 DOCKER_IMAGE := rfmineguy/rflang-x86-testing
 
 .PHONY: always clean build build-x86

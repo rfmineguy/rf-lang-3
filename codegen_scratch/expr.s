@@ -3,7 +3,6 @@
 ;   a: int = 4 - 3 * 5
 ; }
 
-; at&t syntax
 main_i_cpp_i:
 	push ebp
 	mov  ebp, esp

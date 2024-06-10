@@ -75,7 +75,7 @@ void codegen_term_x86_32(codegen_x86_32_ctx* ctx, Term t) {
 		}
 		switch (op) {
 			case '*': {
-				fprintf(ctx->file, "", ...)
+				// fprintf(ctx->file, "", ...)
 			}
 		}
 	}

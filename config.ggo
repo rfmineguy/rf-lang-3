@@ -12,3 +12,4 @@ section "actions" sectiondesc="The actions that can be performed on file"
 option "tokenize" - "Tokenize the file" flag off
 option "parse" - "Parse the file" flag off
 option "codegen" - "Codegen the file" flag off
+option "reconstruct" - "Reconstruct code file" flag off

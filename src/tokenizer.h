@@ -1,5 +1,6 @@
 #ifndef TOKENIZER_H
 #define TOKENIZER_H
+#include <_regex.h>
 #include <stddef.h>
 #include <regex.h>
 #include "lib/sv.h"
@@ -54,19 +55,16 @@ typedef struct tokenizer_state {
 	int line, col, index;
 } tokenizer_state;
 
-typedef union tokenizer_regex_store {
-	regex_t *r_store;
-	struct {
-		regex_t r_string_lit; // 1
-		regex_t r_char_lit; // 1
-		regex_t r_fn, r_if, r_else, r_switch, r_break, r_default, r_module; // 7
-		regex_t r_hexlit, r_dbllit, r_declit, r_id; // 4
-		regex_t r_lor, r_land, r_gteq, r_lteq, r_deq; // 5
-		regex_t r_comma, r_period, r_semi; // 3
-		regex_t r_return, r_arrow; // 1
+typedef struct tokenizer_regex_store {
+	regex_t r_string_lit; // 1
+	regex_t r_char_lit; // 1
+	regex_t r_fn, r_if, r_else, r_switch, r_break, r_default, r_module; // 7
+	regex_t r_hexlit, r_dbllit, r_declit, r_id; // 4
+	regex_t r_lor, r_land, r_gteq, r_lteq, r_deq; // 5
+	regex_t r_comma, r_period, r_semi; // 3
+	regex_t r_return, r_arrow; // 2
 
-		// Total : 1 + 1 + 7 + 4 + 5 + 3 + 1 = 22
-	};
+	// Total : 1 + 1 + 7 + 4 + 5 + 3 + 2 = 23
 } tokenizer_regex_store;
 
 typedef struct token {
@@ -80,7 +78,11 @@ typedef struct tokenizer_ctx {
 	char const *content;
 	size_t content_length;
 	tokenizer_state state;
-	tokenizer_regex_store regex_store;
+	union {
+		regex_t r_store[sizeof(tokenizer_regex_store)/sizeof(regex_t)];
+		tokenizer_regex_store store;
+	} regex_store;
+	// tokenizer_regex_store regex_store;
 } tokenizer_ctx;
 
 regex_t       rnew(const char*);

@@ -106,34 +106,38 @@ const char* token_str(token_type t) {
 }
 
 void tctx_internal_init_regex(tokenizer_ctx* ctx) {
-	ctx->regex_store.r_string_lit = rnew("\\\"([^\\\"]|\n)*\\\"");
-	ctx->regex_store.r_char_lit   = rnew("\\\'(.)\\\'");
-	ctx->regex_store.r_fn         = rnew("fn");
-	ctx->regex_store.r_if         = rnew("if");
-	ctx->regex_store.r_else       = rnew("else");
-	ctx->regex_store.r_switch     = rnew("switch");
-	ctx->regex_store.r_break      = rnew("break");
-	ctx->regex_store.r_default    = rnew("default");
-	ctx->regex_store.r_module     = rnew("module");
-	ctx->regex_store.r_return     = rnew("return");
-	ctx->regex_store.r_hexlit     = rnew("0x[0-9a-fA-F]+");
-	ctx->regex_store.r_dbllit     = rnew("[0-9]+\\.[0-9]+");
-	ctx->regex_store.r_declit     = rnew("[0-9]+");
-	ctx->regex_store.r_id         = rnew("[a-zA-Z][a-zA-Z0-9_]*");
-	ctx->regex_store.r_lor        = rnew("\\|\\|");
-	ctx->regex_store.r_land       = rnew("&&");
-	ctx->regex_store.r_gteq       = rnew(">=");
-	ctx->regex_store.r_lteq       = rnew("<=");
-	ctx->regex_store.r_deq        = rnew("==");
-	ctx->regex_store.r_comma      = rnew(",");
-	ctx->regex_store.r_period     = rnew(".");
-	ctx->regex_store.r_semi       = rnew(";");
-	ctx->regex_store.r_arrow      = rnew("->");
+	memset(&ctx->regex_store, 0, sizeof(tokenizer_regex_store));
+	ctx->regex_store.store.r_string_lit = rnew("\\\"([^\\\"]|\n)*\\\"");
+	ctx->regex_store.store.r_char_lit   = rnew("\\\'(.)\\\'");
+	ctx->regex_store.store.r_fn         = rnew("fn");
+	ctx->regex_store.store.r_if         = rnew("if");
+	ctx->regex_store.store.r_else       = rnew("else");
+	ctx->regex_store.store.r_switch     = rnew("switch");
+	ctx->regex_store.store.r_break      = rnew("break");
+	ctx->regex_store.store.r_default    = rnew("default");
+	ctx->regex_store.store.r_module     = rnew("module");
+	ctx->regex_store.store.r_return     = rnew("return");
+	ctx->regex_store.store.r_hexlit     = rnew("0x[0-9a-fA-F]+");
+	ctx->regex_store.store.r_dbllit     = rnew("[0-9]+\\.[0-9]+");
+	ctx->regex_store.store.r_declit     = rnew("[0-9]+");
+	ctx->regex_store.store.r_id         = rnew("[a-zA-Z][a-zA-Z0-9_]*");
+	ctx->regex_store.store.r_lor        = rnew("\\|\\|");
+	ctx->regex_store.store.r_land       = rnew("&&");
+	ctx->regex_store.store.r_gteq       = rnew(">=");
+	ctx->regex_store.store.r_lteq       = rnew("<=");
+	ctx->regex_store.store.r_deq        = rnew("==");
+	ctx->regex_store.store.r_comma      = rnew(",");
+	ctx->regex_store.store.r_period     = rnew(".");
+	ctx->regex_store.store.r_semi       = rnew(";");
+	ctx->regex_store.store.r_arrow      = rnew("->");
+	printf("%p\n", &ctx->regex_store);
+	printf("%p\n", &ctx->regex_store.r_store);
+	printf("%p\n", &ctx->regex_store.store.r_arrow);
 }
 
 void tctx_internal_free_regex(tokenizer_ctx* ctx) {
-	int count = sizeof(ctx->regex_store) / sizeof(regex_t);
-	for (int i = 0; i < count - 1; i++) {
+	int count = sizeof(tokenizer_regex_store) / sizeof(regex_t);
+	for (int i = 0; i < count; i++) {
 		regfree(&ctx->regex_store.r_store[i]);
 	}
 }
@@ -225,25 +229,25 @@ token tctx_get_next(tokenizer_ctx* ctx) {
 
 	// Match code
 	//   To see the actual regex strings, view tctx_internal_init_regex(..)
-	RMATCH(ctx->regex_store.r_string_lit, T_STRING_LIT);
-	RMATCH(ctx->regex_store.r_char_lit, T_CHAR_LIT);
-	RMATCH(ctx->regex_store.r_fn, T_FN);
-	RMATCH(ctx->regex_store.r_if, T_IF);
-	RMATCH(ctx->regex_store.r_else, T_ELSE);
-	RMATCH(ctx->regex_store.r_switch, T_SWITCH);
-	RMATCH(ctx->regex_store.r_break, T_BREAK);
-	RMATCH(ctx->regex_store.r_default, T_DEFAULT);
-	RMATCH(ctx->regex_store.r_return, T_RETURN);
-	RMATCH(ctx->regex_store.r_arrow, T_ARROW);
-	RMATCH(ctx->regex_store.r_hexlit, T_HEX_LIT);
-	RMATCH(ctx->regex_store.r_dbllit, T_DOUBLE_LIT);
-	RMATCH(ctx->regex_store.r_declit, T_DECIMAL_LIT);
-	RMATCH(ctx->regex_store.r_id, T_ID);
-	RMATCH(ctx->regex_store.r_lor, T_LOR);
-	RMATCH(ctx->regex_store.r_land, T_LAND);
-	RMATCH(ctx->regex_store.r_gteq, T_GTEQ);
-	RMATCH(ctx->regex_store.r_lteq, T_LTEQ);
-	RMATCH(ctx->regex_store.r_deq, T_DEQ);
+	RMATCH(ctx->regex_store.store.r_string_lit, T_STRING_LIT);
+	RMATCH(ctx->regex_store.store.r_char_lit, T_CHAR_LIT);
+	RMATCH(ctx->regex_store.store.r_fn, T_FN);
+	RMATCH(ctx->regex_store.store.r_if, T_IF);
+	RMATCH(ctx->regex_store.store.r_else, T_ELSE);
+	RMATCH(ctx->regex_store.store.r_switch, T_SWITCH);
+	RMATCH(ctx->regex_store.store.r_break, T_BREAK);
+	RMATCH(ctx->regex_store.store.r_default, T_DEFAULT);
+	RMATCH(ctx->regex_store.store.r_return, T_RETURN);
+	RMATCH(ctx->regex_store.store.r_arrow, T_ARROW);
+	RMATCH(ctx->regex_store.store.r_hexlit, T_HEX_LIT);
+	RMATCH(ctx->regex_store.store.r_dbllit, T_DOUBLE_LIT);
+	RMATCH(ctx->regex_store.store.r_declit, T_DECIMAL_LIT);
+	RMATCH(ctx->regex_store.store.r_id, T_ID);
+	RMATCH(ctx->regex_store.store.r_lor, T_LOR);
+	RMATCH(ctx->regex_store.store.r_land, T_LAND);
+	RMATCH(ctx->regex_store.store.r_gteq, T_GTEQ);
+	RMATCH(ctx->regex_store.store.r_lteq, T_LTEQ);
+	RMATCH(ctx->regex_store.store.r_deq, T_DEQ);
 	CHMATCH('|', T_BOR);
 	CHMATCH('&', T_BAND);
 	CHMATCH('>', T_GT);

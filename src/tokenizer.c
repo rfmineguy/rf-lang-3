@@ -221,19 +221,26 @@ token tctx_get_next(tokenizer_ctx* ctx) {
 		s.loc.index++;
 	}
 	// Consume spaces
-	while (isspace(*s.cursor) != 0 && *s.cursor != '\n') {
+	while (isspace(*s.cursor) != 0) {
+		if (*s.cursor == '\n') {
+			s.cursor++;
+			s.loc.index++;
+			s.loc.col = 0;
+			s.loc.line++;
+			continue;
+		}
 		s.cursor++;
 		s.loc.col++;
 		s.loc.index++;
 	}
-	while (*s.cursor == '\n') {
-		s.cursor++;
-		s.loc.line++;
-		s.loc.col = 0;
-		s.loc.index++;
-	}
+	// while (*s.cursor == '\n') {
+	// 	s.cursor++;
+	// 	s.loc.line++;
+	// 	s.loc.col = 0;
+	// 	s.loc.index++;
+	// }
 	// Consume spaces
-	while (isspace(*s.cursor) != 0 && *s.cursor != '\n') {
+	while (isspace(*s.cursor) != 0) {
 		s.cursor++;
 		s.loc.col++;
 		s.loc.index++;

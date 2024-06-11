@@ -126,7 +126,10 @@ void ast_util_reconstruct_deref(Deref deref){
 
 }
 void ast_util_reconstruct_logical_disj(LogicalDisj* disj){
-	if (!disj) return;
+	if (!disj) {
+		printf("_");
+		return;
+	}
 	switch (disj->type) {
 		case LOGICAL_DISJ_TYPE_CONJ:
 			ast_util_reconstruct_logical_conj(disj->conj);

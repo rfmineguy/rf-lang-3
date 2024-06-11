@@ -33,6 +33,4 @@ void      lalr_pop_n(lalr_ctx*, int);
 
 void      lalr_print_node(AST_Node);
 
-// void      lalr_print_idlist(IdList*);
-
 #endif

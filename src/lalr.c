@@ -411,6 +411,7 @@ int lalr_reduce(lalr_ctx* ctx, AST_Node* out_n) {
 			out_n->type = NT_LOGIC_DISJ;
 			out_n->logicdisj = arena_alloc(&ctx->arena, sizeof(LogicalDisj));
 			out_n->logicdisj->type = LOGICAL_DISJ_TYPE_DISJ_CONJ;
+			out_n->logicdisj->disj = peeked[2].logicdisj;
 			out_n->logicdisj->conj = peeked[0].logicconj;
 			return 3;
 		}

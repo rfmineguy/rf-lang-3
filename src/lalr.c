@@ -26,12 +26,34 @@ void lalr_show_stack(lalr_ctx* ctx) {
 int lalr_reduce_tok_to_term(token tok, AST_Node* out_n) {
 	out_n->type = NT_TOKEN;
 	out_n->token = tok;
+	out_n->token.loc = tok.loc;
 	return 1;
 }
 
 int lalr_reduce(lalr_ctx* ctx, AST_Node* out_n) {
 	AST_Node peeked[5] = {lalr_peek_n(ctx, 0), lalr_peek_n(ctx, 1), lalr_peek_n(ctx, 2), lalr_peek_n(ctx, 3),  lalr_peek_n(ctx, 4)};
 	token_type lookahead = ctx->lookahead.type;
+
+	/** number
+		* number 					 := <declit>
+		* 									| <hexlit>
+	 */
+	{
+		if (peeked[0].type == NT_TOKEN && peeked[0].token.type == T_DECIMAL_LIT) {
+			out_n->type = NT_NUMBER;
+			out_n->number.type = NUMBER_TYPE_INT;
+			out_n->number.i = number_parse_integer_base(peeked[0].token.text.data, 10).ok;
+			out_n->number.loc = peeked[0].token.loc;
+			return 1;
+		}
+		if (peeked[0].type == NT_TOKEN && peeked[0].token.type == T_HEX_LIT) {
+			out_n->type = NT_NUMBER;
+			out_n->number.type = NUMBER_TYPE_INT;
+			out_n->number.i = number_parse_integer_base(peeked[0].token.text.data, 16).ok;
+			out_n->number.loc = peeked[0].token.loc;
+			return 1;
+		}
+	}
 
 	/**  header
 	 *     header := <id="module"> <id>
@@ -45,6 +67,7 @@ int lalr_reduce(lalr_ctx* ctx, AST_Node* out_n) {
 			out_n->type = NT_HEADER;
 			out_n->header.type = HEADER_TYPE_MODULE;
 			out_n->header.module.name = peeked[0].token.text;
+			out_n->header.loc = peeked[1].token.loc;
 			return 2;
 		}
 	}
@@ -64,6 +87,7 @@ int lalr_reduce(lalr_ctx* ctx, AST_Node* out_n) {
 			out_n->type = NT_VAR_TYPE;
 			out_n->var_type.type = VAR_TYPE_ID;
 			out_n->var_type.Id.id = peeked[0].token.text;
+			out_n->var_type.loc = peeked[0].token.loc;
 			return 1;
 		}
 		if (peeked[0].type == NT_TOKEN && peeked[0].token.type == T_ID &&
@@ -72,6 +96,7 @@ int lalr_reduce(lalr_ctx* ctx, AST_Node* out_n) {
 			out_n->type = NT_VAR_TYPE;
 			out_n->var_type.type = VAR_TYPE_ID;
 			out_n->var_type.Id.id = peeked[0].token.text;
+			out_n->var_type.loc = peeked[0].token.loc;
 			return 1;
 		}
 	  // vartype := <id="_">
@@ -79,6 +104,7 @@ int lalr_reduce(lalr_ctx* ctx, AST_Node* out_n) {
 				lookahead == T_ARROW) {
 			out_n->type = NT_VAR_TYPE;
 			out_n->var_type.type = VAR_TYPE_NONE;
+			out_n->var_type.loc = peeked[0].token.loc;
 			return 1;
 		}
 
@@ -92,6 +118,7 @@ int lalr_reduce(lalr_ctx* ctx, AST_Node* out_n) {
 			out_n->var_type.type = VAR_TYPE_ARRAY;
 			out_n->var_type.Array.id = peeked[3].token.text;
 			out_n->var_type.Array.exprList = peeked[1].exprList;
+			out_n->var_type.loc = peeked[4].token.loc;
 			return 5;
 		}
 
@@ -108,6 +135,7 @@ int lalr_reduce(lalr_ctx* ctx, AST_Node* out_n) {
 			out_n->var_type.Array.exprList->type = EXPRESSION_LIST_TYPE_EXPR;
 			out_n->var_type.Array.exprList->expr = peeked[1].expr;
 			out_n->var_type.Array.exprList->next = NULL;
+			out_n->var_type.loc = peeked[4].token.loc;
 			return 5;
 		}
 
@@ -120,6 +148,7 @@ int lalr_reduce(lalr_ctx* ctx, AST_Node* out_n) {
 			out_n->type = NT_VAR_TYPE;
 			out_n->var_type.type = VAR_TYPE_NESTED;
 			out_n->var_type.nested = arena_alloc(&ctx->arena, sizeof(VarType));
+			out_n->var_type.loc = peeked[4].token.loc;
 			return 5;
 		}
 
@@ -129,6 +158,7 @@ int lalr_reduce(lalr_ctx* ctx, AST_Node* out_n) {
 			peeked[1].var_type.pointerDepth++;
 			out_n->type = NT_VAR_TYPE;
 			out_n->var_type = peeked[1].var_type;
+			out_n->var_type.loc = peeked[1].var_type.loc;
 			return 2;
 		}
 	}
@@ -144,6 +174,7 @@ int lalr_reduce(lalr_ctx* ctx, AST_Node* out_n) {
 			out_n->type = NT_TYPED_ID;
 			out_n->typed_id.type = peeked[0].var_type;
 			out_n->typed_id.id = peeked[2].token.text;
+			out_n->typed_id.loc = peeked[2].token.loc;
 			return 3;
 		}
 	}
@@ -196,15 +227,16 @@ int lalr_reduce(lalr_ctx* ctx, AST_Node* out_n) {
 			out_n->type = NT_FACTOR;
 			out_n->factor.type = FACTOR_TYPE_ID;
 			out_n->factor.id = peeked[0].token.text;
+			out_n->factor.loc = peeked[0].token.loc;
 			return 1;
 		}
 
 		// factor := <number>
-		if (peeked[0].type == NT_TOKEN && peeked[0].token.type == T_DECIMAL_LIT) {
+		if (peeked[0].type == NT_NUMBER && peeked[0].number.type == NUMBER_TYPE_INT) {
 			out_n->type = NT_FACTOR;
 			out_n->factor.type = FACTOR_TYPE_NUMBER;
-			out_n->factor.number.type = NUMBER_TYPE_INT;
-			out_n->factor.number.i = number_parse_integer_base(peeked[0].token.text.data, 10).ok;
+			out_n->factor.number = peeked[0].number;
+			out_n->factor.loc = peeked[0].number.loc;
 			return 1;
 		}
 
@@ -214,6 +246,7 @@ int lalr_reduce(lalr_ctx* ctx, AST_Node* out_n) {
 			out_n->type = NT_FACTOR;
 			out_n->factor.type = FACTOR_TYPE_STR;
 			out_n->factor.str = peeked[0].token.text;
+			out_n->factor.loc = peeked[0].token.loc;
 			return 1;
 		}
 
@@ -225,6 +258,7 @@ int lalr_reduce(lalr_ctx* ctx, AST_Node* out_n) {
 			out_n->type = NT_FACTOR;
 			out_n->factor.type = FACTOR_TYPE_EXPR;
 			out_n->factor.expr = peeked[1].expr;
+			out_n->factor.loc = peeked[2].token.loc;
 			return 3;
 		}
 
@@ -233,6 +267,7 @@ int lalr_reduce(lalr_ctx* ctx, AST_Node* out_n) {
 			out_n->type = NT_FACTOR;
 			out_n->factor.type = FACTOR_TYPE_FUNC_CALL;
 			out_n->factor.funcCall = peeked[0].funcCall; 
+			out_n->factor.loc = peeked[0].funcCall.loc;
 			return 1;
 		}
 
@@ -241,6 +276,7 @@ int lalr_reduce(lalr_ctx* ctx, AST_Node* out_n) {
 			out_n->type = NT_FACTOR;
 			out_n->factor.type = FACTOR_TYPE_DEREF;
 			out_n->factor.deref = peeked[0].deref;
+			out_n->factor.loc = peeked[0].deref.loc;
 			return 1;
 		}
 	}
@@ -263,6 +299,7 @@ int lalr_reduce(lalr_ctx* ctx, AST_Node* out_n) {
 			out_n->term->op = peeked[1].token.text.data[0];
 			out_n->term->left = peeked[2].term;
 			out_n->term->right = peeked[0].factor;
+			out_n->term->loc = peeked[2].term->loc;
 			return 3;
 		}
 
@@ -273,6 +310,7 @@ int lalr_reduce(lalr_ctx* ctx, AST_Node* out_n) {
 			out_n->term->type = TERM_TYPE_FACTOR;
 			out_n->term->right = peeked[0].factor;
 			out_n->term->left = NULL;
+			out_n->term->loc = peeked[0].factor.loc;
 			return 1;
 		}
 	}
@@ -297,6 +335,7 @@ int lalr_reduce(lalr_ctx* ctx, AST_Node* out_n) {
 			out_n->mathexpr->op = peeked[1].token.text.data[0];
 			out_n->mathexpr->left = peeked[2].mathexpr;
 			out_n->mathexpr->right = peeked[0].term;
+			out_n->mathexpr->loc = peeked[0].term->loc;
 			return 3;
 		}
 
@@ -309,6 +348,7 @@ int lalr_reduce(lalr_ctx* ctx, AST_Node* out_n) {
 			out_n->mathexpr = arena_alloc(&ctx->arena, sizeof(MathExpression));
 			out_n->mathexpr->type = MATH_EXPR_TYPE_TERM;
 			out_n->mathexpr->right = peeked[0].term;
+			out_n->mathexpr->loc = peeked[0].term->loc;
 			return 1;
 		}
 	}
@@ -344,6 +384,7 @@ int lalr_reduce(lalr_ctx* ctx, AST_Node* out_n) {
 			out_n->relate->relate = peeked[2].relate;
 			out_n->relate->mathexpr = peeked[0].mathexpr;
 			out_n->relate->op = peeked[1].token.text;
+			out_n->relate->loc = peeked[2].relate->loc;
 			return 3;
 		}
 
@@ -357,6 +398,7 @@ int lalr_reduce(lalr_ctx* ctx, AST_Node* out_n) {
 			out_n->relate = arena_alloc(&ctx->arena, sizeof(Relational));
 			out_n->relate->type = RELATIONAL_TYPE_MATH_EXPR;
 			out_n->relate->mathexpr = peeked[0].mathexpr;
+			out_n->relate->loc = peeked[0].mathexpr->loc;
 			return 1;
 		}
 	}
@@ -378,6 +420,7 @@ int lalr_reduce(lalr_ctx* ctx, AST_Node* out_n) {
 			out_n->logicconj->type = LOGICAL_CONJ_TYPE_CONJ_RELATE;
 			out_n->logicconj->relate = peeked[0].relate;
 			out_n->logicconj->conj = peeked[2].logicconj;
+			out_n->logicconj->loc = peeked[2].logicconj->loc;
 			return 3;
 		}
 
@@ -389,6 +432,7 @@ int lalr_reduce(lalr_ctx* ctx, AST_Node* out_n) {
 			out_n->logicconj = arena_alloc(&ctx->arena, sizeof(LogicalConj));
 			out_n->logicconj->type = LOGICAL_CONJ_TYPE_RELATE;
 			out_n->logicconj->relate = peeked[0].relate;
+			out_n->logicconj->loc = peeked[0].relate->loc;
 			return 1;
 		}
 	}
@@ -409,6 +453,7 @@ int lalr_reduce(lalr_ctx* ctx, AST_Node* out_n) {
 			out_n->logicdisj->type = LOGICAL_DISJ_TYPE_DISJ_CONJ;
 			out_n->logicdisj->disj = peeked[2].logicdisj;
 			out_n->logicdisj->conj = peeked[0].logicconj;
+			out_n->logicdisj->loc  = peeked[2].logicdisj->loc;
 			return 3;
 		}
 
@@ -419,6 +464,7 @@ int lalr_reduce(lalr_ctx* ctx, AST_Node* out_n) {
 			out_n->logicdisj = arena_alloc(&ctx->arena, sizeof(LogicalDisj));
 			out_n->logicdisj->type = LOGICAL_DISJ_TYPE_CONJ;
 			out_n->logicdisj->conj = peeked[0].logicconj;
+			out_n->logicdisj->loc = peeked[0].logicconj->loc;
 			return 1;
 		}
 	}
@@ -433,6 +479,7 @@ int lalr_reduce(lalr_ctx* ctx, AST_Node* out_n) {
 			out_n->expr = arena_alloc(&ctx->arena, sizeof(Expression));
 			out_n->expr->type = EXPRESSION_TYPE_LOGIC_DISJ;
 			out_n->expr->disj = peeked[0].logicdisj;
+			out_n->expr->loc = peeked[0].logicdisj->loc;
 			return 1;
 		}
 	}
@@ -464,6 +511,7 @@ int lalr_reduce(lalr_ctx* ctx, AST_Node* out_n) {
 
 			out_n->type = NT_EXPRESSION_LIST;
 			out_n->exprList = peeked[2].exprList;
+			out_n->exprList->loc = peeked[2].exprList->loc;
 			return 3;
 		}
 
@@ -473,6 +521,7 @@ int lalr_reduce(lalr_ctx* ctx, AST_Node* out_n) {
 			out_n->type = NT_EXPRESSION_LIST;
 			out_n->exprList = arena_alloc(&ctx->arena, sizeof(ExpressionList));
 			out_n->exprList->expr = peeked[0].expr;
+			out_n->exprList->loc = peeked[0].expr->loc;
 			return 1;
 		}
 	}
@@ -494,6 +543,7 @@ int lalr_reduce(lalr_ctx* ctx, AST_Node* out_n) {
 			out_n->deref.type = DEREF_TYPE_BRKT;
 			out_n->deref.Brkt.exprList = peeked[1].exprList;
 			out_n->deref.Brkt.id = peeked[3].token.text;
+			out_n->deref.loc = peeked[3].token.loc;
 			return 4;
 		}
 
@@ -512,6 +562,7 @@ int lalr_reduce(lalr_ctx* ctx, AST_Node* out_n) {
 			out_n->deref.Brkt.exprList->type = EXPRESSION_LIST_TYPE_EXPR;
 			out_n->deref.Brkt.exprList->expr = peeked[1].expr;
 			out_n->deref.Brkt.exprList->next = NULL;
+			out_n->deref.loc = peeked[3].token.loc;
 			return 4;
 		}
 	}
@@ -533,6 +584,7 @@ int lalr_reduce(lalr_ctx* ctx, AST_Node* out_n) {
 			out_n->type = NT_FUNC_CALL;
 			out_n->funcCall.exprList = peeked[1].exprList;
 			out_n->funcCall.id = peeked[3].token.text;
+			out_n->funcCall.loc = peeked[3].token.loc;
 			return 4;
 		}
 
@@ -543,6 +595,7 @@ int lalr_reduce(lalr_ctx* ctx, AST_Node* out_n) {
 			out_n->type = NT_FUNC_CALL;
 			out_n->funcCall.exprList = NULL;
 			out_n->funcCall.id = peeked[2].token.text;
+			out_n->funcCall.loc = peeked[2].token.loc;
 			return 3;
 		}
 
@@ -557,6 +610,7 @@ int lalr_reduce(lalr_ctx* ctx, AST_Node* out_n) {
 			out_n->funcCall.exprList->type = EXPRESSION_LIST_TYPE_EXPR;
 			out_n->funcCall.exprList->expr = peeked[1].expr;
 			out_n->funcCall.exprList->next = NULL;
+			out_n->funcCall.loc = peeked[3].token.loc;
 			return 4;
 		}
 	}
@@ -574,6 +628,7 @@ int lalr_reduce(lalr_ctx* ctx, AST_Node* out_n) {
 			out_n->type = NT_FUNC_HEADER;
 			out_n->funcHeader.params = peeked[2].typed_idlist;
 			out_n->funcHeader.returnType = peeked[0].var_type;
+			out_n->funcHeader.loc = peeked[2].typed_idlist->loc;
 			return 3;
 		}
 		if (peeked[2].type == NT_VAR_TYPE &&
@@ -587,6 +642,7 @@ int lalr_reduce(lalr_ctx* ctx, AST_Node* out_n) {
 			idlist->next = NULL;
 			out_n->funcHeader.params = idlist;
 			out_n->funcHeader.returnType = peeked[0].var_type;
+			out_n->funcHeader.loc = peeked[2].var_type.loc;
 			return 3;
 		}
 	}
@@ -601,6 +657,7 @@ int lalr_reduce(lalr_ctx* ctx, AST_Node* out_n) {
 			out_n->type = NT_IF;
 			out_n->iff.expr = peeked[1].expr;
 			out_n->iff.block = peeked[0].block;
+			out_n->iff.loc = peeked[2].token.loc;
 			return 3;
 		}
 	}
@@ -616,6 +673,7 @@ int lalr_reduce(lalr_ctx* ctx, AST_Node* out_n) {
 			out_n->assign.type = ASSIGN_TYPE_TYPED_ID;
 			out_n->assign.typedId = peeked[2].typed_id;
 			out_n->assign.expr = peeked[0].expr;
+			out_n->assign.loc = peeked[2].typed_id.loc;
 			return 3;
 		}
 		if (peeked[2].type == NT_TOKEN && peeked[2].token.type == T_ID &&
@@ -625,6 +683,7 @@ int lalr_reduce(lalr_ctx* ctx, AST_Node* out_n) {
 			out_n->assign.type = ASSIGN_TYPE_UNTYPED_ID;
 			out_n->assign.untypedId = peeked[2].token.text;
 			out_n->assign.expr = peeked[0].expr;
+			out_n->assign.loc = peeked[2].token.loc;
 			return 3;
 		}
 	}
@@ -647,6 +706,7 @@ int lalr_reduce(lalr_ctx* ctx, AST_Node* out_n) {
 
 			out_n->type = NT_STATEMENT_LIST;
 			out_n->stmtList = peeked[1].stmtList;
+			out_n->stmtList->loc = peeked[1].stmtList->loc;
 			return 2;
 		}
 
@@ -655,6 +715,7 @@ int lalr_reduce(lalr_ctx* ctx, AST_Node* out_n) {
 			out_n->stmtList = arena_alloc(&ctx->arena, sizeof(StatementList));
 			out_n->stmtList->stmt = peeked[0].stmt;
 			out_n->stmtList->next = NULL;
+			out_n->stmtList->loc = peeked[0].stmt.loc;
 			return 1;
 		}
 	}
@@ -674,6 +735,7 @@ int lalr_reduce(lalr_ctx* ctx, AST_Node* out_n) {
 			out_n->type = NT_STATEMENT;
 			out_n->stmt.type = STATEMENT_TYPE_ASSIGN;
 			out_n->stmt.assign = peeked[0].assign;
+			out_n->stmt.loc = peeked[0].assign.loc;
 			return 1;
 		}
 		// statement := <if>
@@ -681,6 +743,7 @@ int lalr_reduce(lalr_ctx* ctx, AST_Node* out_n) {
 			out_n->type = NT_STATEMENT;
 			out_n->stmt.type = STATEMENT_TYPE_IF;
 			out_n->stmt.iff = peeked[0].iff;
+			out_n->stmt.loc = peeked[0].iff.loc;
 			return 1;
 		}
 		// statement := return <expression>
@@ -690,6 +753,7 @@ int lalr_reduce(lalr_ctx* ctx, AST_Node* out_n) {
 			out_n->type = NT_STATEMENT;
 			out_n->stmt.type = STATEMENT_TYPE_RETURN;
 			out_n->stmt.Return.expr = peeked[0].expr;
+			out_n->stmt.loc = peeked[0].expr->loc;
 			return 2;
 		}
 		// statement := <expression>
@@ -698,6 +762,7 @@ int lalr_reduce(lalr_ctx* ctx, AST_Node* out_n) {
 			out_n->type = NT_STATEMENT;
 			out_n->stmt.type = STATEMENT_TYPE_EXPR;
 			out_n->stmt.expr = peeked[0].expr;
+			out_n->stmt.loc = peeked[0].expr->loc;
 			return 1;
 		}
 		if (peeked[0].type == NT_EXPRESSION &&
@@ -705,6 +770,7 @@ int lalr_reduce(lalr_ctx* ctx, AST_Node* out_n) {
 			out_n->type = NT_STATEMENT;
 			out_n->stmt.type = STATEMENT_TYPE_EXPR;
 			out_n->stmt.expr = peeked[0].expr;
+			out_n->stmt.loc = peeked[0].expr->loc;
 			return 1;
 		}
 	}
@@ -721,6 +787,7 @@ int lalr_reduce(lalr_ctx* ctx, AST_Node* out_n) {
 				peeked[0].token.type == T_RBRC) {
 			out_n->type = NT_BLOCK;
 			out_n->block.stmts = NULL;
+			out_n->block.loc = peeked[1].token.loc;
 			return 2;
 		}
 
@@ -732,6 +799,7 @@ int lalr_reduce(lalr_ctx* ctx, AST_Node* out_n) {
 				peeked[0].token.type == T_RBRC) {
 			out_n->type = NT_BLOCK;
 			out_n->block.stmts = peeked[1].stmtList;
+			out_n->block.loc = peeked[2].token.loc;
 			return 3;
 		}
 	}
@@ -748,6 +816,7 @@ int lalr_reduce(lalr_ctx* ctx, AST_Node* out_n) {
 			out_n->function.id = peeked[3].token.text;
 			out_n->function.header = peeked[1].funcHeader;
 			out_n->function.block = peeked[0].block;
+			out_n->function.loc = peeked[3].token.loc;
 			return 4;
 		}
 	}

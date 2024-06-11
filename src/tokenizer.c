@@ -101,7 +101,17 @@ const char* token_str(token_type t) {
 		case T_ARROW:  			return "ARROW";
 		case T_UNDERSCORE:  return "UNDERSCORE";
 		case T_UNKNOWN:  		return "UNKNOWN";
-		default:            printf("%d\n", t); assert(0 && "Unimplemented token_str conversion");
+		case T_SINGLE_LINE_COMMENT: return "___sline_comment-norep___";
+		case T_MULTI_LINE_COMMENT: return "___multi_comment-norep___";
+		case T_RESERVE_BEG: return "RESERVE_BEG";
+		case T_RESERVE_END: return "RESERVE_END";
+		case T_ARITH_BEG:   return "ARITH_BEG"; 
+		case T_ARITH_END:   return "ARITH_END"; 
+		case T_STACK_BEG:   return "STACK_BEG"; 
+		case T_STACK_END:   return "STACK_END"; 
+		case T_LOGIC_BEG:   return "LOGIC_BEG"; 
+		case T_LOGIC_END:   return "LOGIC_END"; 
+											
 	}
 }
 

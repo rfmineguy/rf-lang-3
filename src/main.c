@@ -75,6 +75,9 @@ lalr_ctx parse(const char* file) {
 
 		AST_Node n = {0};
 		lalr_reduce_tok_to_term(t, &n);
+		n.loc.col   = ctx.state.loc.col;
+		n.loc.line  = ctx.state.loc.line;
+		n.loc.index = ctx.state.loc.index;
 		lalr_push(&lctx, n);
 
 		int popped = 0;
@@ -93,6 +96,8 @@ lalr_ctx parse(const char* file) {
 	return lctx;
 }
 
+#define LOC_FMT "{line: %4d, col: %3d, index: %4d}"
+#define LOC_ARG(n) n.loc.line, n.loc.col, n.loc.index
 int tokenize(const char* file) {
 	tokenizer_ctx ctx = tctx_from_file(file);
 	if (ctx.fail) {
@@ -104,7 +109,7 @@ int tokenize(const char* file) {
 	token t;
 	while ((t = tctx_get_next(&ctx)).type != T_EOF) {
 		tctx_advance(&ctx);
-		printf(TOKEN_STR_FMT "\n", TOKEN_STR_ARG(t));
+		printf(LOC_FMT TOKEN_STR_FMT "\n", LOC_ARG(t), TOKEN_STR_ARG(t));
 		if (t.type == T_EOF) break;
 	}
 	tctx_free(&ctx);

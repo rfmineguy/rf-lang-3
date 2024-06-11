@@ -3,7 +3,6 @@ strlit := ".*"
 declit := [0-9]+
 hexlit := 0x
 
-
 number 					 := <declit>
 									| <hexlit>
 
@@ -69,7 +68,6 @@ func_call        := <id> "(" <expression_list> ")"
 deref            := <id> "[" <expression_list> "]"
 expression_list  := <expression_list> "," <expression>
 									| <expression>
-
 
 assignment 			 := { <typed_id> | <id> } "=" <expression>
 return 					 := "return" <expression>

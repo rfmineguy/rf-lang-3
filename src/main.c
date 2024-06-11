@@ -21,6 +21,7 @@ int codegen(const char* file, const char* output, const char* target);
 int reconstruct(const char* file);
 
 int main(int argc, char **argv) {
+	printf("[%*c]\n", 1, '4');
 	struct gengetopt_args_info args_info;
 	if (cmdline_parser(argc, argv, &args_info) != 0) {
 		return 1;
@@ -184,9 +185,12 @@ int codegen(const char* file, const char* output, const char* target) {
 int reconstruct(const char* file) {
 	lalr_ctx pctx = parse(file);
 
+	// for (int i = 0; i <= pctx.stack_top; i++) {
+	// 	AST_Node n = pctx.stack[i];
+	// 	ast_print_node(n, 0);
+	// }
 	for (int i = 0; i <= pctx.stack_top; i++) {
 		AST_Node n = pctx.stack[i];
-		ast_print_node(n, 0);
 		ast_util_reconstruct_ast_node(n);
 	}
 	return 0;

@@ -1,6 +1,5 @@
 #include "ast_util.h"
 #include "ast.h"
-#include "ast_print.h"
 #include "lib/sv.h"
 #include <assert.h>
 #include <stdio.h>
@@ -33,8 +32,11 @@ Operands ast_util_get_logic_conj_operands(LogicalConj conj) {
 }
 
 
+static int nest_depth = 1;
+#define INDENT_FMT "%*c"
+#define INDENT_ARG nest_depth * 2, ' '
+
 void ast_util_reconstruct_ast_node(AST_Node n) {
-	printf("%d\n", n.type);
 	switch (n.type) {
 		case NT_UNDEF:           assert(0 && "Can't reconstruct UNDEFINED"); break;
 		case NT_TOKEN:           assert(0 && "No individual token generation"); break;
@@ -61,7 +63,6 @@ void ast_util_reconstruct_ast_node(AST_Node n) {
 		case NT_FUNCTION:        ast_util_reconstruct_function(n.function); break;
 		case NT_ASSIGNMENT:      ast_util_reconstruct_assignment(n.assign); break;
 	}
-
 }
 
 void ast_util_reconstruct_header(Header header){
@@ -110,7 +111,7 @@ void ast_util_reconstruct_vartype(VarType var_type){
 	}
 }
 void ast_util_reconstruct_typed_id(TypedId typed_id){
-	printf(SV_Fmt ":", SV_Arg(typed_id.id));
+	printf(SV_Fmt ": ", SV_Arg(typed_id.id));
 	ast_util_reconstruct_vartype(typed_id.type);
 }
 void ast_util_reconstruct_deref(Deref deref){
@@ -216,14 +217,22 @@ void ast_util_reconstruct_term(Term* term){
 	}
 }
 void ast_util_reconstruct_block(Block block){
-
+	printf(INDENT_FMT "{\n", INDENT_ARG);
+	nest_depth++;
+	ast_util_reconstruct_stmt_list(block.stmts);
+	nest_depth--;
+	printf(INDENT_FMT "}\n", INDENT_ARG);
 }
 void ast_util_reconstruct_stmt(Statement stmt){
 	switch (stmt.type) {
 		case STATEMENT_TYPE_ASSIGN: 
 			ast_util_reconstruct_assignment(stmt.assign);
+			printf("\n");
 			break;
-		case STATEMENT_TYPE_IF: assert(0 && "Reconstruct if not supported");
+		case STATEMENT_TYPE_IF: 
+			ast_util_reconstruct_if(stmt.iff);
+			printf("\n");
+			break;
 		case STATEMENT_TYPE_RETURN: assert(0 && "Reconstruct return not supported");
 	}
 }
@@ -235,15 +244,18 @@ void ast_util_reconstruct_stmt_list(StatementList* stmts) {
 	}
 }
 void ast_util_reconstruct_if(IfStatement if_stmt){
-
+	printf(INDENT_FMT "if ", INDENT_ARG);
+	ast_util_reconstruct_expr(if_stmt.expr);
+	ast_util_reconstruct_block(if_stmt.block);
 }
 void ast_util_reconstruct_assignment(AssignStatement assign_stmt){
 	switch (assign_stmt.type) {
 		case ASSIGN_TYPE_TYPED_ID:
+			printf(INDENT_FMT, INDENT_ARG);
 			ast_util_reconstruct_typed_id(assign_stmt.typedId);
 			break;
 		case ASSIGN_TYPE_UNTYPED_ID:
-			printf(SV_Fmt, SV_Arg(assign_stmt.untypedId));
+			printf(INDENT_FMT "" SV_Fmt, INDENT_ARG, SV_Arg(assign_stmt.untypedId));
 			break;
 	}
 	printf(" = ");
@@ -266,11 +278,22 @@ void ast_util_reconstruct_func_call(FuncCall func_call){
 
 }
 void ast_util_reconstruct_typed_idlist(TypedIdList* typed_id_list){
-
+	TypedIdList* curr = typed_id_list;
+	while (curr) {
+		ast_util_reconstruct_typed_id(curr->typedId);
+		curr = curr->next;
+		if (curr)
+			printf(", ");
+	}
 }
 void ast_util_reconstruct_function_header(FunctionHeader func_header){
-
+	ast_util_reconstruct_typed_idlist(func_header.params);
+	printf(" -> ");
+	ast_util_reconstruct_vartype(func_header.returnType);
 }
-void ast_util_reconstruct_function(Function function){
 
+void ast_util_reconstruct_function(Function function){
+	printf(INDENT_FMT SV_Fmt " = ", INDENT_ARG, SV_Arg(function.id));
+	ast_util_reconstruct_function_header(function.header);
+	ast_util_reconstruct_block(function.block);
 }

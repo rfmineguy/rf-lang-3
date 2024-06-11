@@ -6,6 +6,7 @@
 #include "codegen_arm64.h"
 #include "lalr.h"
 #include "lib/arena.h"
+#include "number_parser.h"
 #include "tokenizer.h"
 #include <regex.h>
 #include <stdio.h>
@@ -69,7 +70,6 @@ lalr_ctx parse(const char* file) {
 	token t;
 	while ((t = tctx_get_next(&ctx)).type != T_EOF) {
 		tctx_advance(&ctx);
-		// printf(TOKEN_STR_FMT "\n", TOKEN_STR_ARG(t));
 		lctx.lookahead = tctx_get_next(&ctx);
 		if (t.type == T_EOF) break;
 
@@ -186,6 +186,7 @@ int reconstruct(const char* file) {
 
 	for (int i = 0; i <= pctx.stack_top; i++) {
 		AST_Node n = pctx.stack[i];
+		ast_print_node(n, 0);
 		ast_util_reconstruct_ast_node(n);
 	}
 	return 0;

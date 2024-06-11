@@ -17,7 +17,7 @@ TEST_SOURCES := $(TEST_MAIN)\
 								tests/munit.c
 GETOPT_SOURCE := getopt/cmdline.c
 BIN          := rfc
-# CFLAGS       := -ggdb -fsanitize=address
+CFLAGS       := -ggdb # -fsanitize=address
 DOCKER_IMAGE := rfmineguy/rflang-x86-testing
 
 .PHONY: always clean build build-x86

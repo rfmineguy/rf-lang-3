@@ -117,11 +117,11 @@ void ast_print_deref(Deref deref, int d) {
 }
 
 void ast_print_number(Number n, int d) {
-	printf(TREE_FMT "[Number]", TREE_ARG(0));
+	printf(TREE_FMT "[Number]\n", TREE_ARG(0));
 	switch (n.type) {
-		case NUMBER_TYPE_INT:    printf("%d\n", n.i); break;
-		case NUMBER_TYPE_DOUBLE: printf("%0.4f\n", n.d); break;
-		case NUMBER_TYPE_FLOAT:  printf("%0.4f\n", n.f); break;
+		case NUMBER_TYPE_INT:    printf(TREE_FMT "[Integer %d]\n", TREE_ARG(1), n.i); break;
+		case NUMBER_TYPE_DOUBLE: printf(TREE_FMT "[Double %0.4f]\n", TREE_ARG(1), n.d); break;
+		case NUMBER_TYPE_FLOAT:  printf(TREE_FMT "[Float %0.4f]\n", TREE_ARG(1), n.f); break;
 	}
 }
 void ast_print_logical_disj(LogicalDisj* l, int d) {

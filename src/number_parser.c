@@ -9,13 +9,11 @@
 
 bool number_parse_isvalidbase(char c, int base) {
 	c = tolower(c);
-	if (isdigit(c) && c - '0' >= base) return false;
-	if (c - '0' < 0) return false;
-	if (isalpha(c)) {
-		int value = c - 'a' + 10;
-		if (value >= base) return false;
+	if (base <= 10) {
+		return c - '0' < base && c - '0' >= 0;
 	}
-	return true;
+	if (!isalpha(c)) return false;
+	return c - 'a' + 10 < base;
 }
 
 np_integer_result number_parse_integer_base(const char* cursor, int base) {

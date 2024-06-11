@@ -225,7 +225,7 @@ int lalr_reduce(lalr_ctx* ctx, AST_Node* out_n) {
 		if (peeked[2].type == NT_TOKEN && peeked[2].token.type == T_LP &&
 				peeked[1].type == NT_EXPRESSION &&
 				peeked[0].type == NT_TOKEN && peeked[0].token.type == T_RP &&
-				peeked[3].type != NT_TOKEN && peeked[3].token.type != T_ID) {
+				peeked[3].token.type != T_ID) {
 			out_n->type = NT_FACTOR;
 			out_n->factor.type = FACTOR_TYPE_EXPR;
 			out_n->factor.expr = peeked[1].expr;

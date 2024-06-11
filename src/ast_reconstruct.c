@@ -46,13 +46,14 @@ void ast_util_reconstruct_header(Header header){
 			assert("Header type 'use' not implemented");
 	}
 }
+
 void ast_util_reconstruct_factor(Factor factor){
 	switch (factor.type) {
 		case FACTOR_TYPE_ID: 
 			printf(SV_Fmt, SV_Arg(factor.id));
 			break;
 		case FACTOR_TYPE_NUMBER:
-			printf("%d", factor.number.i); // NOTE: Not fully correct
+			ast_util_reconstruct_number(factor.number);
 			break;
 		case FACTOR_TYPE_EXPR:
 			ast_util_reconstruct_expr(factor.expr);
@@ -66,9 +67,21 @@ void ast_util_reconstruct_factor(Factor factor){
 		default: assert(0 && "Reconstruct factor unfinished");
 	}
 }
+
 void ast_util_reconstruct_number(Number number){
-	assert(0 && "Shouldn't be directly called. Just here for completeness");
+	switch (number.type) {
+		case NUMBER_TYPE_INT:
+			printf("%d", number.i);
+			break;
+		case NUMBER_TYPE_FLOAT:
+			printf("%.4f", number.f);
+			break;
+		case NUMBER_TYPE_DOUBLE:
+			printf("%.8f", number.d);
+			break;
+	}
 }
+
 void ast_util_reconstruct_vartype(VarType var_type){
 	switch (var_type.type) {
 		case VAR_TYPE_ID:
@@ -87,10 +100,12 @@ void ast_util_reconstruct_vartype(VarType var_type){
 			assert(0 && "Nested vartype reconstruction not implemented");
 	}
 }
+
 void ast_util_reconstruct_typed_id(TypedId typed_id){
 	printf(SV_Fmt ": ", SV_Arg(typed_id.id));
 	ast_util_reconstruct_vartype(typed_id.type);
 }
+
 void ast_util_reconstruct_deref(Deref deref){
 	switch (deref.type) {
 		case DEREF_TYPE_BRKT:
@@ -100,8 +115,8 @@ void ast_util_reconstruct_deref(Deref deref){
 			break;
 		default: assert(0 && "Deref type fully implemented");
 	}
-
 }
+
 void ast_util_reconstruct_logical_disj(LogicalDisj* disj){
 	if (!disj) {
 		printf("_");
@@ -119,8 +134,8 @@ void ast_util_reconstruct_logical_disj(LogicalDisj* disj){
 			printf(")");
 			break;
 	}
-
 }
+
 void ast_util_reconstruct_logical_conj(LogicalConj* conj){
 	if (!conj) return;
 	switch (conj->type) {
@@ -135,8 +150,8 @@ void ast_util_reconstruct_logical_conj(LogicalConj* conj){
 			printf(")");
 			break;
 	}
-
 }
+
 void ast_util_reconstruct_relational(Relational* relate){
 	if (!relate) return;
 	switch (relate->type) {
@@ -152,6 +167,7 @@ void ast_util_reconstruct_relational(Relational* relate){
 			break;
 	}
 }
+
 void ast_util_reconstruct_expr(Expression* expr){
 	if (!expr) return;
 	switch (expr->type) {
@@ -160,6 +176,7 @@ void ast_util_reconstruct_expr(Expression* expr){
 			break;
 	}
 }
+
 void ast_util_reconstruct_math_expr(MathExpression* mexpr){
 	if (!mexpr) return;
 	switch (mexpr->type) {
@@ -182,6 +199,7 @@ void ast_util_reconstruct_math_expr(MathExpression* mexpr){
 			break;
 	}
 }
+
 void ast_util_reconstruct_term(Term* term){
 	switch (term->type) {
 		case TERM_TYPE_FACTOR:
@@ -196,6 +214,7 @@ void ast_util_reconstruct_term(Term* term){
 			break;
 	}
 }
+
 void ast_util_reconstruct_block(Block block){
 	printf(INDENT_FMT "{\n", INDENT_ARG);
 	nest_depth++;
@@ -203,6 +222,7 @@ void ast_util_reconstruct_block(Block block){
 	nest_depth--;
 	printf(INDENT_FMT "}\n", INDENT_ARG);
 }
+
 void ast_util_reconstruct_stmt(Statement stmt){
 	switch (stmt.type) {
 		case STATEMENT_TYPE_ASSIGN: 
@@ -225,11 +245,13 @@ void ast_util_reconstruct_stmt(Statement stmt){
 			break;
 	}
 }
+
 void ast_util_reconstruct_if(IfStatement if_stmt){
 	printf(INDENT_FMT "if ", INDENT_ARG);
 	ast_util_reconstruct_expr(if_stmt.expr);
 	ast_util_reconstruct_block(if_stmt.block);
 }
+
 void ast_util_reconstruct_assignment(AssignStatement assign_stmt){
 	switch (assign_stmt.type) {
 		case ASSIGN_TYPE_TYPED_ID:
@@ -243,6 +265,7 @@ void ast_util_reconstruct_assignment(AssignStatement assign_stmt){
 	printf(" = ");
 	ast_util_reconstruct_expr(assign_stmt.expr);
 }
+
 void ast_util_reconstruct_stmt_list(StatementList* stmts) {
 	StatementList* curr = stmts;
 	while (curr) {
@@ -250,6 +273,7 @@ void ast_util_reconstruct_stmt_list(StatementList* stmts) {
 		curr = curr->next;
 	}
 }
+
 void ast_util_reconstruct_expr_list(ExpressionList* expr_list){
 	ExpressionList* curr = expr_list;
 	while (curr) {
@@ -259,6 +283,7 @@ void ast_util_reconstruct_expr_list(ExpressionList* expr_list){
 			printf(",");
 	}
 }
+
 void ast_util_reconstruct_func_call(FuncCall func_call){
 	printf(SV_Fmt, SV_Arg(func_call.id));
 	printf("(");
@@ -266,6 +291,7 @@ void ast_util_reconstruct_func_call(FuncCall func_call){
 	printf(")");
 
 }
+
 void ast_util_reconstruct_typed_idlist(TypedIdList* typed_id_list){
 	TypedIdList* curr = typed_id_list;
 	while (curr) {
@@ -275,6 +301,7 @@ void ast_util_reconstruct_typed_idlist(TypedIdList* typed_id_list){
 			printf(", ");
 	}
 }
+
 void ast_util_reconstruct_function_header(FunctionHeader func_header){
 	ast_util_reconstruct_typed_idlist(func_header.params);
 	printf(" -> ");

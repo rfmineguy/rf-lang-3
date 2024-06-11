@@ -66,7 +66,13 @@ void ast_util_reconstruct_ast_node(AST_Node n) {
 }
 
 void ast_util_reconstruct_header(Header header){
-
+	switch (header.type) {
+		case HEADER_TYPE_MODULE: 
+			printf(INDENT_FMT "module " SV_Fmt "\n", INDENT_ARG, SV_Arg(header.module.name));
+			break;
+		case HEADER_TYPE_USE:
+			assert("Header type 'use' not implemented");
+	}
 }
 void ast_util_reconstruct_factor(Factor factor){
 	switch (factor.type) {
@@ -89,7 +95,7 @@ void ast_util_reconstruct_factor(Factor factor){
 	}
 }
 void ast_util_reconstruct_number(Number number){
-	// 3 + 4;
+	assert(0 && "Shouldn't be directly called. Just here for completeness");
 }
 void ast_util_reconstruct_vartype(VarType var_type){
 	switch (var_type.type) {
@@ -247,13 +253,6 @@ void ast_util_reconstruct_stmt(Statement stmt){
 			break;
 	}
 }
-void ast_util_reconstruct_stmt_list(StatementList* stmts) {
-	StatementList* curr = stmts;
-	while (curr) {
-		ast_util_reconstruct_stmt(curr->stmt);
-		curr = curr->next;
-	}
-}
 void ast_util_reconstruct_if(IfStatement if_stmt){
 	printf(INDENT_FMT "if ", INDENT_ARG);
 	ast_util_reconstruct_expr(if_stmt.expr);
@@ -271,6 +270,13 @@ void ast_util_reconstruct_assignment(AssignStatement assign_stmt){
 	}
 	printf(" = ");
 	ast_util_reconstruct_expr(assign_stmt.expr);
+}
+void ast_util_reconstruct_stmt_list(StatementList* stmts) {
+	StatementList* curr = stmts;
+	while (curr) {
+		ast_util_reconstruct_stmt(curr->stmt);
+		curr = curr->next;
+	}
 }
 void ast_util_reconstruct_expr_list(ExpressionList* expr_list){
 	ExpressionList* curr = expr_list;

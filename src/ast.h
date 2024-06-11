@@ -80,7 +80,7 @@ typedef enum {
 
 typedef struct Statement Statement;
 typedef enum {
-	STATEMENT_TYPE_RETURN, STATEMENT_TYPE_IF, STATEMENT_TYPE_ASSIGN
+	STATEMENT_TYPE_RETURN, STATEMENT_TYPE_IF, STATEMENT_TYPE_ASSIGN, STATEMENT_TYPE_EXPR
 } StatementType;
 
 typedef struct StatementList StatementList;
@@ -342,6 +342,7 @@ struct AssignStatement {
  * 									| <for>
  * 									| <while>
  * 									| <switch>
+ * 									| <expression>
  */
 struct Statement {
 	StatementType type;
@@ -351,6 +352,7 @@ struct Statement {
 		} Return;
 		IfStatement iff;
 		AssignStatement assign;
+		Expression* expr;
 	};
 };
 

@@ -4,7 +4,8 @@ b = 4
 
 main = argc: int, argv: char** -> int {
 	a: int = 4
-	if a == 1 || a > 5 {
+	if a == 1 || a > 5 && a == 4 {
 		b: int = 4
+		add(3, 4) - 3
 	}
 }

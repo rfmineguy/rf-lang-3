@@ -695,6 +695,14 @@ int lalr_reduce(lalr_ctx* ctx, AST_Node* out_n) {
 			out_n->stmt.Return.expr = peeked[0].expr;
 			return 2;
 		}
+		// statement := <expression>
+		if (peeked[0].type == NT_EXPRESSION && 
+				peeked[1].type != NT_TOKEN) {
+			out_n->type = NT_STATEMENT;
+			out_n->stmt.type = STATEMENT_TYPE_EXPR;
+			out_n->stmt.expr = peeked[0].expr;
+			return 1;
+		}
 	}
 
 	/** block

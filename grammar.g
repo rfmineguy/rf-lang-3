@@ -32,6 +32,7 @@ statement        := <assignment>
 									| <for>
 									| <while>
 									| <switch>
+									| <expression>
 
 expression       := <logical_disj>
 

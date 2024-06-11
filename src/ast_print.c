@@ -225,6 +225,9 @@ void ast_print_stmt(Statement stmt, int d) {
 		case STATEMENT_TYPE_ASSIGN:
 			ast_print_assignment(stmt.assign, d + 1);
 			break;
+		case STATEMENT_TYPE_EXPR:
+			ast_print_expr(stmt.expr, d + 1);
+			break;
 	}
 }
 

@@ -87,10 +87,9 @@ void ast_util_reconstruct_factor(Factor factor){
 			break;
 		default: assert(0 && "Reconstruct factor unfinished");
 	}
-
 }
 void ast_util_reconstruct_number(Number number){
-
+	// 3 + 4;
 }
 void ast_util_reconstruct_vartype(VarType var_type){
 	switch (var_type.type) {

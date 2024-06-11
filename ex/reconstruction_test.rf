@@ -1,7 +1,6 @@
 a: int* = 4 + 5 * 3 - 5 > (3 * 4 - 3 + 4) && test(3, 4) == 1 && b[442 + i * 3]
 b = 4
 
-
 main = argc: int, argv: char** -> int {
 	a: int = 4
 	if a == 1 || a > 5 && a == 4 {

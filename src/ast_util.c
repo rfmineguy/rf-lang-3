@@ -235,7 +235,16 @@ void ast_util_reconstruct_stmt(Statement stmt){
 			ast_util_reconstruct_if(stmt.iff);
 			printf("\n");
 			break;
-		case STATEMENT_TYPE_RETURN: assert(0 && "Reconstruct return not supported");
+		case STATEMENT_TYPE_EXPR:
+			printf(INDENT_FMT, INDENT_ARG);
+			ast_util_reconstruct_expr(stmt.expr);
+			printf("\n");
+			break;
+		case STATEMENT_TYPE_RETURN:
+			printf(INDENT_FMT "return ", INDENT_ARG);
+			ast_util_reconstruct_expr(stmt.Return.expr);
+			printf("\n");
+			break;
 	}
 }
 void ast_util_reconstruct_stmt_list(StatementList* stmts) {

@@ -113,6 +113,7 @@ typedef enum AST_NodeType {
  */
 struct Header {
 	HeaderType type;
+	LocationInfo loc;
 	union {
 		struct {
 			String_View name;
@@ -122,6 +123,7 @@ struct Header {
 
 struct Number {
 	NumberType type;
+	LocationInfo loc;
 	union {
 		int i;
 		double d;
@@ -138,6 +140,7 @@ struct Number {
  */
 struct VarType {
 	VarTypeType type;
+	LocationInfo loc;
 	union {
 		struct {
 			String_View id;
@@ -157,6 +160,7 @@ struct VarType {
 struct TypedId {
 	String_View id;
 	VarType type;
+	LocationInfo loc;
 };
 
 /* typedid_list
@@ -166,6 +170,7 @@ struct TypedId {
 struct TypedIdList {
 	TypedId typedId;
 	TypedIdList* next;
+	LocationInfo loc;
 };
 
 /* function_header
@@ -175,6 +180,7 @@ struct TypedIdList {
 struct FunctionHeader {
 	TypedIdList* params;
 	VarType returnType;
+	LocationInfo loc;
 };
 
 /* block
@@ -182,6 +188,7 @@ struct FunctionHeader {
  */
 struct Block {
 	StatementList* stmts;
+	LocationInfo loc;
 };
 
 /* function
@@ -191,6 +198,7 @@ struct Function {
 	String_View id;
 	FunctionHeader header;
 	Block block;
+	LocationInfo loc;
 };
 
 /* func_call
@@ -199,6 +207,7 @@ struct Function {
 struct FuncCall {
 	String_View id;
 	ExpressionList* exprList;
+	LocationInfo loc;
 };
 
 /* deref
@@ -212,6 +221,7 @@ struct Deref {
 			ExpressionList* exprList;
 		} Brkt;
 	};
+	LocationInfo loc;
 };
 
 /* factor
@@ -233,6 +243,7 @@ struct Factor {
 		FuncCall funcCall;
 		Deref deref;
 	};
+	LocationInfo loc;
 };
 
 /* term
@@ -246,6 +257,7 @@ struct Term {
 	Term* left;
 	Factor right;
 	char op;
+	LocationInfo loc;
 };
 
 /* math_expression
@@ -260,6 +272,7 @@ struct MathExpression {
 	MathExpression* left;
 	Term* right;
 	char op;
+	LocationInfo loc;
 };
 
 /* relational
@@ -275,6 +288,7 @@ struct Relational {
 	String_View op;
 	Relational* relate;
 	MathExpression* mathexpr;
+	LocationInfo loc;
 };
 
 /* expression
@@ -283,6 +297,7 @@ struct Relational {
 struct Expression {
 	ExpressionType type;
 	LogicalDisj* disj;
+	LocationInfo loc;
 };
 
 /* expression_list
@@ -293,6 +308,7 @@ struct ExpressionList {
 	ExpressionListType type;
 	Expression* expr;
 	ExpressionList* next;
+	LocationInfo loc;
 };
 
 /* logical_disj
@@ -303,6 +319,7 @@ struct LogicalConj {
 	LogicalConjType type;
 	LogicalConj* conj;
 	Relational* relate;
+	LocationInfo loc;
 };
 
 /* logical_conj
@@ -313,6 +330,7 @@ struct LogicalDisj {
 	LogicalDisjType type;
 	LogicalDisj* disj;
 	LogicalConj* conj;
+	LocationInfo loc;
 };
 
 /* if_stmt
@@ -321,6 +339,7 @@ struct LogicalDisj {
 struct IfStatement {
 	Expression* expr;
 	Block block;
+	LocationInfo loc;
 };
 
 /* assignment
@@ -333,6 +352,7 @@ struct AssignStatement {
 		String_View untypedId;
 	};
 	Expression* expr;
+	LocationInfo loc;
 };
 
 /* statement
@@ -354,6 +374,7 @@ struct Statement {
 		AssignStatement assign;
 		Expression* expr;
 	};
+	LocationInfo loc;
 };
 
 /* statements
@@ -364,10 +385,12 @@ struct StatementList {
 	StatementListType type;
 	Statement stmt;
 	StatementList* next;
+	LocationInfo loc;
 };
 
 struct AST_Node {
 	AST_NodeType type;
+	LocationInfo loc;
 	union {
 		VarType var_type;
 		token token;

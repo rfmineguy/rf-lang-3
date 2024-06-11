@@ -107,6 +107,10 @@ typedef enum AST_NodeType {
 	NT_UNDEF, NT_TOKEN, NT_FACTOR, NT_NUMBER, NT_EXPRESSION, NT_EXPRESSION_LIST, NT_STATEMENT, NT_LOGIC_DISJ, NT_LOGIC_CONJ, NT_RELATE, NT_MATH_EXPR, NT_TERM, NT_FUNC_CALL, NT_HEADER, NT_TYPED_ID, NT_DEREF, NT_VAR_TYPE, NT_TYPED_ID_LIST, NT_FUNC_HEADER, NT_IF, NT_BLOCK, NT_STATEMENT_LIST, NT_FUNCTION, NT_ASSIGNMENT
 } AST_NodeType;
 
+/* header
+ *  module_header    := <id="module"> <id>
+ *  use_header       := <id="use"> <id> "{" <idlist> "}"
+ */
 struct Header {
 	HeaderType type;
 	union {
@@ -115,6 +119,7 @@ struct Header {
 		} module;
 	};
 };
+
 struct Number {
 	NumberType type;
 	union {
@@ -123,6 +128,14 @@ struct Number {
 		float f;
 	};
 };
+
+/* vartype
+ * vartype          := <id>
+ * 									| <id="_">
+ * 									| "[" <id> ";" <expression_list> "]"
+ * 									| "[" <vartype> ";" <expression_list> "]"
+ * 									| <vartype> "*"
+ */
 struct VarType {
 	VarTypeType type;
 	union {
@@ -137,32 +150,60 @@ struct VarType {
 	VarType* nested;
 	int pointerDepth;
 };
+
+/* typed_id
+ *	typed_id         := <id> ":" <var_type>
+ */
 struct TypedId {
 	String_View id;
 	VarType type;
 };
+
+/* typedid_list
+ *	typed_id_list    := <typed_id> 
+ *	                  | <typed_id_list> "," <typed_id>
+ */
 struct TypedIdList {
 	TypedId typedId;
 	TypedIdList* next;
 };
+
+/* function_header
+ *	function_header  := <typed_id_list> "->" <vartype>
+ *										| <vartype>
+ */
 struct FunctionHeader {
 	TypedIdList* params;
 	VarType returnType;
 };
 
+/* block
+ *  block := '{' <statement_list> '}'
+ */
 struct Block {
 	StatementList* stmts;
 };
+
+/* function
+ *    function         := <id> { <generic> } "=" { <function_header> } <block>
+ */
 struct Function {
 	String_View id;
 	FunctionHeader header;
 	Block block;
 };
+
+/* func_call
+ * func_call        := <id> "(" <expression_list> ")"
+ */
 struct FuncCall {
 	String_View id;
 	ExpressionList* exprList;
 };
 
+/* deref
+ *   deref := <id> "[" <expression_list> "]"
+ */
 struct Deref {
 	DerefType type;
 	union {
@@ -172,6 +213,15 @@ struct Deref {
 		} Brkt;
 	};
 };
+
+/* factor
+ * factor := "(" <expression> ")"
+ *  			 | <func_call>
+ *  			 | <deref>
+ *  			 | <number>
+ *  			 | <strlit>
+ *  			 | <id>
+ */
 struct Factor {
 	FactorType type;
 	union {
@@ -185,6 +235,12 @@ struct Factor {
 	};
 };
 
+/* term
+ * term		 := <term> "*" <factor>
+ * 					| <term> "/" <factor>
+ * 					| <term> "%" <factor>
+ * 					| <factor>
+ */
 struct Term {
 	TermType type;
 	Term* left;
@@ -192,6 +248,12 @@ struct Term {
 	char op;
 };
 
+/* math_expression
+ * math_expression  := <math_expression> "+" <term>
+ *  		  					 | <math_expression> "-" <term>
+ *	    						 | <term>
+ *
+ */
 struct MathExpression {
 	MathExpressionType type;
 
@@ -200,6 +262,14 @@ struct MathExpression {
 	char op;
 };
 
+/* relational
+ * relational       := <relational> ">=" <math_expression>
+ *									| <relational> "<=" <math_expression>
+ *									| <relational> ">"  <math_expression>
+ *									| <relational> "<"  <math_expression>
+ *									| <relational> "==" <math_expression>
+ *									| <math_expression>
+ */
 struct Relational {
 	RelationalType type;
 	String_View op;
@@ -207,34 +277,55 @@ struct Relational {
 	MathExpression* mathexpr;
 };
 
+/* expression
+ * expression       := <logical_disj>
+*/
 struct Expression {
 	ExpressionType type;
 	LogicalDisj* disj;
 };
 
+/* expression_list
+ * expression_list  := <expression_list> "," <expression>
+ *  		  					 | <expression>
+ */
 struct ExpressionList {
 	ExpressionListType type;
 	Expression* expr;
 	ExpressionList* next;
 };
 
+/* logical_disj
+ * logical_disj     := <logical_disj> "||" <logical_conj>
+ * 								  | <logical_conj>
+ */
 struct LogicalConj {
 	LogicalConjType type;
 	LogicalConj* conj;
 	Relational* relate;
 };
 
+/* logical_conj
+ * logical_conj     := <logical_conj> "&&" <relational>
+ *									| <relational>
+ */
 struct LogicalDisj {
 	LogicalDisjType type;
 	LogicalDisj* disj;
 	LogicalConj* conj;
 };
 
+/* if_stmt
+ * if 							 := "if" <expression> <block>
+ */
 struct IfStatement {
 	Expression* expr;
 	Block block;
 };
 
+/* assignment
+ *		assignment 			 := { <typed_id> | <id> } "=" <expression>
+ */
 struct AssignStatement {
 	AssignStatementType type;
 	union {
@@ -244,6 +335,14 @@ struct AssignStatement {
 	Expression* expr;
 };
 
+/* statement
+ * statement        := <assignment>
+ * 									| <return>
+ * 									| <if>
+ * 									| <for>
+ * 									| <while>
+ * 									| <switch>
+ */
 struct Statement {
 	StatementType type;
 	union {
@@ -255,6 +354,10 @@ struct Statement {
 	};
 };
 
+/* statements
+ * statements        := <statements> <statement>
+ *  									| <statement>
+ */
 struct StatementList {
 	StatementListType type;
 	Statement stmt;

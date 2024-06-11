@@ -21,7 +21,6 @@ int codegen(const char* file, const char* output, const char* target);
 int reconstruct(const char* file);
 
 int main(int argc, char **argv) {
-	printf("[%*c]\n", 1, '4');
 	struct gengetopt_args_info args_info;
 	if (cmdline_parser(argc, argv, &args_info) != 0) {
 		return 1;

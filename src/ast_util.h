@@ -10,6 +10,11 @@ Operands ast_util_get_expr_operands(Expression);
 Operands ast_util_get_logic_disj_operands(LogicalDisj);
 Operands ast_util_get_logic_conj_operands(LogicalConj);
 
+/**
+ * AST Reconstruction
+ *    Purpose: Rebuilds the original source from the parse tree
+ *    Input:   The ast node you wish to start reconstruction from
+ */
 void ast_util_reconstruct_ast_node(AST_Node);
 void ast_util_reconstruct_header(Header);
 void ast_util_reconstruct_factor(Factor);

@@ -65,6 +65,7 @@ int lalr_reduce(lalr_ctx* ctx, AST_Node* out_n) {
 			out_n->type = NT_VAR_TYPE;
 			out_n->var_type.type = VAR_TYPE_ID;
 			out_n->var_type.Id.id = peeked[0].token.text;
+			printf(SV_Fmt "\n", SV_Arg(out_n->var_type.Id.id));
 			return 1;
 		}
 		if (peeked[0].type == NT_TOKEN && peeked[0].token.type == T_ID &&
@@ -73,6 +74,7 @@ int lalr_reduce(lalr_ctx* ctx, AST_Node* out_n) {
 			out_n->type = NT_VAR_TYPE;
 			out_n->var_type.type = VAR_TYPE_ID;
 			out_n->var_type.Id.id = peeked[0].token.text;
+			printf(SV_Fmt "\n", SV_Arg(out_n->var_type.Id.id));
 			return 1;
 		}
 	  // vartype := <id="_">

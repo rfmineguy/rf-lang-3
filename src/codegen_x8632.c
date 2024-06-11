@@ -54,6 +54,7 @@ void codegen_expr_x86_32(codegen_x86_32_ctx* ctx, Expression* expr) {
 			LogicalDisj* d = disj->disj;
 			LogicalConj* c = disj->conj;
 		}
+		case LOGICAL_DISJ_TYPE_CONJ: assert(0 && "Disjunction Conjunction not supported");
 	}
 }
 

@@ -1,5 +1,6 @@
 #include "ast_util.h"
 #include "ast.h"
+#include <assert.h>
 #include <stdio.h>
 #define INTERNAL
 
@@ -31,6 +32,7 @@ Operands ast_util_get_logic_conj_operands(LogicalConj conj) {
 
 
 void ast_util_reconstruct_ast_node(AST_Node n) {
+	printf("%d\n", n.type);
 	switch (n.type) {
 		case NT_UNDEF:           assert(0 && "Can't reconstruct UNDEFINED"); break;
 		case NT_TOKEN:           assert(0 && "No individual token generation"); break;
@@ -70,15 +72,30 @@ void ast_util_reconstruct_number(Number number){
 
 }
 void ast_util_reconstruct_vartype(VarType var_type){
-
+	switch (var_type.type) {
+		case VAR_TYPE_ID:
+			printf(SV_Fmt, SV_Arg(var_type.Id.id));
+			break;
+		case VAR_TYPE_NONE:
+			printf("_");
+			break;
+		case VAR_TYPE_ARRAY:
+			printf("[" SV_Fmt ";", SV_Arg(var_type.Array.id));
+			ast_util_reconstruct_expr_list(var_type.Array.exprList);
+			break;
+		case VAR_TYPE_NESTED:
+			assert(0 && "Nested vartype reconstruction not implemented");
+	}
 }
 void ast_util_reconstruct_typed_id(TypedId typed_id){
-
+	printf(SV_Fmt ":", SV_Arg(typed_id.id));
+	ast_util_reconstruct_vartype(typed_id.type);
 }
 void ast_util_reconstruct_deref(Deref deref){
 
 }
 void ast_util_reconstruct_logical_disj(LogicalDisj* disj){
+	if (!disj) return;
 	printf("(");
 	switch (disj->type) {
 		case LOGICAL_DISJ_TYPE_CONJ:
@@ -94,6 +111,7 @@ void ast_util_reconstruct_logical_disj(LogicalDisj* disj){
 
 }
 void ast_util_reconstruct_logical_conj(LogicalConj* conj){
+	if (!conj) return;
 	printf("(");
 	switch (conj->type) {
 		case LOGICAL_CONJ_TYPE_RELATE:
@@ -109,6 +127,7 @@ void ast_util_reconstruct_logical_conj(LogicalConj* conj){
 
 }
 void ast_util_reconstruct_relational(Relational* relate){
+	if (!relate) return;
 	printf("(");
 	switch (relate->type) {
 		case RELATIONAL_TYPE_MATH_EXPR:
@@ -122,6 +141,7 @@ void ast_util_reconstruct_relational(Relational* relate){
 	printf(")");
 }
 void ast_util_reconstruct_expr(Expression* expr){
+	if (!expr) return;
 	printf("(");
 	switch (expr->type) {
 		case EXPRESSION_TYPE_LOGIC_DISJ:
@@ -131,6 +151,7 @@ void ast_util_reconstruct_expr(Expression* expr){
 	printf(")");
 }
 void ast_util_reconstruct_math_expr(MathExpression* mexpr){
+	if (!mexpr) return;
 	printf("(");
 	switch (mexpr->type) {
 		case MATH_EXPR_TYPE_ADD:
@@ -156,12 +177,26 @@ void ast_util_reconstruct_block(Block block){
 
 }
 void ast_util_reconstruct_stmt(Statement stmt){
-
+	switch (stmt.type) {
+		case STATEMENT_TYPE_ASSIGN: 
+			ast_util_reconstruct_assignment(stmt.assign);
+			break;
+		case STATEMENT_TYPE_IF: assert(0 && "Reconstruct if not supported");
+		case STATEMENT_TYPE_RETURN: assert(0 && "Reconstruct return not supported");
+	}
+}
+void ast_util_reconstruct_stmt_list(StatementList* stmts) {
+	StatementList* curr = stmts;
+	while (curr) {
+		ast_util_reconstruct_stmt(curr->stmt);
+		curr = curr->next;
+	}
 }
 void ast_util_reconstruct_if(IfStatement if_stmt){
 
 }
 void ast_util_reconstruct_assignment(AssignStatement assign_stmt){
+	printf("assign\n");
 	switch (assign_stmt.type) {
 		case ASSIGN_TYPE_TYPED_ID:
 			ast_util_reconstruct_typed_id(assign_stmt.typedId);
@@ -171,10 +206,7 @@ void ast_util_reconstruct_assignment(AssignStatement assign_stmt){
 			break;
 	}
 	printf(" = ");
-	ast_util_reconstruct_expr(assign_stmt.expr);
-}
-void ast_util_reconstruct_stmt_list(StatementList* stmt_list){
-
+	// ast_util_reconstruct_expr(assign_stmt.expr);
 }
 void ast_util_reconstruct_expr_list(ExpressionList* expr_list){
 

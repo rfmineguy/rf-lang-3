@@ -130,9 +130,6 @@ void tctx_internal_init_regex(tokenizer_ctx* ctx) {
 	ctx->regex_store.store.r_period     = rnew(".");
 	ctx->regex_store.store.r_semi       = rnew(";");
 	ctx->regex_store.store.r_arrow      = rnew("->");
-	printf("%p\n", &ctx->regex_store);
-	printf("%p\n", &ctx->regex_store.r_store);
-	printf("%p\n", &ctx->regex_store.store.r_arrow);
 }
 
 void tctx_internal_free_regex(tokenizer_ctx* ctx) {

@@ -45,7 +45,6 @@ int lalr_reduce(lalr_ctx* ctx, AST_Node* out_n) {
 			out_n->type = NT_HEADER;
 			out_n->header.type = HEADER_TYPE_MODULE;
 			out_n->header.module.name = peeked[0].token.text;
-			printf("Header %d\n", out_n->header.type);
 			return 2;
 		}
 	}
@@ -65,7 +64,6 @@ int lalr_reduce(lalr_ctx* ctx, AST_Node* out_n) {
 			out_n->type = NT_VAR_TYPE;
 			out_n->var_type.type = VAR_TYPE_ID;
 			out_n->var_type.Id.id = peeked[0].token.text;
-			printf(SV_Fmt "\n", SV_Arg(out_n->var_type.Id.id));
 			return 1;
 		}
 		if (peeked[0].type == NT_TOKEN && peeked[0].token.type == T_ID &&
@@ -74,7 +72,6 @@ int lalr_reduce(lalr_ctx* ctx, AST_Node* out_n) {
 			out_n->type = NT_VAR_TYPE;
 			out_n->var_type.type = VAR_TYPE_ID;
 			out_n->var_type.Id.id = peeked[0].token.text;
-			printf(SV_Fmt "\n", SV_Arg(out_n->var_type.Id.id));
 			return 1;
 		}
 	  // vartype := <id="_">
@@ -95,7 +92,6 @@ int lalr_reduce(lalr_ctx* ctx, AST_Node* out_n) {
 			out_n->var_type.type = VAR_TYPE_ARRAY;
 			out_n->var_type.Array.id = peeked[3].token.text;
 			out_n->var_type.Array.exprList = peeked[1].exprList;
-			printf("var_type_array\n");
 			return 5;
 		}
 
@@ -670,6 +666,7 @@ int lalr_reduce(lalr_ctx* ctx, AST_Node* out_n) {
 	 *    statement := <for>
 	 *    statement := <while>
 	 *    statement := <switch>
+	 *    statement := <expression>
 	 */
 	{
 		// statement := <assignment>
@@ -698,6 +695,13 @@ int lalr_reduce(lalr_ctx* ctx, AST_Node* out_n) {
 		// statement := <expression>
 		if (peeked[0].type == NT_EXPRESSION && 
 				peeked[1].type != NT_TOKEN) {
+			out_n->type = NT_STATEMENT;
+			out_n->stmt.type = STATEMENT_TYPE_EXPR;
+			out_n->stmt.expr = peeked[0].expr;
+			return 1;
+		}
+		if (peeked[0].type == NT_EXPRESSION &&
+				peeked[1].type == NT_TOKEN && peeked[1].token.type == T_LBRC) {
 			out_n->type = NT_STATEMENT;
 			out_n->stmt.type = STATEMENT_TYPE_EXPR;
 			out_n->stmt.expr = peeked[0].expr;

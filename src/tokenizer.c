@@ -172,7 +172,8 @@ void tctx_free(tokenizer_ctx* ctx) {
 			return (token) {\
 				.type = t,\
 				.text=(sv_from_parts(was, length)),\
-				.state = ctx->state\
+				.state = ctx->state,\
+				.loc = ctx->state.loc\
 			};\
 		}\
 	} while(0)
@@ -186,7 +187,8 @@ void tctx_free(tokenizer_ctx* ctx) {
 			return (token) {\
 				.type = t,\
 				.text=(sv_from_parts(was, 1)),\
-				.state = ctx->state\
+				.state = ctx->state,\
+				.loc = ctx->state.loc\
 			};\
 		}\
 	} while(0)
@@ -194,6 +196,7 @@ void tctx_free(tokenizer_ctx* ctx) {
 token tctx_advance(tokenizer_ctx* ctx) {
 	token t = tctx_get_next(ctx);
 	ctx->state.cursor += t.text.count;
+	ctx->state.loc = t.loc;
 	return t;
 }
 
@@ -210,17 +213,30 @@ token tctx_get_next(tokenizer_ctx* ctx) {
 		const char* begin = s.cursor;
 		while (*s.cursor != '\n') {
 			s.cursor++;
+			s.loc.col++;
+			s.loc.index++;
 		}
 		s.cursor++;
+		s.loc.col++;
+		s.loc.index++;
 	}
 	// Consume spaces
-	while (isspace(*s.cursor) != 0) {
+	while (isspace(*s.cursor) != 0 && *s.cursor != '\n') {
 		s.cursor++;
-		s.col++;
+		s.loc.col++;
+		s.loc.index++;
 	}
-	if (*s.cursor == '\n') {
+	while (*s.cursor == '\n') {
 		s.cursor++;
-		s.line++;
+		s.loc.line++;
+		s.loc.col = 0;
+		s.loc.index++;
+	}
+	// Consume spaces
+	while (isspace(*s.cursor) != 0 && *s.cursor != '\n') {
+		s.cursor++;
+		s.loc.col++;
+		s.loc.index++;
 	}
 	ctx->state = s;
 

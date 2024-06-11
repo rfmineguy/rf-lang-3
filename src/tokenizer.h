@@ -50,11 +50,6 @@ typedef enum token_type {
 	T_EOF = 600, T_SPACE, T_UNKNOWN
 } token_type;
 
-typedef struct tokenizer_state {
-	char const *cursor;
-	int line, col, index;
-} tokenizer_state;
-
 typedef struct tokenizer_regex_store {
 	regex_t r_string_lit; // 1
 	regex_t r_char_lit; // 1
@@ -67,7 +62,17 @@ typedef struct tokenizer_regex_store {
 	// Total : 1 + 1 + 7 + 4 + 5 + 3 + 2 = 23
 } tokenizer_regex_store;
 
+typedef struct LocationInfo {
+	int line, col, index;
+} LocationInfo;
+
+typedef struct tokenizer_state {
+	char const *cursor;
+	LocationInfo loc;
+} tokenizer_state;
+
 typedef struct token {
+	LocationInfo loc;
 	token_type type;
 	String_View text;
 	tokenizer_state state;

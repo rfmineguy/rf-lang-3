@@ -1,6 +1,6 @@
 #include "codegen_x8632.h"
 #include "ast.h"
-#include "ast_util.h"
+#include "ast_reconstruct.h"
 #include "lalr.h"
 #include <assert.h>
 #include <stdio.h>

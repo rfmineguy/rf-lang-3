@@ -6,7 +6,7 @@ GEN_SOURCES  := src/tokenizer.c \
 						 src/number_parser.c\
 						 src/lalr.c\
 						 src/ast_print.c\
-						 src/ast_util.c\
+						 src/ast_reconstruct.c\
 						 src/codegen_x8632.c\
 						 src/codegen_x8664.c\
 						 src/codegen_arm64.c

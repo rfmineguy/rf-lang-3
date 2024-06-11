@@ -1,6 +1,6 @@
 #include "ast.h"
 #include "ast_print.h"
-#include "ast_util.h"
+#include "ast_reconstruct.h"
 #include "codegen_x8632.h"
 #include "codegen_x8664.h"
 #include "codegen_arm64.h"

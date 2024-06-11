@@ -1,36 +1,8 @@
-#include "ast_util.h"
+#include "ast_reconstruct.h"
 #include "ast.h"
 #include "lib/sv.h"
 #include <assert.h>
 #include <stdio.h>
-#define INTERNAL
-
-Operands ast_util_get_expr_operands(Expression e) {
-	Operands op = {0};
-	switch (e.type) {
-		case EXPRESSION_TYPE_LOGIC_DISJ:
-			return ast_util_get_logic_disj_operands(*e.disj);
-	}
-	return (Operands) {};
-}
-
-Operands ast_util_get_logic_disj_operands(LogicalDisj disj) {
-	switch (disj.type) {
-		case LOGICAL_DISJ_TYPE_DISJ_CONJ: {
-			break;
-		}
-		case LOGICAL_DISJ_TYPE_CONJ: {
-			Operands op = ast_util_get_logic_conj_operands(*disj.conj);
-			return op;
-		}
-	}
-	return (Operands) {};
-}
-
-Operands ast_util_get_logic_conj_operands(LogicalConj conj) {
-	return (Operands) {};
-}
-
 
 static int nest_depth = 1;
 #define INDENT_FMT "%*c"

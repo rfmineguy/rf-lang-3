@@ -111,6 +111,17 @@ int lalr_reduce(lalr_ctx* ctx, AST_Node* out_n) {
 			return 1;
 		}
 
+		if (peeked[2].type == NT_TOKEN && peeked[2].token.type == T_COLON &&
+				peeked[1].type == NT_TOKEN && peeked[1].token.type == T_LBRK &&
+				peeked[0].type == NT_TOKEN && peeked[0].token.type == T_ID) {
+			out_n->type = NT_VAR_TYPE;
+			out_n->var_type = (VarType){0};
+			out_n->var_type.type = VAR_TYPE_ID;
+			out_n->var_type.Id.id = peeked[0].token.text;
+			out_n->var_type.loc = peeked[0].token.loc;
+			return 1;
+		}
+
 		// vartype := "[" <id> ";" <expression_list> "]"
 		if (peeked[4].type == NT_TOKEN && peeked[4].token.type == T_LBRK &&
 				peeked[3].type == NT_TOKEN && peeked[3].token.type == T_ID &&
@@ -149,6 +160,20 @@ int lalr_reduce(lalr_ctx* ctx, AST_Node* out_n) {
 				peeked[3].type == NT_VAR_TYPE &&
 				peeked[2].type == NT_TOKEN && peeked[2].token.type == T_SEMI &&
 				peeked[1].type == NT_EXPRESSION_LIST &&
+				peeked[0].type == NT_TOKEN && peeked[0].token.type == T_RBRK) {
+			out_n->type = NT_VAR_TYPE;
+			out_n->var_type = (VarType){0};
+			out_n->var_type.type = VAR_TYPE_NESTED;
+			out_n->var_type.nested = arena_alloc(&ctx->arena, sizeof(VarType));
+			out_n->var_type.loc = peeked[4].token.loc;
+			return 5;
+		}
+
+		// vartype := "[" <vartype> ";" <expression> "]"
+		if (peeked[4].type == NT_TOKEN && peeked[4].token.type == T_LBRK &&
+				peeked[3].type == NT_VAR_TYPE &&
+				peeked[2].type == NT_TOKEN && peeked[2].token.type == T_SEMI &&
+				peeked[1].type == NT_EXPRESSION &&
 				peeked[0].type == NT_TOKEN && peeked[0].token.type == T_RBRK) {
 			out_n->type = NT_VAR_TYPE;
 			out_n->var_type = (VarType){0};

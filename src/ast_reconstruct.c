@@ -216,7 +216,7 @@ void ast_util_reconstruct_term(Term* term){
 }
 
 void ast_util_reconstruct_block(Block block){
-	printf(INDENT_FMT "{\n", INDENT_ARG);
+	printf(" {\n");
 	nest_depth++;
 	ast_util_reconstruct_stmt_list(block.stmts);
 	nest_depth--;

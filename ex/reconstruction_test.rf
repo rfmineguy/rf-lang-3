@@ -14,8 +14,10 @@ main = argc: int, argv: char** -> int {
 
 main = argc: int, argv: char** -> int { if b > 4 { print(4) } }
 
-main = _ -> int* {}
+main = _ -> int* {
+	a = 3
+}
 
-a: int**
-a: int*
-a: int
+a: int** = 4
+a: int* = 4
+a: int = 4

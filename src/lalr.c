@@ -177,8 +177,9 @@ int lalr_reduce(lalr_ctx* ctx, AST_Node* out_n) {
 				peeked[0].type == NT_TOKEN && peeked[0].token.type == T_RBRK) {
 			out_n->type = NT_VAR_TYPE;
 			out_n->var_type = (VarType){0};
-			out_n->var_type.type = VAR_TYPE_NESTED;
+			out_n->var_type.type = VAR_TYPE_ARRAY;
 			out_n->var_type.nested = arena_alloc(&ctx->arena, sizeof(VarType));
+			*out_n->var_type.nested = peeked[3].var_type;
 			out_n->var_type.loc = peeked[4].token.loc;
 			return 5;
 		}

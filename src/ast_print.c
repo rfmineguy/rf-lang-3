@@ -269,7 +269,6 @@ void ast_print_expr_list_rec(ExpressionList* eList, int d, int index) {
 void ast_print_expr_list(ExpressionList * eList, int d) {
 	printf(LOC_FMT TREE_FMT "[ExpressionList]\n", LOC_ARG((*eList)), TREE_ARG(0));
 	ast_print_expr_list_rec(eList, d, 0);
-	// printf(LOC_FMT "ExpressionList(NULL)\n", LOC_ARG((*eList)));
 }
 
 void ast_print_func_call(FuncCall funcCall, int d) {

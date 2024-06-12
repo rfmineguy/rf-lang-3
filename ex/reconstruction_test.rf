@@ -1,5 +1,4 @@
-
-  module Main
+module Main
 
 a: int* = 4 + 5 * 3 - 5 > (3 * 4 - 3 + 4) && test(3, 4) == 1 && b[442 + i * 3]
 b = 4
@@ -13,6 +12,10 @@ main = argc: int, argv: char** -> int {
 	return 4
 }
 
- main = argc: int, argv: char** -> int { if b > 4 { print(4) } }
+main = argc: int, argv: char** -> int { if b > 4 { print(4) } }
 
- main = _ -> int {}
+main = _ -> int {}
+
+a: int**
+a: int*
+a: int

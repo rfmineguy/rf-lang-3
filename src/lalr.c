@@ -85,6 +85,7 @@ int lalr_reduce(lalr_ctx* ctx, AST_Node* out_n) {
 				peeked[1].type == NT_TOKEN && peeked[1].token.type == T_COLON &&
 				lookahead != T_LP) {
 			out_n->type = NT_VAR_TYPE;
+			out_n->var_type = (VarType){0};
 			out_n->var_type.type = VAR_TYPE_ID;
 			out_n->var_type.Id.id = peeked[0].token.text;
 			out_n->var_type.loc = peeked[0].token.loc;
@@ -94,17 +95,21 @@ int lalr_reduce(lalr_ctx* ctx, AST_Node* out_n) {
 				peeked[1].type == NT_TOKEN && peeked[1].token.type == T_ARROW &&
 				lookahead != T_LP) {
 			out_n->type = NT_VAR_TYPE;
+			out_n->var_type = (VarType){0};
 			out_n->var_type.type = VAR_TYPE_ID;
 			out_n->var_type.Id.id = peeked[0].token.text;
 			out_n->var_type.loc = peeked[0].token.loc;
+			printf("vartype<id>: %d\n", out_n->var_type.pointerDepth);
 			return 1;
 		}
 	  // vartype := <id="_">
 		if (peeked[0].type == NT_TOKEN && peeked[0].token.type == T_UNDERSCORE &&
 				lookahead == T_ARROW) {
 			out_n->type = NT_VAR_TYPE;
+			out_n->var_type = (VarType){0};
 			out_n->var_type.type = VAR_TYPE_NONE;
 			out_n->var_type.loc = peeked[0].token.loc;
+			printf("vartype<id='_'>: %d\n", out_n->var_type.pointerDepth);
 			return 1;
 		}
 
@@ -115,10 +120,12 @@ int lalr_reduce(lalr_ctx* ctx, AST_Node* out_n) {
 				peeked[1].type == NT_EXPRESSION_LIST &&
 				peeked[0].type == NT_TOKEN && peeked[0].token.type == T_RBRK) {
 			out_n->type = NT_VAR_TYPE;
+			out_n->var_type = (VarType){0};
 			out_n->var_type.type = VAR_TYPE_ARRAY;
 			out_n->var_type.Array.id = peeked[3].token.text;
 			out_n->var_type.Array.exprList = peeked[1].exprList;
 			out_n->var_type.loc = peeked[4].token.loc;
+			printf("vartype := [ <id> ; <expression_list> ] = %d\n", out_n->var_type.pointerDepth);
 			return 5;
 		}
 
@@ -129,6 +136,7 @@ int lalr_reduce(lalr_ctx* ctx, AST_Node* out_n) {
 				peeked[1].type == NT_EXPRESSION &&
 				peeked[0].type == NT_TOKEN && peeked[0].token.type == T_RBRK) {
 			out_n->type = NT_VAR_TYPE;
+			out_n->var_type = (VarType){0};
 			out_n->var_type.type = VAR_TYPE_ARRAY;
 			out_n->var_type.Array.id = peeked[3].token.text;
 			out_n->var_type.Array.exprList = arena_alloc(&ctx->arena, sizeof(ExpressionList));
@@ -146,6 +154,7 @@ int lalr_reduce(lalr_ctx* ctx, AST_Node* out_n) {
 				peeked[1].type == NT_EXPRESSION_LIST &&
 				peeked[0].type == NT_TOKEN && peeked[0].token.type == T_RBRK) {
 			out_n->type = NT_VAR_TYPE;
+			out_n->var_type = (VarType){0};
 			out_n->var_type.type = VAR_TYPE_NESTED;
 			out_n->var_type.nested = arena_alloc(&ctx->arena, sizeof(VarType));
 			out_n->var_type.loc = peeked[4].token.loc;
@@ -155,10 +164,14 @@ int lalr_reduce(lalr_ctx* ctx, AST_Node* out_n) {
 	  // vartype := <vartype> "*"
 		if (peeked[1].type == NT_VAR_TYPE &&
 				peeked[0].type == NT_TOKEN && peeked[0].token.type == T_MUL) {
-			peeked[1].var_type.pointerDepth++;
 			out_n->type = NT_VAR_TYPE;
+			out_n->var_type = (VarType){0};
 			out_n->var_type = peeked[1].var_type;
+			printf("1. vartype := <vartype> '*' ::: %d\n", peeked[1].var_type.pointerDepth);
+			printf("2. vartype := <vartype> '*' ::: %d\n", out_n->var_type.pointerDepth);
+			out_n->var_type.pointerDepth++;
 			out_n->var_type.loc = peeked[1].var_type.loc;
+			printf("3. vartype := <vartype> '*' ::: %d\n", out_n->var_type.pointerDepth);
 			return 2;
 		}
 	}

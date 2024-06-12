@@ -99,7 +99,6 @@ int lalr_reduce(lalr_ctx* ctx, AST_Node* out_n) {
 			out_n->var_type.type = VAR_TYPE_ID;
 			out_n->var_type.Id.id = peeked[0].token.text;
 			out_n->var_type.loc = peeked[0].token.loc;
-			printf("vartype<id>: %d\n", out_n->var_type.pointerDepth);
 			return 1;
 		}
 	  // vartype := <id="_">
@@ -109,7 +108,6 @@ int lalr_reduce(lalr_ctx* ctx, AST_Node* out_n) {
 			out_n->var_type = (VarType){0};
 			out_n->var_type.type = VAR_TYPE_NONE;
 			out_n->var_type.loc = peeked[0].token.loc;
-			printf("vartype<id='_'>: %d\n", out_n->var_type.pointerDepth);
 			return 1;
 		}
 
@@ -125,7 +123,6 @@ int lalr_reduce(lalr_ctx* ctx, AST_Node* out_n) {
 			out_n->var_type.Array.id = peeked[3].token.text;
 			out_n->var_type.Array.exprList = peeked[1].exprList;
 			out_n->var_type.loc = peeked[4].token.loc;
-			printf("vartype := [ <id> ; <expression_list> ] = %d\n", out_n->var_type.pointerDepth);
 			return 5;
 		}
 
@@ -167,11 +164,8 @@ int lalr_reduce(lalr_ctx* ctx, AST_Node* out_n) {
 			out_n->type = NT_VAR_TYPE;
 			out_n->var_type = (VarType){0};
 			out_n->var_type = peeked[1].var_type;
-			printf("1. vartype := <vartype> '*' ::: %d\n", peeked[1].var_type.pointerDepth);
-			printf("2. vartype := <vartype> '*' ::: %d\n", out_n->var_type.pointerDepth);
 			out_n->var_type.pointerDepth++;
 			out_n->var_type.loc = peeked[1].var_type.loc;
-			printf("3. vartype := <vartype> '*' ::: %d\n", out_n->var_type.pointerDepth);
 			return 2;
 		}
 	}

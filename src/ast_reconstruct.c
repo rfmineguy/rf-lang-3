@@ -100,7 +100,12 @@ void ast_util_reconstruct_vartype(VarType* var_type){
 			printf("]");
 			break;
 		case VAR_TYPE_ARRAY_NESTED:
-			assert(0 && "Nested vartype reconstruction not implemented");
+			printf("[");
+			ast_util_reconstruct_vartype(var_type->nested);
+			printf(";");
+			ast_util_reconstruct_expr_list(var_type->nested->Array.exprList);
+			printf("]");
+			break;
 	}
 }
 
@@ -278,6 +283,8 @@ void ast_util_reconstruct_stmt_list(StatementList* stmts) {
 }
 
 void ast_util_reconstruct_expr_list(ExpressionList* expr_list){
+	if (expr_list == NULL)
+		printf("NULL");
 	ExpressionList* curr = expr_list;
 	while (curr) {
 		ast_util_reconstruct_expr(curr->expr);

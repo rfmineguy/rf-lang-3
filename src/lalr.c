@@ -77,12 +77,12 @@ int lalr_reduce(lalr_ctx* ctx, AST_Node* out_n) {
 	 *    vartype := <id="_">
 	 *    vartype := "[" <id> ";" <expression_list> "]"
 	 *		vartype := "[" <vartype> ";" <expression_list> "]"
-	 *    vartype := <vartype> "*"
+	 *    vartype := "*" <vartype>
 	 */
 	{
 	  // vartype := <id>       NOTE: with context of previous and next tokens
 		if (peeked[0].type == NT_TOKEN && peeked[0].token.type == T_ID &&
-				peeked[1].type == NT_TOKEN && peeked[1].token.type == T_COLON &&
+				peeked[1].type == NT_TOKEN && (peeked[1].token.type == T_COLON || peeked[1].token.type == T_MUL) &&
 				lookahead != T_LP) {
 			out_n->type = NT_VAR_TYPE;
 			out_n->var_type = arena_alloc(&ctx->arena, sizeof(VarType));
@@ -171,27 +171,31 @@ int lalr_reduce(lalr_ctx* ctx, AST_Node* out_n) {
 		}
 
 		// vartype := "[" <vartype> ";" <expression> "]"
-		// if (peeked[4].type == NT_TOKEN && peeked[4].token.type == T_LBRK &&
-		// 		peeked[3].type == NT_VAR_TYPE &&
-		// 		peeked[2].type == NT_TOKEN && peeked[2].token.type == T_SEMI &&
-		// 		peeked[1].type == NT_EXPRESSION &&
-		// 		peeked[0].type == NT_TOKEN && peeked[0].token.type == T_RBRK) {
-		// 	out_n->type = NT_VAR_TYPE;
-		// 	out_n->var_type = arena_alloc(&ctx->arena, sizeof(VarType));
-		// 	out_n->var_type->type = VAR_TYPE_ARRAY;
-		// 	out_n->var_type->nested = peeked[3].var_type;
-		// 	out_n->var_type->loc = peeked[4].token.loc;
-		// 	return 5;
-		// }
-
-	  // vartype := <vartype> "*"
-		if (peeked[1].type == NT_VAR_TYPE &&
-				peeked[0].type == NT_TOKEN && peeked[0].token.type == T_MUL) {
+		if (peeked[4].type == NT_TOKEN && peeked[4].token.type == T_LBRK &&
+				peeked[3].type == NT_VAR_TYPE &&
+				peeked[2].type == NT_TOKEN && peeked[2].token.type == T_SEMI &&
+				peeked[1].type == NT_EXPRESSION &&
+				peeked[0].type == NT_TOKEN && peeked[0].token.type == T_RBRK) {
 			out_n->type = NT_VAR_TYPE;
 			out_n->var_type = arena_alloc(&ctx->arena, sizeof(VarType));
-			out_n->var_type = peeked[1].var_type;
+			out_n->var_type->type = VAR_TYPE_ARRAY_NESTED;
+			out_n->var_type->nested = peeked[3].var_type;
+			out_n->var_type->nested->Array.exprList = arena_alloc(&ctx->arena, sizeof(ExpressionList));
+			out_n->var_type->nested->Array.exprList->type = EXPRESSION_LIST_TYPE_EXPR;
+			out_n->var_type->nested->Array.exprList->expr = peeked[1].expr;
+			out_n->var_type->nested->Array.exprList->next = NULL;
+			out_n->var_type->loc = peeked[4].token.loc;
+			return 5;
+		}
+
+	  // vartype := "*" <vartype>
+		if (peeked[0].type == NT_VAR_TYPE &&
+				peeked[1].type == NT_TOKEN && peeked[1].token.type == T_MUL) {
+			out_n->type = NT_VAR_TYPE;
+			out_n->var_type = arena_alloc(&ctx->arena, sizeof(VarType));
+			out_n->var_type = peeked[0].var_type;
 			out_n->var_type->pointerDepth++;
-			out_n->var_type->loc = peeked[1].var_type->loc;
+			out_n->var_type->loc = peeked[0].var_type->loc;
 			return 2;
 		}
 	}
@@ -256,7 +260,8 @@ int lalr_reduce(lalr_ctx* ctx, AST_Node* out_n) {
 		// factor := <id>
 		if (peeked[0].type == NT_TOKEN && peeked[0].token.type == T_ID &&
 				!sv_eq(peeked[0].token.text, SV("module")) &&
-				lookahead != T_LP && lookahead != T_LBRK && lookahead != T_COLON && lookahead != T_SEMI && lookahead != T_LBRC && lookahead != T_EQ) {
+				lookahead != T_LP && lookahead != T_LBRK && lookahead != T_COLON && lookahead != T_SEMI && lookahead != T_LBRC && lookahead != T_EQ &&
+				peeked[1].token.type != T_MUL) {
 			out_n->type = NT_FACTOR;
 			out_n->factor.type = FACTOR_TYPE_ID;
 			out_n->factor.id = peeked[0].token.text;

@@ -11,7 +11,7 @@
 void ast_print_node(AST_Node n, int d) {
 	switch (n.type) {
 		case NT_UNDEF:           printf("UNDEFINED\n"); break;
-		case NT_TOKEN:           printf(TREE_FMT "[Token] %s\n", TREE_ARG(0), token_str(n.token.type)); break;
+		case NT_TOKEN:           printf(TREE_FMT "[Token] %s " SV_Fmt "\n", TREE_ARG(0), token_str(n.token.type), SV_Arg(n.token.text)); break;
 		case NT_FACTOR:          ast_print_factor(n.factor, d); break;
 		case NT_NUMBER:          ast_print_number(n.number, d); break;
 		case NT_EXPRESSION:      ast_print_expr(n.expr, d); break;
@@ -268,8 +268,10 @@ void ast_print_expr_list_rec(ExpressionList* eList, int d, int index) {
 }
 
 void ast_print_expr_list(ExpressionList * eList, int d) {
-	printf(LOC_FMT TREE_FMT "[ExpressionList]\n", LOC_ARG((*eList)), TREE_ARG(0));
-	ast_print_expr_list_rec(eList, d, 0);
+	if (eList) {
+		printf(LOC_FMT TREE_FMT "[ExpressionList]\n", LOC_ARG((*eList)), TREE_ARG(0));
+		ast_print_expr_list_rec(eList, d, 0);
+	}
 }
 
 void ast_print_func_call(FuncCall funcCall, int d) {

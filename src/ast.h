@@ -19,7 +19,7 @@ typedef struct Function Function;
 
 typedef struct VarType VarType;
 typedef enum {
-	VAR_TYPE_ID, VAR_TYPE_ARRAY, VAR_TYPE_NESTED, VAR_TYPE_NONE
+	VAR_TYPE_ID, VAR_TYPE_ARRAY, VAR_TYPE_ARRAY_NESTED, VAR_TYPE_NONE
 } VarTypeType;
 
 typedef struct Deref Deref;
@@ -159,7 +159,7 @@ struct VarType {
  */
 struct TypedId {
 	String_View id;
-	VarType type;
+	VarType* type;
 	LocationInfo loc;
 };
 
@@ -179,7 +179,7 @@ struct TypedIdList {
  */
 struct FunctionHeader {
 	TypedIdList* params;
-	VarType returnType;
+	VarType* returnType;
 	LocationInfo loc;
 };
 
@@ -392,7 +392,7 @@ struct AST_Node {
 	AST_NodeType type;
 	LocationInfo loc;
 	union {
-		VarType var_type;
+		VarType* var_type;
 		token token;
 		Factor factor;
 		Number number;

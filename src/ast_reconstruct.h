@@ -12,7 +12,7 @@ void ast_util_reconstruct_ast_node(AST_Node);
 void ast_util_reconstruct_header(Header);
 void ast_util_reconstruct_factor(Factor);
 void ast_util_reconstruct_number(Number);
-void ast_util_reconstruct_vartype(VarType);
+void ast_util_reconstruct_vartype(VarType*);
 void ast_util_reconstruct_typed_id(TypedId);
 void ast_util_reconstruct_deref(Deref);
 void ast_util_reconstruct_logical_disj(LogicalDisj*);

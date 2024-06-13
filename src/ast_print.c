@@ -65,22 +65,23 @@ void ast_print_factor(Factor f, int d) {
 	}
 }
 
-void ast_print_vartype(VarType type, int d) {
-	printf(LOC_FMT TREE_FMT "[VarType]\n", LOC_ARG(type), TREE_ARG(0));
-	printf(LOC_FMT TREE_FMT "[ptrdepth=%d]\n", LOC_ARG(type), TREE_ARG(1), type.pointerDepth);
-	switch (type.type) {
+void ast_print_vartype(VarType* type, int d) {
+	printf(LOC_FMT TREE_FMT "[VarType]\n", LOC_ARG((*type)), TREE_ARG(0));
+	printf(LOC_FMT TREE_FMT "[ptrdepth=%d]\n", LOC_ARG((*type)), TREE_ARG(1), type->pointerDepth);
+	switch (type->type) {
 		case VAR_TYPE_ID:
-			printf(LOC_FMT  TREE_FMT "[Id " SV_Fmt "]\n", LOC_ARG(type), TREE_ARG(1), SV_Arg(type.Id.id));
+			printf(LOC_FMT  TREE_FMT "[Id " SV_Fmt "]\n", LOC_ARG((*type)), TREE_ARG(1), SV_Arg(type->Id.id));
 			break;
 		case VAR_TYPE_ARRAY:
-			printf(LOC_FMT TREE_FMT "[Id " SV_Fmt "]\n", LOC_ARG(type), TREE_ARG(1), SV_Arg(type.Array.id));
-			ast_print_expr_list(type.Array.exprList, d + 1);
+			printf(LOC_FMT TREE_FMT "[Id " SV_Fmt "]\n", LOC_ARG((*type)), TREE_ARG(1), SV_Arg(type->Array.id));
+			ast_print_expr_list(type->Array.exprList, d + 1);
 			break;
-		case VAR_TYPE_NESTED:
-			ast_print_vartype(*type.nested, d + 1);
+		case VAR_TYPE_ARRAY_NESTED:
+			ast_print_vartype(type->nested, d + 1);
+			ast_print_expr_list(type->Array.exprList, d + 1);
 			break;
 		case VAR_TYPE_NONE: 
-			printf(LOC_FMT  TREE_FMT "None\n", LOC_ARG(type), TREE_ARG(0));
+			printf(LOC_FMT  TREE_FMT "None\n", LOC_ARG((*type)), TREE_ARG(0));
 			break;
 	}
 }
@@ -102,7 +103,7 @@ void ast_print_typed_idlist_rec(TypedIdList* list, int i, int d, LocationInfo lo
 }
 
 void ast_print_typed_idlist(TypedIdList* list, int d) {
-	if (list->typedId.type.type == VAR_TYPE_NONE) printf(LOC_FMT TREE_FMT "[TypedIdList] Empty\n", LOC_ARG((*list)), TREE_ARG(d));
+	if (list->typedId.type->type == VAR_TYPE_NONE) printf(LOC_FMT TREE_FMT "[TypedIdList] Empty\n", LOC_ARG((*list)), TREE_ARG(d));
 	printf(LOC_FMT TREE_FMT "[TypedIdList]\n", LOC_ARG((*list)), TREE_ARG(0));
 	ast_print_typed_idlist_rec(list, 0, d, list->loc);
 }

@@ -89,14 +89,14 @@ void codegen_function_x86_32(codegen_x86_32_ctx* ctx, Function func) {
 	// Codegen FuncHeader
 	TypedIdList* curr = func.header.params;
 	while (curr) {
-		switch (curr->typedId.type.type) {
+		switch (curr->typedId.type->type) {
 			case VAR_TYPE_ID:
-				fprintf(ctx->file, "%c_", curr->typedId.type.Id.id.data[0]);
+				fprintf(ctx->file, "%c_", curr->typedId.type->Id.id.data[0]);
 				break;
 			case VAR_TYPE_ARRAY:
-				fprintf(ctx->file, "A%c_", curr->typedId.type.Array.id.data[0]);
+				fprintf(ctx->file, "A%c_", curr->typedId.type->Array.id.data[0]);
 				break;
-			case VAR_TYPE_NESTED:
+			case VAR_TYPE_ARRAY_NESTED:
 				assert(0 && "VAR_TYPE_NESTED unsupported in codegen");
 				break;
 			case VAR_TYPE_NONE:

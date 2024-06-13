@@ -82,21 +82,24 @@ void ast_util_reconstruct_number(Number number){
 	}
 }
 
-void ast_util_reconstruct_vartype(VarType var_type){
-	switch (var_type.type) {
+void ast_util_reconstruct_vartype(VarType* var_type){
+	if (!var_type) {
+		return;
+	}
+	switch (var_type->type) {
 		case VAR_TYPE_ID:
-			printf(SV_Fmt, SV_Arg(var_type.Id.id));
-			for (int i = 0; i < var_type.pointerDepth; i++)	printf("*");
+			printf(SV_Fmt, SV_Arg(var_type->Id.id));
+			for (int i = 0; i < var_type->pointerDepth; i++)	printf("*");
 			break;
 		case VAR_TYPE_NONE:
 			printf("_");
 			break;
 		case VAR_TYPE_ARRAY:
-			printf("[" SV_Fmt ";", SV_Arg(var_type.Array.id));
-			ast_util_reconstruct_expr_list(var_type.Array.exprList);
+			printf("[" SV_Fmt ";", SV_Arg(var_type->Array.id));
+			ast_util_reconstruct_expr_list(var_type->Array.exprList);
 			printf("]");
 			break;
-		case VAR_TYPE_NESTED:
+		case VAR_TYPE_ARRAY_NESTED:
 			assert(0 && "Nested vartype reconstruction not implemented");
 	}
 }

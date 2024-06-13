@@ -6,7 +6,7 @@ void ast_print_node(AST_Node, int);
 void ast_print_header(Header, int);
 void ast_print_factor(Factor, int);
 void ast_print_number(Number, int);
-void ast_print_vartype(VarType, int);
+void ast_print_vartype(VarType*, int);
 void ast_print_typed_id(TypedId, int);
 void ast_print_deref(Deref, int);
 void ast_print_logical_disj(LogicalDisj*, int);

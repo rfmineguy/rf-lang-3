@@ -13,9 +13,13 @@ main = argc: int, argv: **char -> int {
 	return 4
 }
 
-main = argc: int, argv: **char -> int { if b > 4 { print(4) } }
+main = argc: int, argv: **char -> int { 
+	if b > 4 {
+		print("{}", 4)
+	} 
+}
 
-main = _ -> *int {
+main = _ -> int {
 	a = 3
 }
 
@@ -23,12 +27,9 @@ a: **int = 4
 a: *int = 4
 a: int = 4
 
-b: *[*int; 4, 5]
-b: *[[*int; 2]; 4, 5]
+b: *[*int; 4, 5] = 3
+c: *[[*int; 2]; 4, 5] = 0
 
-
-b: *[*int; 4, 5]
-
-c: *[int; 4] // pointer to array of 4 ints
-
-d: *[[int; 4]; 2] // pointer to array of 2 arrays of 4 ints
+d: *[*int; 4, 5] = 0
+e: *[int; 4] = 0
+f: *[*int; 4, 2] = 0

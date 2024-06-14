@@ -52,6 +52,9 @@ void ast_util_reconstruct_factor(Factor factor){
 		case FACTOR_TYPE_ID: 
 			printf(SV_Fmt, SV_Arg(factor.id));
 			break;
+		case FACTOR_TYPE_STR:
+			printf(SV_Fmt, SV_Arg(factor.str));
+			break;
 		case FACTOR_TYPE_NUMBER:
 			ast_util_reconstruct_number(factor.number);
 			break;
@@ -86,10 +89,10 @@ void ast_util_reconstruct_vartype(VarType* var_type){
 	if (!var_type) {
 		return;
 	}
+	for (int i = 0; i < var_type->pointerDepth; i++)	printf("*");
 	switch (var_type->type) {
 		case VAR_TYPE_ID:
 			printf(SV_Fmt, SV_Arg(var_type->Id.id));
-			for (int i = 0; i < var_type->pointerDepth; i++)	printf("*");
 			break;
 		case VAR_TYPE_NONE:
 			printf("_");

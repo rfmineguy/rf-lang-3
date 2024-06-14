@@ -165,7 +165,7 @@ int lalr_reduce(lalr_ctx* ctx, AST_Node* out_n) {
 			out_n->var_type = arena_alloc(&ctx->arena, sizeof(VarType));
 			out_n->var_type->type = VAR_TYPE_ARRAY_NESTED;
 			out_n->var_type->nested = peeked[3].var_type;
-			out_n->var_type->Array.exprList = peeked[1].exprList;
+			out_n->var_type->nested->Array.exprList = peeked[1].exprList;
 			out_n->var_type->loc = peeked[4].token.loc;
 			return 5;
 		}

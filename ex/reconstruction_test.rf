@@ -1,5 +1,7 @@
-module Main
+module    Main
 
+// casting should be done with 'as
+// afh
 a: *int = 4 + 5 * 3 - 5 > (3 * 4 - 3 + 4) && test(3, 4) == 1 && b[442 + i * 3]
 b = 4
 
@@ -33,3 +35,4 @@ c: *[[*int; 2]; 4, 5] = 0
 d: *[*int; 4, 5] = 0
 e: *[int; 4] = 0
 f: *[*int; 4, 2] = 0
+f: int = 0

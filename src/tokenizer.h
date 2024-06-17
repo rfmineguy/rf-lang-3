@@ -9,7 +9,6 @@ typedef enum token_type {
 	// Unreserved tokens
 	T_ID = 0, 
 	T_DOUBLE_LIT, T_DECIMAL_LIT, T_HEX_LIT, T_STRING_LIT, T_CHAR_LIT,
-	T_SINGLE_LINE_COMMENT, T_MULTI_LINE_COMMENT,
 
 	// Reserved tokens
 	T_RESERVE_BEG = 100,
@@ -22,6 +21,9 @@ typedef enum token_type {
 	T_RETURN,
 	T_ARROW,
 	T_UNDERSCORE,
+	T_BEGIN_SINGLELINE_COMMENT,
+	T_BEGIN_MULTILINE_COMMENT, T_END_MULTILINE_COMMENT,
+	T_SINGLELINE_COMMENT,
 	T_RESERVE_END,
 
 	T_BOR = 200, T_BAND, // bitwise
@@ -46,19 +48,20 @@ typedef enum token_type {
 	T_ARITH_END,
 
 	// Internal tokens
-	T_EOF = 600, T_SPACE, T_UNKNOWN
+	T_EOF = 600, T_WHITESPACE, T_NEWLINE, T_UNKNOWN
 } token_type;
 
 typedef struct tokenizer_regex_store {
-	regex_t r_string_lit; // 1
-	regex_t r_char_lit; // 1
-	regex_t r_fn, r_if, r_else, r_switch, r_break, r_default, r_module; // 7
-	regex_t r_hexlit, r_dbllit, r_declit, r_id; // 4
-	regex_t r_lor, r_land, r_gteq, r_lteq, r_deq; // 5
-	regex_t r_comma, r_period, r_semi; // 3
-	regex_t r_return, r_arrow; // 2
-
-	// Total : 1 + 1 + 7 + 4 + 5 + 3 + 2 = 23
+	regex_t r_begin_singlecomment;
+	regex_t r_begin_multicomment, r_end_multicomment;
+	regex_t r_string_lit;
+	regex_t r_char_lit;
+	regex_t r_fn, r_if, r_else, r_switch, r_break, r_default, r_module;
+	regex_t r_hexlit, r_dbllit, r_declit, r_id;
+	regex_t r_lor, r_land, r_gteq, r_lteq, r_deq;
+	regex_t r_comma, r_period, r_semi;
+	regex_t r_return, r_arrow;
+	regex_t r_newline;
 } tokenizer_regex_store;
 
 typedef struct LocationInfo {

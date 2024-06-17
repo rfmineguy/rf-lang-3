@@ -95,14 +95,17 @@ const char* token_str(token_type t) {
 		case T_CHAR_LIT:    return "CHAR_LIT";
 		case T_SQUOTE: 			return "SQUOTE";
 		case T_DQUOTE:      return "DQUOTE";
-		case T_EOF: 				return "EOF";
-		case T_SPACE:       return "SPACE";
+		case T_EOF: 				return "EOF (Shouldnt be printed)";
+		case T_WHITESPACE:  return "WHITESPACE (Shouldnt be printed)";
+		case T_NEWLINE:     return "NEWLINE (Shouldnt be printed)";
 		case T_RETURN:      return "RETURN";
 		case T_ARROW:  			return "ARROW";
 		case T_UNDERSCORE:  return "UNDERSCORE";
 		case T_UNKNOWN:  		return "UNKNOWN";
-		case T_SINGLE_LINE_COMMENT: return "___sline_comment-norep___";
-		case T_MULTI_LINE_COMMENT: return "___multi_comment-norep___";
+		case T_SINGLELINE_COMMENT: return "SINGLELINE_COMMENT";
+		case T_BEGIN_SINGLELINE_COMMENT: return "BEGIN_SINGLELINE_COMMENT";
+		case T_BEGIN_MULTILINE_COMMENT: return "BEGIN_MULTILINE_COMMENT";
+		case T_END_MULTILINE_COMMENT: return "END_MULTILINE_COMMENTT";
 		case T_RESERVE_BEG: return "RESERVE_BEG";
 		case T_RESERVE_END: return "RESERVE_END";
 		case T_ARITH_BEG:   return "ARITH_BEG"; 
@@ -111,35 +114,44 @@ const char* token_str(token_type t) {
 		case T_STACK_END:   return "STACK_END"; 
 		case T_LOGIC_BEG:   return "LOGIC_BEG"; 
 		case T_LOGIC_END:   return "LOGIC_END"; 
-											
 	}
 }
 
 void tctx_internal_init_regex(tokenizer_ctx* ctx) {
 	memset(&ctx->regex_store, 0, sizeof(tokenizer_regex_store));
-	ctx->regex_store.store.r_string_lit = rnew("\\\"([^\\\"]|\n)*\\\"");
-	ctx->regex_store.store.r_char_lit   = rnew("\\\'(.)\\\'");
-	ctx->regex_store.store.r_fn         = rnew("fn");
-	ctx->regex_store.store.r_if         = rnew("if");
-	ctx->regex_store.store.r_else       = rnew("else");
-	ctx->regex_store.store.r_switch     = rnew("switch");
-	ctx->regex_store.store.r_break      = rnew("break");
-	ctx->regex_store.store.r_default    = rnew("default");
-	ctx->regex_store.store.r_module     = rnew("module");
-	ctx->regex_store.store.r_return     = rnew("return");
-	ctx->regex_store.store.r_hexlit     = rnew("0x[0-9a-fA-F]+");
-	ctx->regex_store.store.r_dbllit     = rnew("[0-9]+\\.[0-9]+");
-	ctx->regex_store.store.r_declit     = rnew("[0-9]+");
-	ctx->regex_store.store.r_id         = rnew("[a-zA-Z][a-zA-Z0-9_]*");
-	ctx->regex_store.store.r_lor        = rnew("\\|\\|");
-	ctx->regex_store.store.r_land       = rnew("&&");
-	ctx->regex_store.store.r_gteq       = rnew(">=");
-	ctx->regex_store.store.r_lteq       = rnew("<=");
-	ctx->regex_store.store.r_deq        = rnew("==");
-	ctx->regex_store.store.r_comma      = rnew(",");
-	ctx->regex_store.store.r_period     = rnew(".");
-	ctx->regex_store.store.r_semi       = rnew(";");
-	ctx->regex_store.store.r_arrow      = rnew("->");
+
+	/* Multiline Comment
+	 *     \/\(*.(\r\n|\r|\n)+\*\/
+	 * Singleline Comment
+	 *     \/\/.*(\n|\r|\r\n)
+	 */
+	ctx->regex_store.store.r_begin_multicomment   = rnew("\\/\\*");
+	ctx->regex_store.store.r_end_multicomment   	= rnew("\\*\\/");
+	ctx->regex_store.store.r_begin_singlecomment  = rnew("\\/\\/");
+	ctx->regex_store.store.r_string_lit    				= rnew("\\\"([^\\\"]|\r\n)*\\\"");
+	ctx->regex_store.store.r_char_lit      				= rnew("\\\'(.)\\\'");
+	ctx->regex_store.store.r_fn            				= rnew("fn");
+	ctx->regex_store.store.r_if            				= rnew("if");
+	ctx->regex_store.store.r_else          				= rnew("else");
+	ctx->regex_store.store.r_switch        				= rnew("switch");
+	ctx->regex_store.store.r_break         				= rnew("break");
+	ctx->regex_store.store.r_default       				= rnew("default");
+	ctx->regex_store.store.r_module        				= rnew("module");
+	ctx->regex_store.store.r_return        				= rnew("return");
+	ctx->regex_store.store.r_hexlit        				= rnew("0x[0-9a-fA-F]+");
+	ctx->regex_store.store.r_dbllit        				= rnew("[0-9]+\\.[0-9]+");
+	ctx->regex_store.store.r_declit        				= rnew("[0-9]+");
+	ctx->regex_store.store.r_id            				= rnew("[a-zA-Z][a-zA-Z0-9_]*");
+	ctx->regex_store.store.r_lor           				= rnew("\\|\\|");
+	ctx->regex_store.store.r_land          				= rnew("&&");
+	ctx->regex_store.store.r_gteq          				= rnew(">=");
+	ctx->regex_store.store.r_lteq          				= rnew("<=");
+	ctx->regex_store.store.r_deq           				= rnew("==");
+	ctx->regex_store.store.r_comma         				= rnew(",");
+	ctx->regex_store.store.r_period        				= rnew(".");
+	ctx->regex_store.store.r_semi          				= rnew(";");
+	ctx->regex_store.store.r_arrow         				= rnew("->");
+	ctx->regex_store.store.r_newline              = rnew("\r|\r\n|\n");
 }
 
 void tctx_internal_free_regex(tokenizer_ctx* ctx) {
@@ -203,62 +215,40 @@ void tctx_free(tokenizer_ctx* ctx) {
 		}\
 	} while(0)
 
-token tctx_advance(tokenizer_ctx* ctx) {
-	token t = tctx_get_next(ctx);
+void tctx_advance_internal(tokenizer_ctx* ctx, token t) {
 	ctx->state.cursor += t.text.count;
 	ctx->state.loc = t.loc;
+}
+
+token tctx_advance(tokenizer_ctx* ctx) {
+	token t = tctx_get_next(ctx);
+
+	// Handle single line comments
+	if (t.type == T_BEGIN_SINGLELINE_COMMENT) {
+		while ((t = tctx_get_next(ctx)).type != T_NEWLINE) {
+			tctx_advance_internal(ctx, t);
+		}
+	}
+
+	// Handle whitespace/newlines
+	while (t.type == T_WHITESPACE || t.type == T_NEWLINE) {
+		tctx_advance_internal(ctx, t);
+		t = tctx_get_next(ctx);
+		continue;
+	}
+	tctx_advance_internal(ctx, t);
 	return t;
 }
 
 token tctx_get_next(tokenizer_ctx* ctx) {
 	// Detect EOF
-	if (ctx->state.cursor >= ctx->content + ctx->content_length - 1)
+	if (ctx->state.cursor >= ctx->content + ctx->content_length - 1 ||
+			*ctx->state.cursor == '\0')
 		return (token) {.type=T_EOF };
-	if (*ctx->state.cursor == '\0')
-		return (token) {.type=T_EOF };
-
-	tokenizer_state s = ctx->state;
-	// Consume comments
-	if (strncmp(s.cursor, "//", 2) == 0) {
-		const char* begin = s.cursor;
-		while (*s.cursor != '\n') {
-			s.cursor++;
-			s.loc.col++;
-			s.loc.index++;
-		}
-		s.cursor++;
-		s.loc.col++;
-		s.loc.index++;
-	}
-	// Consume spaces
-	while (isspace(*s.cursor) != 0) {
-		if (*s.cursor == '\n') {
-			s.cursor++;
-			s.loc.index++;
-			s.loc.col = 0;
-			s.loc.line++;
-			continue;
-		}
-		s.cursor++;
-		s.loc.col++;
-		s.loc.index++;
-	}
-	// while (*s.cursor == '\n') {
-	// 	s.cursor++;
-	// 	s.loc.line++;
-	// 	s.loc.col = 0;
-	// 	s.loc.index++;
-	// }
-	// Consume spaces
-	while (isspace(*s.cursor) != 0) {
-		s.cursor++;
-		s.loc.col++;
-		s.loc.index++;
-	}
-	ctx->state = s;
 
 	// Match code
 	//   To see the actual regex strings, view tctx_internal_init_regex(..)
+	RMATCH(ctx->regex_store.store.r_begin_singlecomment, T_BEGIN_SINGLELINE_COMMENT);
 	RMATCH(ctx->regex_store.store.r_string_lit, T_STRING_LIT);
 	RMATCH(ctx->regex_store.store.r_char_lit, T_CHAR_LIT);
 	RMATCH(ctx->regex_store.store.r_fn, T_FN);
@@ -278,6 +268,7 @@ token tctx_get_next(tokenizer_ctx* ctx) {
 	RMATCH(ctx->regex_store.store.r_gteq, T_GTEQ);
 	RMATCH(ctx->regex_store.store.r_lteq, T_LTEQ);
 	RMATCH(ctx->regex_store.store.r_deq, T_DEQ);
+	RMATCH(ctx->regex_store.store.r_newline, T_NEWLINE);
 	CHMATCH('|', T_BOR);
 	CHMATCH('&', T_BAND);
 	CHMATCH('>', T_GT);
@@ -301,6 +292,8 @@ token tctx_get_next(tokenizer_ctx* ctx) {
 	CHMATCH('=', T_EQ);
 	CHMATCH('\'', T_SQUOTE);
 	CHMATCH('\"', T_DQUOTE);
+	CHMATCH('\t', T_WHITESPACE);
+	CHMATCH(' ', T_WHITESPACE);
 
 	return (token) {.type=T_UNKNOWN, .text=sv_from_parts(ctx->state.cursor, 1)};
 }

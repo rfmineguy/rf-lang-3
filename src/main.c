@@ -108,8 +108,17 @@ int tokenize(const char* file) {
 
 	token t;
 	while ((t = tctx_get_next(&ctx)).type != T_EOF) {
-		tctx_advance(&ctx);
+		if (t.type == T_BEGIN_SINGLELINE_COMMENT) {
+			while ((t = tctx_get_next(&ctx)).type != T_NEWLINE) {
+				tctx_advance(&ctx);
+			}
+		}
+		if (t.type == T_WHITESPACE || t.type == T_NEWLINE) {
+			tctx_advance(&ctx);
+			continue;
+		}
 		printf(LOC_FMT TOKEN_STR_FMT "\n", LOC_ARG(t), TOKEN_STR_ARG(t));
+		tctx_advance(&ctx);
 		if (t.type == T_EOF) break;
 	}
 	tctx_free(&ctx);

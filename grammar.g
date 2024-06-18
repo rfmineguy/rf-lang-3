@@ -53,21 +53,23 @@ math_expression  := <math_expression> "+" <term>
 									| <math_expression> "-" <term>
 									| <term>
 
-term 						 := <term> "*" <factor>
-									| <term> "/" <factor>
-									| <term> "%" <factor>
+term 						 := <term> "*" <deref>
+									| <term> "/" <deref>
+									| <term> "%" <deref>
+									| <deref>
+
+deref            := "*" <deref> // if there is any operator preceding the "*"
 									| <factor>
 
 factor 					 := "(" <expression> ")"
 									| <func_call>
-									| <deref>
+									| <array_index>
 									| <number>
 									| <strlit>
 									| <id>
 
 func_call        := <id> "(" <expression_list> ")"
-deref            := <id> "[" <expression_list> "]"
-									| <factor> "*"
+array_index      := <id> "[" <expression_list> "]"
 expression_list  := <expression_list> "," <expression>
 									| <expression>
 

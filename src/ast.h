@@ -243,7 +243,8 @@ struct Deref {
 			ExpressionList* exprList;
 		} Brkt;
 		struct {
-			Factor f;
+			Expression* expr;
+			int depth;
 		} Asterisk;
 	};
 	LocationInfo loc;

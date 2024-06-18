@@ -115,7 +115,10 @@ void ast_print_deref(Deref* deref, int d) {
 			printf(LOC_FMT TREE_FMT "[Id " SV_Fmt "]\n", LOC_ARG((*deref)), TREE_ARG(1), SV_Arg(deref->Brkt.id));
 			ast_print_expr_list(deref->Brkt.exprList, d + 1);
 			break;
-		case DEREF_TYPE_ASTERISK: assert(0 && "Not printable yet"); break;
+		case DEREF_TYPE_ASTERISK: 
+			printf(LOC_FMT TREE_FMT "[depth = %d]\n",LOC_ARG((*deref)), TREE_ARG(1), deref->Asterisk.depth);
+			ast_print_expr(deref->Asterisk.expr, d + 1);
+			break;
 	}
 }
 

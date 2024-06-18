@@ -314,7 +314,7 @@ token tctx_get_next(tokenizer_ctx* ctx) {
 	CHMATCH('-', T_MINUS);
 	CHMATCH('+', T_PLUS);
 	CHMATCH('*', T_MUL);
-	// CHMATCH('/', T_DIV);
+	CHMATCH('/', T_DIV);
 	CHMATCH('%', T_MOD);
 	CHMATCH('=', T_EQ);
 	CHMATCH('\'', T_SQUOTE);

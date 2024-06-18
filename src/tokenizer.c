@@ -1,5 +1,7 @@
 #include "tokenizer.h"
 #include <ctype.h>
+#include <stdbool.h>
+#include <stddef.h>
 #include <stdio.h>
 #include <regex.h>
 #include <string.h>
@@ -127,7 +129,7 @@ void tctx_internal_init_regex(tokenizer_ctx* ctx) {
 	 */
 	ctx->regex_store.store.r_begin_multicomment   = rnew("\\/\\*");
 	ctx->regex_store.store.r_end_multicomment   	= rnew("\\*\\/");
-	ctx->regex_store.store.r_begin_singlecomment  = rnew("\\/\\/");
+	// ctx->regex_store.store.r_begin_singlecomment  = rnew("\\/\\/");
 	ctx->regex_store.store.r_string_lit    				= rnew("\\\"([^\\\"]|\r\n)*\\\"");
 	ctx->regex_store.store.r_char_lit      				= rnew("\\\'(.)\\\'");
 	ctx->regex_store.store.r_fn            				= rnew("fn");
@@ -190,7 +192,6 @@ void tctx_free(tokenizer_ctx* ctx) {
 		int length;\
 		if (rmatch(ctx->state.cursor, str, &length) != -1) {\
 			const char* was = ctx->state.cursor;\
-			/* ctx->state.cursor += length;*/\
 			return (token) {\
 				.type = t,\
 				.text=(sv_from_parts(was, length)),\
@@ -202,10 +203,8 @@ void tctx_free(tokenizer_ctx* ctx) {
 
 #define CHMATCH(c, t) \
 	do {\
-		int length;\
 		if (*ctx->state.cursor == c) {\
 			const char* was = ctx->state.cursor;\
-			/* ctx->state.cursor += 1;*/ \
 			return (token) {\
 				.type = t,\
 				.text=(sv_from_parts(was, 1)),\
@@ -220,24 +219,16 @@ void tctx_advance_internal(tokenizer_ctx* ctx, token t) {
 	ctx->state.loc = t.loc;
 }
 
-token tctx_advance(tokenizer_ctx* ctx) {
+void tctx_advance(tokenizer_ctx* ctx) {
 	token t = tctx_get_next(ctx);
-
-	// Handle single line comments
-	if (t.type == T_BEGIN_SINGLELINE_COMMENT) {
-		while ((t = tctx_get_next(ctx)).type != T_NEWLINE) {
-			tctx_advance_internal(ctx, t);
-		}
-	}
-
-	// Handle whitespace/newlines
-	while (t.type == T_WHITESPACE || t.type == T_NEWLINE) {
-		tctx_advance_internal(ctx, t);
-		t = tctx_get_next(ctx);
-		continue;
-	}
 	tctx_advance_internal(ctx, t);
-	return t;
+}
+
+size_t isnewline(const char* s) {
+	if (*s == '\r') return 1;
+	if (*s == '\n') return 1;
+	if (*s == '\r' && *(s + 1) == '\n') return 2;
+	return 0;
 }
 
 token tctx_get_next(tokenizer_ctx* ctx) {
@@ -246,9 +237,45 @@ token tctx_get_next(tokenizer_ctx* ctx) {
 			*ctx->state.cursor == '\0')
 		return (token) {.type=T_EOF };
 
+	// Deal with whitespace and newlines
+	while (*ctx->state.cursor == ' ' || *ctx->state.cursor == '\t' || *ctx->state.cursor == '\n') {
+		ctx->state.loc.col++;
+		ctx->state.loc.index++;
+		if (*ctx->state.cursor == '\n') {
+			ctx->state.loc.line ++;
+			ctx->state.loc.col = 0;
+		}
+		ctx->state.cursor++;
+	}
+
+	// Detect comment
+	bool skippedComments = false;
+	while (strncmp(ctx->state.cursor, "//", 2) == 0) {
+		size_t len = 0;
+		while ((len = isnewline(ctx->state.cursor)) == 0) {
+			// printf("skipping %c\n", *ctx->state.cursor);
+			ctx->state.cursor++;
+		}
+		ctx->state.cursor += len;
+		// printf("comment-next: %c\n", *ctx->state.cursor);
+		skippedComments = true;
+	}
+
+	// Deal with whitespace and newlines
+	while (*ctx->state.cursor == ' ' || *ctx->state.cursor == '\t' || *ctx->state.cursor == '\n') {
+		ctx->state.loc.col++;
+		ctx->state.loc.index++;
+		if (*ctx->state.cursor == '\n') {
+			ctx->state.loc.line ++;
+			ctx->state.loc.col = 0;
+		}
+		ctx->state.cursor++;
+	}
+	// if (skippedComments)
+	// 	printf("Next : %c\n", *ctx->state.cursor);
+
 	// Match code
 	//   To see the actual regex strings, view tctx_internal_init_regex(..)
-	RMATCH(ctx->regex_store.store.r_begin_singlecomment, T_BEGIN_SINGLELINE_COMMENT);
 	RMATCH(ctx->regex_store.store.r_string_lit, T_STRING_LIT);
 	RMATCH(ctx->regex_store.store.r_char_lit, T_CHAR_LIT);
 	RMATCH(ctx->regex_store.store.r_fn, T_FN);
@@ -287,13 +314,11 @@ token tctx_get_next(tokenizer_ctx* ctx) {
 	CHMATCH('-', T_MINUS);
 	CHMATCH('+', T_PLUS);
 	CHMATCH('*', T_MUL);
-	CHMATCH('/', T_DIV);
+	// CHMATCH('/', T_DIV);
 	CHMATCH('%', T_MOD);
 	CHMATCH('=', T_EQ);
 	CHMATCH('\'', T_SQUOTE);
 	CHMATCH('\"', T_DQUOTE);
-	CHMATCH('\t', T_WHITESPACE);
-	CHMATCH(' ', T_WHITESPACE);
 
 	return (token) {.type=T_UNKNOWN, .text=sv_from_parts(ctx->state.cursor, 1)};
 }

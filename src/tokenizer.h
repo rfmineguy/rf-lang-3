@@ -52,7 +52,6 @@ typedef enum token_type {
 } token_type;
 
 typedef struct tokenizer_regex_store {
-	regex_t r_begin_singlecomment;
 	regex_t r_begin_multicomment, r_end_multicomment;
 	regex_t r_string_lit;
 	regex_t r_char_lit;
@@ -80,6 +79,10 @@ typedef struct token {
 	tokenizer_state state;
 } token;
 
+typedef struct tokenizer_advance_data {
+	token curr, lookahead;
+} tokenizer_advance_data;
+
 typedef struct tokenizer_ctx {
 	bool fail;
 	char const *content;
@@ -105,7 +108,23 @@ tokenizer_ctx tctx_from_file(const char*);
 tokenizer_ctx tctx_from_cstr(const char*);
 void          tctx_free(tokenizer_ctx*);
 
-token         tctx_advance(tokenizer_ctx*);
+#define       tctx_consume_comment(extra) \
+	if (t.type == T_BEGIN_SINGLELINE_COMMENT) {\
+		while ((t = tctx_get_next(&ctx)).type != T_NEWLINE) {\
+			tctx_advance(&ctx);\
+		}\
+		extra;\
+		continue;\
+	}\
+
+#define       tctx_consume_whitespace(extra) \
+	if (t.type == T_WHITESPACE || t.type == T_NEWLINE) {\
+		tctx_advance(&ctx);\
+		extra;\
+		continue;\
+	}\
+
+void          tctx_advance(tokenizer_ctx*);
 token         tctx_get_next(tokenizer_ctx*);
 #define       tctx_show_next(t) { tctx_show_next_internal(t, __LINE__); }
 void          tctx_show_next_internal(tokenizer_ctx*, int);

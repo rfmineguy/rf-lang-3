@@ -8,6 +8,7 @@
 #include "lib/arena.h"
 #include "number_parser.h"
 #include "tokenizer.h"
+#include <assert.h>
 #include <regex.h>
 #include <stdio.h>
 #include <string.h>
@@ -67,10 +68,12 @@ lalr_ctx parse(const char* file) {
 
 	lalr_ctx lctx = lalr_create();
 
-	token t;
+	token t, prev;
 	while ((t = tctx_get_next(&ctx)).type != T_EOF) {
 		tctx_advance(&ctx);
 		lctx.lookahead = tctx_get_next(&ctx);
+
+		printf("t : " TOKEN_STR_FMT "  ;  Lookahead : " TOKEN_STR_FMT "\n", TOKEN_STR_ARG(t), TOKEN_STR_ARG(lctx.lookahead));
 		if (t.type == T_EOF) break;
 
 		AST_Node n = {0};
@@ -108,17 +111,8 @@ int tokenize(const char* file) {
 
 	token t;
 	while ((t = tctx_get_next(&ctx)).type != T_EOF) {
-		if (t.type == T_BEGIN_SINGLELINE_COMMENT) {
-			while ((t = tctx_get_next(&ctx)).type != T_NEWLINE) {
-				tctx_advance(&ctx);
-			}
-		}
-		if (t.type == T_WHITESPACE || t.type == T_NEWLINE) {
-			tctx_advance(&ctx);
-			continue;
-		}
-		printf(LOC_FMT TOKEN_STR_FMT "\n", LOC_ARG(t), TOKEN_STR_ARG(t));
 		tctx_advance(&ctx);
+		printf(LOC_FMT TOKEN_STR_FMT "\n", LOC_ARG(t), TOKEN_STR_ARG(t));
 		if (t.type == T_EOF) break;
 	}
 	tctx_free(&ctx);
@@ -127,39 +121,7 @@ int tokenize(const char* file) {
 }
 
 int compile(const char* file) {	
-	tokenizer_ctx ctx = tctx_from_file(file);
-	if (ctx.fail) {
-		fprintf(stderr, "Failed to open file\n");
-		tctx_free(&ctx);
-		return 2;
-	}
-
-	lalr_ctx lctx = lalr_create();
-
-	token t;
-	while ((t = tctx_get_next(&ctx)).type != T_EOF) {
-		tctx_advance(&ctx);
-		// printf(TOKEN_STR_FMT "\n", TOKEN_STR_ARG(t));
-		lctx.lookahead = tctx_get_next(&ctx);
-		if (t.type == T_EOF) break;
-
-		AST_Node n = {0};
-		lalr_reduce_tok_to_term(t, &n);
-		lalr_push(&lctx, n);
-
-		int popped = 0;
-		while ((popped = lalr_reduce(&lctx, &n)) != 0) {
-			lalr_pop_n(&lctx, popped);
-			lalr_push(&lctx, n);
-			if (lctx.skip_next == 1) {
-				tctx_advance(&ctx);
-				lctx.lookahead = tctx_get_next(&ctx);
-				lctx.skip_next = 0;
-				break;
-			}
-		}
-	}
-
+	lalr_ctx lctx = parse(file);
 	lalr_show_stack(&lctx);
 
 	printf("bytes used : %lu\n", arena_bytes(&lctx.arena));
@@ -198,10 +160,6 @@ int codegen(const char* file, const char* output, const char* target) {
 int reconstruct(const char* file) {
 	lalr_ctx pctx = parse(file);
 
-	// for (int i = 0; i <= pctx.stack_top; i++) {
-	// 	AST_Node n = pctx.stack[i];
-	// 	ast_print_node(n, 0);
-	// }
 	for (int i = 0; i <= pctx.stack_top; i++) {
 		AST_Node n = pctx.stack[i];
 		ast_util_reconstruct_ast_node(n);

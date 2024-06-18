@@ -210,20 +210,6 @@ struct FuncCall {
 	LocationInfo loc;
 };
 
-/* deref
- *   deref := <id> "[" <expression_list> "]"
- */
-struct Deref {
-	DerefType type;
-	union {
-		struct {
-			String_View id;
-			ExpressionList* exprList;
-		} Brkt;
-	};
-	LocationInfo loc;
-};
-
 /* factor
  * factor := "(" <expression> ")"
  *  			 | <func_call>
@@ -241,7 +227,24 @@ struct Factor {
 		Expression* expr;
 		LogicalDisj* logicdisj;
 		FuncCall funcCall;
-		Deref deref;
+		Deref* deref;
+	};
+	LocationInfo loc;
+};
+
+/* deref
+ *   deref := <id> "[" <expression_list> "]"
+ */
+struct Deref {
+	DerefType type;
+	union {
+		struct {
+			String_View id;
+			ExpressionList* exprList;
+		} Brkt;
+		struct {
+			Factor f;
+		} Asterisk;
 	};
 	LocationInfo loc;
 };
@@ -414,7 +417,7 @@ struct AST_Node {
 		Header header;
 		TypedId typed_id;
 		TypedIdList* typed_idlist;
-		Deref deref;
+		Deref* deref;
 	};
 };
 

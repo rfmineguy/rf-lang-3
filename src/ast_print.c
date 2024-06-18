@@ -108,12 +108,12 @@ void ast_print_typed_idlist(TypedIdList* list, int d) {
 	ast_print_typed_idlist_rec(list, 0, d, list->loc);
 }
 
-void ast_print_deref(Deref deref, int d) {
-	printf(LOC_FMT TREE_FMT "[Deref %d]\n", LOC_ARG(deref), TREE_ARG(0), deref.type);
-	switch (deref.type) {
+void ast_print_deref(Deref* deref, int d) {
+	printf(LOC_FMT TREE_FMT "[Deref %d]\n", LOC_ARG((*deref)), TREE_ARG(0), deref->type);
+	switch (deref->type) {
 		case DEREF_TYPE_BRKT:
-			printf(LOC_FMT TREE_FMT "[Id " SV_Fmt "]\n", LOC_ARG(deref), TREE_ARG(1), SV_Arg(deref.Brkt.id));
-			ast_print_expr_list(deref.Brkt.exprList, d + 1);
+			printf(LOC_FMT TREE_FMT "[Id " SV_Fmt "]\n", LOC_ARG((*deref)), TREE_ARG(1), SV_Arg(deref->Brkt.id));
+			ast_print_expr_list(deref->Brkt.exprList, d + 1);
 			break;
 		case DEREF_TYPE_ASTERISK: assert(0 && "Not printable yet"); break;
 	}

@@ -314,7 +314,7 @@ int lalr_reduce(lalr_ctx* ctx, AST_Node* out_n) {
 			out_n->type = NT_FACTOR;
 			out_n->factor.type = FACTOR_TYPE_DEREF;
 			out_n->factor.deref = peeked[0].deref;
-			out_n->factor.loc = peeked[0].deref.loc;
+			out_n->factor.loc = peeked[0].deref->loc;
 			return 1;
 		}
 	}
@@ -578,10 +578,11 @@ int lalr_reduce(lalr_ctx* ctx, AST_Node* out_n) {
 				peeked[0].type == NT_TOKEN &&
 				peeked[0].token.type == T_RBRK) {
 			out_n->type = NT_DEREF;
-			out_n->deref.type = DEREF_TYPE_BRKT;
-			out_n->deref.Brkt.exprList = peeked[1].exprList;
-			out_n->deref.Brkt.id = peeked[3].token.text;
-			out_n->deref.loc = peeked[3].token.loc;
+			out_n->deref = arena_alloc(&ctx->arena, sizeof(Deref));
+			out_n->deref->type = DEREF_TYPE_BRKT;
+			out_n->deref->Brkt.exprList = peeked[1].exprList;
+			out_n->deref->Brkt.id = peeked[3].token.text;
+			out_n->deref->loc = peeked[3].token.loc;
 			return 4;
 		}
 
@@ -594,13 +595,14 @@ int lalr_reduce(lalr_ctx* ctx, AST_Node* out_n) {
 				peeked[0].type == NT_TOKEN &&
 				peeked[0].token.type == T_RBRK) {
 			out_n->type = NT_DEREF;
-			out_n->deref.type = DEREF_TYPE_BRKT;
-			out_n->deref.Brkt.id = peeked[3].token.text;
-			out_n->deref.Brkt.exprList = arena_alloc(&ctx->arena, sizeof(ExpressionList));
-			out_n->deref.Brkt.exprList->type = EXPRESSION_LIST_TYPE_EXPR;
-			out_n->deref.Brkt.exprList->expr = peeked[1].expr;
-			out_n->deref.Brkt.exprList->next = NULL;
-			out_n->deref.loc = peeked[3].token.loc;
+			out_n->deref = arena_alloc(&ctx->arena, sizeof(Deref));
+			out_n->deref->type = DEREF_TYPE_BRKT;
+			out_n->deref->Brkt.id = peeked[3].token.text;
+			out_n->deref->Brkt.exprList = arena_alloc(&ctx->arena, sizeof(ExpressionList));
+			out_n->deref->Brkt.exprList->type = EXPRESSION_LIST_TYPE_EXPR;
+			out_n->deref->Brkt.exprList->expr = peeked[1].expr;
+			out_n->deref->Brkt.exprList->next = NULL;
+			out_n->deref->loc = peeked[3].token.loc;
 			return 4;
 		}
 	}

@@ -3,10 +3,11 @@ module    Main
 // hi
 // poarpidh
 a: *int = 4 + 5 * 3 - 5 > (3 * 4 - 3 + 4) && test(3, 4) == 1 && b[442 + i * 3]
-b = 4
+b = 4 / 4
 
 // adjgfhsgd
 main = argc: int, argv: **char -> int {
+	//kahfjg
 	a: int = 4
 	if a == 1 || a > 5 && a == 4 {
 		b: int = 4
@@ -37,3 +38,6 @@ d: *[*int; 4, 5] = 0
 e: *[int; 4] = 0
 f: *[*int; 4, 2] = 0
 f: int = 0
+
+// x: *int = &f
+// y: int  = (*x) + 3

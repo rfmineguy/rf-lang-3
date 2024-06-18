@@ -117,11 +117,11 @@ void ast_util_reconstruct_typed_id(TypedId typed_id){
 	ast_util_reconstruct_vartype(typed_id.type);
 }
 
-void ast_util_reconstruct_deref(Deref deref){
-	switch (deref.type) {
+void ast_util_reconstruct_deref(Deref* deref){
+	switch (deref->type) {
 		case DEREF_TYPE_BRKT:
-			printf(SV_Fmt "[", SV_Arg(deref.Brkt.id));
-			ast_util_reconstruct_expr_list(deref.Brkt.exprList);
+			printf(SV_Fmt "[", SV_Arg(deref->Brkt.id));
+			ast_util_reconstruct_expr_list(deref->Brkt.exprList);
 			printf("]");
 			break;
 		default: assert(0 && "Deref type fully implemented");

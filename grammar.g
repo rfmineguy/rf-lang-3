@@ -67,6 +67,7 @@ factor 					 := "(" <expression> ")"
 
 func_call        := <id> "(" <expression_list> ")"
 deref            := <id> "[" <expression_list> "]"
+									| <factor> "*"
 expression_list  := <expression_list> "," <expression>
 									| <expression>
 

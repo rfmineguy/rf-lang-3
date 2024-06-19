@@ -270,6 +270,28 @@ int lalr_reduce(lalr_ctx* ctx, AST_Node* out_n) {
 		}
 	}
 
+	/** addressof parsing
+	 *    addressof := "&" <addressof>
+	 *    addressof := <deref>
+	 */
+	{
+		if (peeked[1].type == NT_TOKEN && peeked[1].token.type == T_BAND &&
+				peeked[0].type == NT_ADDRESS_OF) {
+			peeked[0].address_of->depth++;
+			out_n->address_of = peeked[0].address_of;
+			return 2;
+		}
+
+		if (peeked[0].type == NT_DEREF) {
+			out_n->type = NT_ADDRESS_OF;
+			out_n->address_of = arena_alloc(&ctx->arena, sizeof(AddressOf));
+			out_n->address_of->type = ADDRESS_OF_TYPE_DEREF;
+			out_n->address_of->deref = peeked[0].deref;
+			out_n->address_of->loc = peeked[0].deref->loc;
+			return 1;
+		}
+	}
+
 	/**  factor parsing
 	 *   	 factor := "(" <expression> ")"
 	 *     factor := <id>
@@ -339,35 +361,35 @@ int lalr_reduce(lalr_ctx* ctx, AST_Node* out_n) {
 	}
 
 	/**  term parsing
-	 *	   term := <term> "*" <deref>
-	 *	   term := <term> "/" <deref>
-	 *	   term := <term> "%" <deref>
-	 *	   term := <deref>
+	 *	   term := <term> "*" <addressof>
+	 *	   term := <term> "/" <addressof>
+	 *	   term := <term> "%" <addressof>
+	 *	   term := <addressof>
 	 */
 	{
-		// term := <term> {"*" | "/" | "%"} <deref>
+		// term := <term> {"*" | "/" | "%"} <addressof>
 		if ( peeked[2].type == NT_TERM &&
 				 peeked[1].type == NT_TOKEN && 
 				(peeked[1].token.type == T_MUL || peeked[1].token.type == T_DIV || peeked[1].token.type == T_MOD) &&
-				 peeked[0].type == NT_DEREF) {
+				 peeked[0].type == NT_ADDRESS_OF) {
 			out_n->type = NT_TERM;
 			out_n->term = arena_alloc(&ctx->arena, sizeof(Term));
-			out_n->term->type = TERM_TYPE_TERM_OP_DEREF;
+			out_n->term->type = TERM_TYPE_TERM_OP_ADDRESS_OF;
 			out_n->term->op = peeked[1].token.text.data[0];
 			out_n->term->left = peeked[2].term;
-			out_n->term->right = peeked[0].deref;
+			out_n->term->right = peeked[0].address_of;
 			out_n->term->loc = peeked[2].term->loc;
 			return 3;
 		}
 
-		// term := <deref>
-		if (peeked[0].type == NT_DEREF) {
+		// term := <addressof>
+		if (peeked[0].type == NT_ADDRESS_OF) {
 			out_n->type = NT_TERM;
 			out_n->term = arena_alloc(&ctx->arena, sizeof(Term));
-			out_n->term->type = TERM_TYPE_DEREF;
-			out_n->term->right = peeked[0].deref;
+			out_n->term->type = TERM_TYPE_ADDRESS_OF;
+			out_n->term->right = peeked[0].address_of;
 			out_n->term->left = NULL;
-			out_n->term->loc = peeked[0].deref->loc;
+			out_n->term->loc = peeked[0].address_of->loc;
 			return 1;
 		}
 	}

@@ -53,9 +53,12 @@ math_expression  := <math_expression> "+" <term>
 									| <math_expression> "-" <term>
 									| <term>
 
-term 						 := <term> "*" <deref>
-									| <term> "/" <deref>
-									| <term> "%" <deref>
+term 						 := <term> "*" <addressof>
+									| <term> "/" <addressof>
+									| <term> "%" <addressof>
+									| <addressof>
+
+addressof        := "&" <addressof>
 									| <deref>
 
 deref            := "*" <deref> // if there is any operator preceding the "*"

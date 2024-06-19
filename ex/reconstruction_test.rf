@@ -1,7 +1,5 @@
-module    Main
+module Main
 
-// hi
-// poarpidh
 a: *int = 4 + 5 * 3 - 5 > (3 * 4 - 3 + 4) && test(3, 4) == 1 && b[442 + i * 3]
 b = 4 / 4
 
@@ -17,14 +15,16 @@ main = argc: int, argv: **char -> int {
 	return 4
 }
 
-main = argc: int, argv: **char -> int { 
+main = argc: int, argv: **char -> int {
 	if b > 4 {
 		print("{}", 4)
 	}
+	return 0
 }
 
 main = _ -> int {
-	a = 3
+	a: int = 3
+	return a
 }
 
 a: **int = 4
@@ -36,8 +36,8 @@ c: *[[*int; 2]; 4, 5] = 0
 
 d: *[*int; 4, 5] = 0
 e: *[int; 4] = 0
-f: *[*int; 4, 2] = 0
+f: *[*int; 4, 2] = 0 * 7 - 4
 f: int = 0
 
-// x: *int = &f
-y: int  = **(x - 5) + *(x + 3)
+x: *int = &f * 3
+y: int  = **(x - 5) + *(x + 3) * 3

@@ -15,6 +15,7 @@ void ast_util_reconstruct_number(Number);
 void ast_util_reconstruct_vartype(VarType*);
 void ast_util_reconstruct_typed_id(TypedId);
 void ast_util_reconstruct_deref(Deref*);
+void ast_util_reconstruct_addressof(AddressOf*);
 void ast_util_reconstruct_array_index(ArrayIndex*);
 void ast_util_reconstruct_logical_disj(LogicalDisj*);
 void ast_util_reconstruct_logical_conj(LogicalConj*);

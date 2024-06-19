@@ -9,6 +9,7 @@ void ast_print_number(Number, int);
 void ast_print_vartype(VarType*, int);
 void ast_print_typed_id(TypedId, int);
 void ast_print_deref(Deref*, int);
+void ast_print_addressof(AddressOf*, int);
 void ast_print_array_index(ArrayIndex*, int);
 void ast_print_logical_disj(LogicalDisj*, int);
 void ast_print_logical_conj(LogicalConj*, int);

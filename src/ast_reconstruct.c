@@ -26,6 +26,8 @@ void ast_util_reconstruct_ast_node(AST_Node n) {
 		case NT_HEADER: 				 ast_util_reconstruct_header(n.header); break;
 		case NT_TYPED_ID:				 ast_util_reconstruct_typed_id(n.typed_id); break;
 		case NT_DEREF:           ast_util_reconstruct_deref(n.deref); break;
+		case NT_ADDRESS_OF:      ast_util_reconstruct_addressof(n.address_of); break;
+		case NT_ARRAY_INDEX:     ast_util_reconstruct_array_index(n.arrayIndex); break;
 		case NT_VAR_TYPE:        ast_util_reconstruct_vartype(n.var_type); break;
 		case NT_TYPED_ID_LIST:   ast_util_reconstruct_typed_idlist(n.typed_idlist); break;
 		case NT_FUNC_HEADER:     ast_util_reconstruct_function_header(n.funcHeader); break;
@@ -125,13 +127,26 @@ void ast_util_reconstruct_deref(Deref* deref){
 		return;
 	switch (deref->type) {
 		case DEREF_TYPE_FACTOR:
+			for (int i = 0; i < deref->depth; i++) printf("*");
 			ast_util_reconstruct_factor(deref->f);
 			break;
 		case DEREF_TYPE_DEREF:
-			printf("*");
-			ast_util_reconstruct_deref(deref->deref);
+			// NOTE: Not sure if this is still necessary
 			break;
-		default: assert(0 && "Deref type reconstruct not fully implemented");
+	}
+}
+
+void ast_util_reconstruct_addressof(AddressOf* addr_of) {
+	if (addr_of == NULL)
+		return;
+	switch (addr_of->type) {
+		case ADDRESS_OF_TYPE_DEREF:
+			for (int i = 0; i < addr_of->depth; i++) printf("&");
+			ast_util_reconstruct_deref(addr_of->deref);
+			break;
+		case ADDRESS_OF_TYPE_ADDRESS_OF:
+			// NOTE: Not sure if this is still necessary
+			break;
 	}
 }
 
@@ -226,14 +241,14 @@ void ast_util_reconstruct_math_expr(MathExpression* mexpr){
 
 void ast_util_reconstruct_term(Term* term){
 	switch (term->type) {
-		case TERM_TYPE_DEREF:
-			ast_util_reconstruct_deref(term->right);
+		case TERM_TYPE_ADDRESS_OF:
+			ast_util_reconstruct_addressof(term->right);
 			break;
-		case TERM_TYPE_TERM_OP_DEREF:
+		case TERM_TYPE_TERM_OP_ADDRESS_OF:
 			printf("(");
 				ast_util_reconstruct_term(term->left);
 				printf("%c", term->op);
-				ast_util_reconstruct_deref(term->right);
+				ast_util_reconstruct_addressof(term->right);
 			printf(")");
 			break;
 	}

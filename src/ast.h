@@ -31,6 +31,11 @@ typedef enum {
 	DEREF_TYPE_FACTOR, DEREF_TYPE_DEREF
 } DerefType;
 
+typedef struct AddressOf AddressOf;
+typedef enum {
+	ADDRESS_OF_TYPE_DEREF, ADDRESS_OF_TYPE_ADDRESS_OF
+} AddressOfType;
+
 typedef struct Factor Factor;
 typedef enum {
 	FACTOR_TYPE_UND, FACTOR_TYPE_ID, FACTOR_TYPE_STR, FACTOR_TYPE_NUMBER, FACTOR_TYPE_EXPR, FACTOR_TYPE_LOGIC_CONJ, FACTOR_TYPE_LOGIC_DISJ, FACTOR_TYPE_FUNC_CALL, FACTOR_TYPE_ARRAY_INDEX
@@ -79,7 +84,7 @@ typedef enum {
 
 typedef struct Term Term;
 typedef enum {
-	TERM_TYPE_DEREF, TERM_TYPE_TERM_OP_DEREF
+	TERM_TYPE_ADDRESS_OF, TERM_TYPE_TERM_OP_ADDRESS_OF
 } TermType;
 
 typedef struct Statement Statement;
@@ -108,7 +113,7 @@ typedef enum {
 
 typedef struct AST_Node AST_Node;
 typedef enum AST_NodeType {
-	NT_UNDEF, NT_TOKEN, NT_FACTOR, NT_NUMBER, NT_EXPRESSION, NT_EXPRESSION_LIST, NT_STATEMENT, NT_LOGIC_DISJ, NT_LOGIC_CONJ, NT_RELATE, NT_MATH_EXPR, NT_TERM, NT_FUNC_CALL, NT_HEADER, NT_TYPED_ID, NT_DEREF, NT_VAR_TYPE, NT_TYPED_ID_LIST, NT_FUNC_HEADER, NT_IF, NT_BLOCK, NT_STATEMENT_LIST, NT_FUNCTION, NT_ASSIGNMENT, NT_ARRAY_INDEX,
+	NT_UNDEF, NT_TOKEN, NT_FACTOR, NT_NUMBER, NT_EXPRESSION, NT_EXPRESSION_LIST, NT_STATEMENT, NT_LOGIC_DISJ, NT_LOGIC_CONJ, NT_RELATE, NT_MATH_EXPR, NT_TERM, NT_FUNC_CALL, NT_HEADER, NT_TYPED_ID, NT_DEREF, NT_VAR_TYPE, NT_TYPED_ID_LIST, NT_FUNC_HEADER, NT_IF, NT_BLOCK, NT_STATEMENT_LIST, NT_FUNCTION, NT_ASSIGNMENT, NT_ARRAY_INDEX, NT_ADDRESS_OF
 } AST_NodeType;
 
 /* header
@@ -250,6 +255,13 @@ struct Deref {
 	LocationInfo loc;
 };
 
+struct AddressOf {
+	AddressOfType type;
+	int depth;
+	Deref* deref;
+	LocationInfo loc;
+};
+
 struct ArrayIndex {
 	struct {
 		String_View id;
@@ -266,7 +278,7 @@ struct ArrayIndex {
 struct Term {
 	TermType type;
 	Term* left;
-	Deref* right;
+	AddressOf* right;
 	char op;
 	LocationInfo loc;
 };
@@ -426,6 +438,7 @@ struct AST_Node {
 		TypedId typed_id;
 		TypedIdList* typed_idlist;
 		Deref* deref;
+		AddressOf* address_of;
 		ArrayIndex* arrayIndex;
 	};
 };

@@ -40,4 +40,4 @@ f: *[*int; 4, 2] = 0
 f: int = 0
 
 // x: *int = &f
-y: int  = *x + 3
+y: int  = **(x - 5) + *3

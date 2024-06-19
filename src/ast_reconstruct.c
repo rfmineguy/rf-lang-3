@@ -64,8 +64,9 @@ void ast_util_reconstruct_factor(Factor factor){
 		case FACTOR_TYPE_FUNC_CALL:
 			ast_util_reconstruct_func_call(factor.funcCall);
 			break;
-		case FACTOR_TYPE_DEREF:
-			ast_util_reconstruct_deref(factor.deref);
+		case FACTOR_TYPE_ARRAY_INDEX:
+			assert(0 && "Reconstruct factor array index not implemented");
+			// ast_util_reconstruct_array_index(factor.deref);
 			break;
 		default: assert(0 && "Reconstruct factor unfinished");
 	}
@@ -119,10 +120,12 @@ void ast_util_reconstruct_typed_id(TypedId typed_id){
 
 void ast_util_reconstruct_deref(Deref* deref){
 	switch (deref->type) {
-		case DEREF_TYPE_BRKT:
-			printf(SV_Fmt "[", SV_Arg(deref->Brkt.id));
-			ast_util_reconstruct_expr_list(deref->Brkt.exprList);
-			printf("]");
+		case DEREF_TYPE_FACTOR:
+			ast_util_reconstruct_factor(deref->f);
+			break;
+		case DEREF_TYPE_DEREF:
+			printf("*");
+			ast_util_reconstruct_deref(deref->deref);
 			break;
 		default: assert(0 && "Deref type fully implemented");
 	}
@@ -213,14 +216,14 @@ void ast_util_reconstruct_math_expr(MathExpression* mexpr){
 
 void ast_util_reconstruct_term(Term* term){
 	switch (term->type) {
-		case TERM_TYPE_FACTOR:
-			ast_util_reconstruct_factor(term->right);
+		case TERM_TYPE_DEREF:
+			ast_util_reconstruct_deref(term->right);
 			break;
-		case TERM_TYPE_TERM_OP_FACTOR:
+		case TERM_TYPE_TERM_OP_DEREF:
 			printf("(");
 				ast_util_reconstruct_term(term->left);
 				printf("%c", term->op);
-				ast_util_reconstruct_factor(term->right);
+				ast_util_reconstruct_deref(term->right);
 			printf(")");
 			break;
 	}

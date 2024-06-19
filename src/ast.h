@@ -22,14 +22,18 @@ typedef enum {
 	VAR_TYPE_ID, VAR_TYPE_ARRAY, VAR_TYPE_ARRAY_NESTED, VAR_TYPE_NONE
 } VarTypeType;
 
+typedef struct ArrayIndex ArrayIndex;
+// typedef enum {
+// } ArrayIndexType;
+
 typedef struct Deref Deref;
 typedef enum {
-	DEREF_TYPE_BRKT, DEREF_TYPE_ASTERISK
+	DEREF_TYPE_FACTOR, DEREF_TYPE_DEREF
 } DerefType;
 
 typedef struct Factor Factor;
 typedef enum {
-	FACTOR_TYPE_UND, FACTOR_TYPE_ID, FACTOR_TYPE_STR, FACTOR_TYPE_NUMBER, FACTOR_TYPE_EXPR, FACTOR_TYPE_LOGIC_CONJ, FACTOR_TYPE_LOGIC_DISJ, FACTOR_TYPE_FUNC_CALL, FACTOR_TYPE_DEREF 
+	FACTOR_TYPE_UND, FACTOR_TYPE_ID, FACTOR_TYPE_STR, FACTOR_TYPE_NUMBER, FACTOR_TYPE_EXPR, FACTOR_TYPE_LOGIC_CONJ, FACTOR_TYPE_LOGIC_DISJ, FACTOR_TYPE_FUNC_CALL, FACTOR_TYPE_ARRAY_INDEX
 } FactorType;
 
 typedef struct Number Number;
@@ -75,7 +79,7 @@ typedef enum {
 
 typedef struct Term Term;
 typedef enum {
-	TERM_TYPE_FACTOR, TERM_TYPE_TERM_OP_FACTOR
+	TERM_TYPE_DEREF, TERM_TYPE_TERM_OP_DEREF
 } TermType;
 
 typedef struct Statement Statement;
@@ -104,7 +108,7 @@ typedef enum {
 
 typedef struct AST_Node AST_Node;
 typedef enum AST_NodeType {
-	NT_UNDEF, NT_TOKEN, NT_FACTOR, NT_NUMBER, NT_EXPRESSION, NT_EXPRESSION_LIST, NT_STATEMENT, NT_LOGIC_DISJ, NT_LOGIC_CONJ, NT_RELATE, NT_MATH_EXPR, NT_TERM, NT_FUNC_CALL, NT_HEADER, NT_TYPED_ID, NT_DEREF, NT_VAR_TYPE, NT_TYPED_ID_LIST, NT_FUNC_HEADER, NT_IF, NT_BLOCK, NT_STATEMENT_LIST, NT_FUNCTION, NT_ASSIGNMENT
+	NT_UNDEF, NT_TOKEN, NT_FACTOR, NT_NUMBER, NT_EXPRESSION, NT_EXPRESSION_LIST, NT_STATEMENT, NT_LOGIC_DISJ, NT_LOGIC_CONJ, NT_RELATE, NT_MATH_EXPR, NT_TERM, NT_FUNC_CALL, NT_HEADER, NT_TYPED_ID, NT_DEREF, NT_VAR_TYPE, NT_TYPED_ID_LIST, NT_FUNC_HEADER, NT_IF, NT_BLOCK, NT_STATEMENT_LIST, NT_FUNCTION, NT_ASSIGNMENT, NT_ARRAY_INDEX,
 } AST_NodeType;
 
 /* header
@@ -227,29 +231,32 @@ struct Factor {
 		Expression* expr;
 		LogicalDisj* logicdisj;
 		FuncCall funcCall;
-		Deref* deref;
+		ArrayIndex* arrayIndex;
 	};
 	LocationInfo loc;
 };
 
 /* deref
- *   deref := <id> "[" <expression_list> "]"
+ *    deref := "*" <deref>
+ *    deref := <factor>
  */
 struct Deref {
 	DerefType type;
+	int depth;
 	union {
-		struct {
-			String_View id;
-			ExpressionList* exprList;
-		} Brkt;
-		struct {
-			Expression* expr;
-			int depth;
-		} Asterisk;
+		Deref* deref;
+		Factor f;
 	};
 	LocationInfo loc;
 };
 
+struct ArrayIndex {
+	struct {
+		String_View id;
+		ExpressionList* exprList;
+	} Brkt;
+	LocationInfo loc;
+};
 /* term
  * term		 := <term> "*" <factor>
  * 					| <term> "/" <factor>
@@ -259,7 +266,7 @@ struct Deref {
 struct Term {
 	TermType type;
 	Term* left;
-	Factor right;
+	Deref* right;
 	char op;
 	LocationInfo loc;
 };
@@ -419,6 +426,7 @@ struct AST_Node {
 		TypedId typed_id;
 		TypedIdList* typed_idlist;
 		Deref* deref;
+		ArrayIndex* arrayIndex;
 	};
 };
 

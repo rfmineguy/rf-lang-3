@@ -60,26 +60,7 @@ void codegen_expr_x86_32(codegen_x86_32_ctx* ctx, Expression* expr) {
 
 void codegen_term_x86_32(codegen_x86_32_ctx* ctx, Term t) {
 	char op = t.op;
-	if (t.type == TERM_TYPE_TERM_OP_FACTOR) {
-		Term t = *t.left;
-		Factor f = t.right;
-		char op = t.op;
-		switch (f.type) {
-			case FACTOR_TYPE_NUMBER:
-				switch (op) {
-					case '*': {
-						fprintf(ctx->file, "mov eax, %d\n", f.number.i);
-					}
-				}
-				break;
-			default: assert(0 && "Factor type unsupported");
-		}
-		switch (op) {
-			case '*': {
-				// fprintf(ctx->file, "", ...)
-			}
-		}
-	}
+	assert(0 && "Term codegen broken");
 }
 
 void codegen_function_x86_32(codegen_x86_32_ctx* ctx, Function func) {

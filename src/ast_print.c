@@ -26,6 +26,7 @@ void ast_print_node(AST_Node n, int d) {
 		case NT_HEADER: 				 ast_print_header(n.header, d); break;
 		case NT_TYPED_ID:				 ast_print_typed_id(n.typed_id, d); break;
 		case NT_DEREF:           ast_print_deref(n.deref, d); break;
+		case NT_ARRAY_INDEX:  	 ast_print_array_index(n.arrayIndex, d); break;
 		case NT_VAR_TYPE:        ast_print_vartype(n.var_type, d); break;
 		case NT_TYPED_ID_LIST:   ast_print_typed_idlist(n.typed_idlist, d); break;
 		case NT_FUNC_HEADER:     ast_print_function_header(n.funcHeader, d); break;
@@ -61,7 +62,7 @@ void ast_print_factor(Factor f, int d) {
 		case FACTOR_TYPE_LOGIC_DISJ:assert(0 && "No factor for logic disjunction");											break;
 		case FACTOR_TYPE_LOGIC_CONJ:assert(0 && "No factor for logic conjunction"); 										break;
 		case FACTOR_TYPE_FUNC_CALL: ast_print_func_call(f.funcCall, d + 1); 														break;
-		case FACTOR_TYPE_DEREF:     ast_print_deref(f.deref, d + 1);  																	break;
+		case FACTOR_TYPE_ARRAY_INDEX:ast_print_array_index(f.arrayIndex, d + 1);  																	break;
 	}
 }
 
@@ -109,17 +110,22 @@ void ast_print_typed_idlist(TypedIdList* list, int d) {
 }
 
 void ast_print_deref(Deref* deref, int d) {
-	printf(LOC_FMT TREE_FMT "[Deref %d]\n", LOC_ARG((*deref)), TREE_ARG(0), deref->type);
+	printf(LOC_FMT TREE_FMT "[Deref]\n", LOC_ARG((*deref)), TREE_ARG(0));
+	printf(LOC_FMT TREE_FMT "[depth = %d]\n",LOC_ARG((*deref)), TREE_ARG(1), deref->depth);
 	switch (deref->type) {
-		case DEREF_TYPE_BRKT:
-			printf(LOC_FMT TREE_FMT "[Id " SV_Fmt "]\n", LOC_ARG((*deref)), TREE_ARG(1), SV_Arg(deref->Brkt.id));
-			ast_print_expr_list(deref->Brkt.exprList, d + 1);
+		case DEREF_TYPE_DEREF:
+			ast_print_factor(deref->f, d + 1);
 			break;
-		case DEREF_TYPE_ASTERISK: 
-			printf(LOC_FMT TREE_FMT "[depth = %d]\n",LOC_ARG((*deref)), TREE_ARG(1), deref->Asterisk.depth);
-			ast_print_expr(deref->Asterisk.expr, d + 1);
+		case DEREF_TYPE_FACTOR: 
+			ast_print_factor(deref->f, d + 1);
 			break;
 	}
+}
+
+void ast_print_array_index(ArrayIndex* array, int d) {
+	printf(LOC_FMT TREE_FMT "[ArrayIndex]\n", LOC_ARG((*array)), TREE_ARG(0));
+	printf(LOC_FMT TREE_FMT SV_Fmt "\n", LOC_ARG((*array)), TREE_ARG(1), SV_Arg(array->Brkt.id));
+	ast_print_expr_list(array->Brkt.exprList, d + 1);
 }
 
 void ast_print_number(Number n, int d) {
@@ -188,12 +194,12 @@ void ast_print_term(Term* t, int d) {
 		return;
 	}
 	switch (t->type) {
-		case TERM_TYPE_FACTOR: 
-			ast_print_factor(t->right, d + 1);
+		case TERM_TYPE_DEREF: 
+			ast_print_deref(t->right, d + 1);
 			break;
-		case TERM_TYPE_TERM_OP_FACTOR: 
+		case TERM_TYPE_TERM_OP_DEREF: 
 			ast_print_term(t->left, d + 1);
-			ast_print_factor(t->right, d + 1);
+			ast_print_deref(t->right, d + 1);
 			break;
 	}
 }

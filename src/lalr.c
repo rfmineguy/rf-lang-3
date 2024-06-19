@@ -256,10 +256,8 @@ int lalr_reduce(lalr_ctx* ctx, AST_Node* out_n) {
 		if (peeked[1].type == NT_TOKEN && peeked[1].token.type == T_MUL &&
 				peeked[0].type == NT_DEREF &&
 				(peeked[2].token.type == T_PLUS || peeked[2].token.type == T_MINUS || peeked[2].token.type == T_MUL || peeked[2].token.type == T_DIV || peeked[2].token.type == T_MOD || peeked[2].token.type == T_EQ)) {
-			out_n->type = NT_DEREF;
+			peeked[0].deref->depth++;
 			out_n->deref = peeked[0].deref;
-			out_n->deref->type = DEREF_TYPE_DEREF;
-			out_n->deref->depth++;
 			return 2;
 		}
 		if (peeked[0].type == NT_FACTOR) {
@@ -278,7 +276,6 @@ int lalr_reduce(lalr_ctx* ctx, AST_Node* out_n) {
 	 *     factor := <number>
 	 *     factor := <strlit>
 	 *     factor := <func_call>
-	 *     factor := <deref>
 	 *     factor := <array_index>
 	 */
 	{
@@ -303,7 +300,6 @@ int lalr_reduce(lalr_ctx* ctx, AST_Node* out_n) {
 		}
 
 		// factor := <strlit>
-		// ?
 		if (peeked[0].type == NT_TOKEN && peeked[0].token.type == T_STRING_LIT) {
 			out_n->type = NT_FACTOR;
 			out_n->factor.type = FACTOR_TYPE_STR;
@@ -339,7 +335,6 @@ int lalr_reduce(lalr_ctx* ctx, AST_Node* out_n) {
 			out_n->factor.type = FACTOR_TYPE_ARRAY_INDEX;
 			out_n->factor.arrayIndex = peeked[0].arrayIndex;
 			return 1;
-			
 		}
 	}
 

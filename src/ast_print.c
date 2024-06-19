@@ -110,13 +110,15 @@ void ast_print_typed_idlist(TypedIdList* list, int d) {
 }
 
 void ast_print_deref(Deref* deref, int d) {
+	if (deref == NULL)
+		return;
 	printf(LOC_FMT TREE_FMT "[Deref]\n", LOC_ARG((*deref)), TREE_ARG(0));
 	printf(LOC_FMT TREE_FMT "[depth = %d]\n",LOC_ARG((*deref)), TREE_ARG(1), deref->depth);
 	switch (deref->type) {
 		case DEREF_TYPE_DEREF:
-			ast_print_factor(deref->f, d + 1);
+			ast_print_deref(deref->deref, d);
 			break;
-		case DEREF_TYPE_FACTOR: 
+		case DEREF_TYPE_FACTOR:
 			ast_print_factor(deref->f, d + 1);
 			break;
 	}

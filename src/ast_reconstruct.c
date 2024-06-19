@@ -65,8 +65,10 @@ void ast_util_reconstruct_factor(Factor factor){
 			ast_util_reconstruct_func_call(factor.funcCall);
 			break;
 		case FACTOR_TYPE_ARRAY_INDEX:
-			assert(0 && "Reconstruct factor array index not implemented");
-			// ast_util_reconstruct_array_index(factor.deref);
+			ast_util_reconstruct_array_index(factor.arrayIndex);
+			break;
+		case FACTOR_TYPE_UND:
+			printf("factor: Undefined");
 			break;
 		default: assert(0 && "Reconstruct factor unfinished");
 	}
@@ -119,6 +121,8 @@ void ast_util_reconstruct_typed_id(TypedId typed_id){
 }
 
 void ast_util_reconstruct_deref(Deref* deref){
+	if (deref == NULL)
+		return;
 	switch (deref->type) {
 		case DEREF_TYPE_FACTOR:
 			ast_util_reconstruct_factor(deref->f);
@@ -127,8 +131,14 @@ void ast_util_reconstruct_deref(Deref* deref){
 			printf("*");
 			ast_util_reconstruct_deref(deref->deref);
 			break;
-		default: assert(0 && "Deref type fully implemented");
+		default: assert(0 && "Deref type reconstruct not fully implemented");
 	}
+}
+
+void ast_util_reconstruct_array_index(ArrayIndex* array_index) {
+	printf(SV_Fmt "[", SV_Arg(array_index->Brkt.id));
+	ast_util_reconstruct_expr_list(array_index->Brkt.exprList);
+	printf("]");
 }
 
 void ast_util_reconstruct_logical_disj(LogicalDisj* disj){

@@ -33,7 +33,8 @@ docker run --rm -t -v $(pwd):$(pwd) -w $(pwd) rfmineguy/rflang-x86-testing:lates
     * [arena-original](https://github.com/tsoding/arena)
     * [arena-modified](https://github.com/rfmineguy/arena)
 - [sv](https://github.com/tsoding/sv)
-- [malloc_trace](https://github.com/rfmineguy/malloc-trace)
+- [malloc-trace](https://github.com/rfmineguy/malloc-trace)
+- [c-generics](https://github.com/rfmineguy/c-generics)
 
 # External
 - [docker-image](https://hub.docker.com/repository/docker/rfmineguy/rflang-x86-testing/general)
